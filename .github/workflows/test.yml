@@ -1,0 +1,16 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+      - name: Test v2 API
+        run: |
+          go test github.com/infamousjoeg/pas-api-go/pasapi/v2
