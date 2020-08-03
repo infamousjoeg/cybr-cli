@@ -1,11 +1,8 @@
 package pasapi
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
-
-	"github.com/infamousjoeg/pas-api-go/pasapi/httpJson"
+	"time"
 )
 
 const (
@@ -14,7 +11,35 @@ const (
 	BaseURL = "https://localhost/PasswordVault"
 )
 
-func header(token string) http.Header {
+// Client ...
+type Client struct {
+	BaseURL      string
+	sessionToken string
+	HTTPClient   *http.Client
+}
+
+// NewClient ...
+func NewClient(sessionToken string) *Client {
+	return &Client{
+		BaseURL:      BaseURL,
+		sessionToken: sessionToken,
+		HTTPClient: &http.Client{
+			Timeout: time.Minute,
+		},
+	}
+}
+
+type errorResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type successResponse struct {
+	Code int         `json:"code"`
+	Data interface{} `json:"data"`
+}
+
+/*func header(token string) http.Header {
 	header := make(http.Header)
 	header.Add("Authorization", token)
 	return header
@@ -60,7 +85,6 @@ func ListApplications(hostname string, token string, location string, includeSub
 	return response, err
 }
 
-/*
 // ListApplicationAuthenticationMethods from cyberark
 func ListApplicationAuthenticationMethods(hostname string, token string, appName string) (map[string]interface{}, error) {
 	url := fmt.Sprintf("https://%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications", hostname, appName)
