@@ -1,21 +1,18 @@
 package pasapi
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 )
 
 // AccountsList contains the count and Accounts array
 type AccountsList struct {
-	Count    int        `json:"count"`
-	Accounts []Accounts `json:"accounts"`
+	Count    int       `json:"count"`
+	Accounts []Account `json:"accounts"`
 }
 
-// Accounts contains the object data for each account returned
-type Accounts struct {
+// Account contains the object data for each account returned
+type Account struct {
 	CategoryModificationTime int                    `json:"categoryModificationTime"`
 	ID                       string                 `json:"id"`
 	Name                     string                 `json:"name"`
@@ -60,13 +57,29 @@ type AccountsOptions struct {
 }
 
 // GetAccounts sends a GET request to the /api/accounts endpoint
-func (c *Client) GetAccounts(ctx context.Context, options *AccountsOptions) (*AccountsList, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/accounts", c.BaseURL), nil)
+func (c *Client) GetAccounts(options *AccountsOptions) (*AccountsList, error) {
+	var search string
+	var searchType string
+	var sort string
+	var offset int
+	var limit int
+	var filter string
+
+	if options != nil {
+		search = options.Search
+		searchType = options.SearchType
+		sort = options.Sort
+		offset = options.Offset
+		limit = options.Limit
+		filter = options.Filter
+	}
+
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/accounts?search=%s&searchType=%s&sort=%s&offset=%d&limit=%d&filter=%s", c.BaseURL, search, searchType, sort, offset, limit, filter), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req = req.WithContext(ctx)
+	req.Header.Set("Content-Type", "application/json charset=utf-8")
 
 	res := AccountsList{}
 	if err := c.sendRequest(req, &res); err != nil {
@@ -74,35 +87,4 @@ func (c *Client) GetAccounts(ctx context.Context, options *AccountsOptions) (*Ac
 	}
 
 	return &res, nil
-}
-
-func (c *Client) sendRequest(req *http.Request, v interface{}) error {
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Authorization", c.sessionToken)
-
-	res, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer res.Body.Close()
-
-	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		var errRes errorResponse
-		if err = json.NewDecoder(res.Body).Decode(&errRes); err == nil {
-			return errors.New(errRes.Message)
-		}
-
-		return fmt.Errorf("unknown error, status code: %d", res.StatusCode)
-	}
-
-	fullResponse := successResponse{
-		Data: v,
-	}
-
-	if err = json.NewDecoder(res.Body).Decode(&fullResponse); err != nil {
-		return err
-	}
-
-	return nil
 }
