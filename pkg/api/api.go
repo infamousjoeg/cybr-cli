@@ -19,7 +19,7 @@ func header(token string) http.Header {
 // Authenticate to PAS REST API /logon endpoint
 // Because we're using concurrentSession capability, this is only supported
 // on PAS REST API v11.3 and above
-func Authenticate(hostname string, username string, password string, authType string, concurrent bool) (token string, err error) {
+func Authenticate(hostname string, username string, password string, authType string) (token string, err error) {
 	// Return error if unsupported authentication type chosen
 	if authType != "cyberark" && authType != "ldap" {
 		log.Fatal("Unsupported auth type used. Only 'cyberark' or 'ldap' supported")
@@ -27,7 +27,7 @@ func Authenticate(hostname string, username string, password string, authType st
 
 	// Set URL for request
 	url := fmt.Sprintf("%s/PasswordVault/api/auth/%s/logon", hostname, authType)
-	body := fmt.Sprintf("{\"username\": \"%s\", \"password\": \"%s\", \"concurrentSession\": \"%t\"}", username, password, concurrent)
+	body := fmt.Sprintf("{\"username\": \"%s\", \"password\": \"%s\"}", username, password)
 
 	// Send request and received response
 	response, err := httpJson.SendRequestRaw(url, "POST", nil, body)
@@ -104,4 +104,13 @@ func GetSafesUserIsMemberOf(hostname string, token string, username string) ([]s
 		}
 	}
 	return safesUserIsMemberOf, err
+}
+
+// ServerVerify is an unauthenticated endpoint for testing Web Service availability
+func ServerVerify(hostname string) (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Verify", hostname)
+	header := make(http.Header)
+	header.Set("Content-Type", "application/json")
+	response, err := httpJson.Get(url, header)
+	return response, err
 }

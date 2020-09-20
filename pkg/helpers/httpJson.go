@@ -14,7 +14,7 @@ import (
 func getResponse(url string, method string, header http.Header, body string) (http.Response, error) {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	httpClient := http.Client{
-		Timeout: time.Second * 2, // Maximum of 2 secs
+		Timeout: time.Second * 30, // Maximum of 30 secs
 	}
 	var bodyReader io.ReadCloser
 	var res *http.Response
@@ -40,8 +40,8 @@ func getResponse(url string, method string, header http.Header, body string) (ht
 		return *res, fmt.Errorf("Failed to send request. %s", err)
 	}
 
-	if res.StatusCode != 200 {
-		return *res, fmt.Errorf("Recieved non-200 status code '%d'", res.StatusCode)
+	if res.StatusCode >= 300 {
+		return *res, fmt.Errorf("Received non-200 status code '%d'", res.StatusCode)
 	}
 
 	return *res, err
