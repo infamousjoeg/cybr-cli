@@ -1,8 +1,8 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -11,71 +11,44 @@ import (
 
 func header(token string) http.Header {
 	header := make(http.Header)
+	header.Add("Content-Type", "application/json")
 	header.Add("Authorization", token)
 	return header
 }
 
-// AuthParams contains parameters for Authenticate
-type AuthParams struct {
-	Hostname string
-	AuthType string
-}
-
-// AuthRequest contains body data for Authenticate
-type AuthRequest struct {
-	Username           string `json:"username"`
-	Password           string `json:"password"`
-	NewPassword        string `json:"newPassword,omitempty"`
-	ConcurrentSessions bool   `json:"concurrentSessions,omitempty"`
-}
-
 // Authenticate to PAS REST API /logon endpoint
-func Authenticate(params *AuthParams, data *AuthRequest) (token string, err error) {
-	// Convert hostname to lowercase or else set to default 'components.cyberarkdemo.com'
-	var hostname string
-	if params.Hostname != "" {
-		hostname = strings.ToLower(params.Hostname)
-	} else {
-		hostname = "https://components.cyberarkdemo.com"
-	}
-	// Convert authType to lowercase or else set to default 'cyberark'
-	var authType string
-	if params.AuthType != "" {
-		authType = strings.ToLower(params.AuthType)
-	} else {
-		authType = "cyberark"
-	}
-
+// Because we're using concurrentSession capability, this is only supported
+// on PAS REST API v11.3 and above
+func Authenticate(hostname string, username string, password string, authType string, concurrent bool) (token string, err error) {
 	// Return error if unsupported authentication type chosen
 	if authType != "cyberark" && authType != "ldap" {
-		return "", fmt.Errorf("Unsupported auth type. Only 'cyberark' or 'ldap' supported")
+		log.Fatal("Unsupported auth type used. Only 'cyberark' or 'ldap' supported")
 	}
 
+	// Set URL for request
 	url := fmt.Sprintf("%s/PasswordVault/api/auth/%s/logon", hostname, authType)
+	body := fmt.Sprintf("{\"username\": \"%s\", \"password\": \"%s\", \"concurrentSession\": \"%t\"}", username, password, concurrent)
 
-	body, err := json.Marshal(data)
+	// Send request and received response
+	response, err := httpJson.SendRequestRaw(url, "POST", nil, body)
 	if err != nil {
-		panic(err)
+		return "", fmt.Errorf("Failed to authenticate to the PAS REST API. %s", err)
 	}
-
-	response, err := httpJson.SendRequestRaw(url, "POST", nil, string(body))
-	if err != nil {
-		return "", fmt.Errorf("Failed to authenticate to the cyberark api. %s", err)
-	}
+	// Trim "..." from response and return session token
 	return strings.Trim(string(response), "\""), err
 }
 
 // ListApplications from cyberark
-func ListApplications(hostname string, token string) (map[string]interface{}, error) {
-	url := fmt.Sprintf("https://%s/PasswordVault/WebServices/PIMServices.svc/Applications/", hostname)
+func ListApplications(hostname string, token string, location string, subLocations bool) (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications?Location=%s&IncludeSublocations=%t", hostname, location, subLocations)
 	header := header(token)
 	response, err := httpJson.Get(url, header)
 	return response, err
 }
 
 // ListApplicationAuthenticationMethods from cyberark
-func ListApplicationAuthenticationMethods(hostname string, token string, appName string) (map[string]interface{}, error) {
-	url := fmt.Sprintf("https://%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications", hostname, appName)
+func ListApplicationAuthenticationMethods(hostname string, token string, appID string) (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications", hostname, appID)
 	header := header(token)
 	response, err := httpJson.Get(url, header)
 	return response, err
@@ -83,20 +56,16 @@ func ListApplicationAuthenticationMethods(hostname string, token string, appName
 
 // ListSafes from cyberark user has access too
 func ListSafes(hostname string, token string) (map[string]interface{}, error) {
-	url := fmt.Sprintf("https://%s/PasswordVault/WebServices/PIMServices.svc/Safes", hostname)
-	// fmt.Println(url)
-	header := make(http.Header)
-	header.Add("Authorization", token)
+	url := fmt.Sprintf("%s/PasswordVault/api/safes", hostname)
+	header := header(token)
 	response, err := httpJson.Get(url, header)
 	return response, err
 }
 
 // ListSafeMembers List all members of a safe
 func ListSafeMembers(hostname string, token string, safeName string) (map[string]interface{}, error) {
-	url := fmt.Sprintf("https://%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s/Members", hostname, safeName)
-	// fmt.Println(url)
-	header := make(http.Header)
-	header.Add("Authorization", token)
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s/Members", hostname, safeName)
+	header := header(token)
 	response, err := httpJson.Get(url, header)
 	return response, err
 }
@@ -107,7 +76,7 @@ func GetSafesUserIsMemberOf(hostname string, token string, username string) ([]s
 	// List safes
 	response, err := ListSafes(hostname, token)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to list cyberark safes %s", err)
+		return nil, fmt.Errorf("Failed to list CyberArk safes %s", err)
 	}
 
 	safes := response["GetSafesResult"].([]interface{})

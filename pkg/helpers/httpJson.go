@@ -1,4 +1,4 @@
-package httpJson
+package httpjson
 
 import (
 	"bytes"
@@ -28,12 +28,11 @@ func getResponse(url string, method string, header http.Header, body string) (ht
 
 	// attach the header
 	if header == nil {
-		header = make(http.Header)
+		req.Header = make(http.Header)
+		req.Header.Add("Content-Type", "application/json")
 	}
 
 	req.Header = header
-	req.Header.Add("Content-Type", "application/json")
-	// req.Header.Add("Content-Type", "application/json")
 
 	// send request
 	res, err = httpClient.Do(req)
@@ -49,7 +48,7 @@ func getResponse(url string, method string, header http.Header, body string) (ht
 
 }
 
-// Send an http request and get response as serialized json map[string]interface{}
+// SendRequest is an http request and get response as serialized json map[string]interface{}
 func SendRequest(url string, method string, header http.Header, body string) (map[string]interface{}, error) {
 	res, err := getResponse(url, method, header, body)
 	if err != nil {
@@ -68,7 +67,7 @@ func SendRequest(url string, method string, header http.Header, body string) (ma
 
 }
 
-// Send an http request and get response as byte[]
+// SendRequestRaw is an http request and get response as byte[]
 func SendRequestRaw(url string, method string, header http.Header, body string) ([]byte, error) {
 	res, err := getResponse(url, method, header, body)
 	if err != nil {
@@ -83,25 +82,25 @@ func SendRequestRaw(url string, method string, header http.Header, body string) 
 
 }
 
-// Send an get request and get response as serialized json map[string]interface{}
+// Get a get request and get response as serialized json map[string]interface{}
 func Get(url string, header http.Header) (map[string]interface{}, error) {
 	response, err := SendRequest(url, http.MethodGet, header, "")
 	return response, err
 }
 
-// Send an Ppo request and get response as serialized json map[string]interface{}
+// Post a post request and get response as serialized json map[string]interface{}
 func Post(url string, header http.Header, body string) (map[string]interface{}, error) {
 	response, err := SendRequest(url, http.MethodPost, header, body)
 	return response, err
 }
 
-// Send an get request and get response as serialized json map[string]interface{}
+// Put a put request and get response as serialized json map[string]interface{}
 func Put(url string, header http.Header, body string) (map[string]interface{}, error) {
 	response, err := SendRequest(url, http.MethodPut, header, body)
 	return response, err
 }
 
-// Send an get request and get response as serialized json map[string]interface{}
+// Delete a delete request and get response as serialized json map[string]interface{}
 func Delete(url string, header http.Header) (map[string]interface{}, error) {
 	response, err := SendRequest(url, http.MethodDelete, header, "")
 	return response, err
