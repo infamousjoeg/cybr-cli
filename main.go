@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -22,18 +21,19 @@ func main() {
 	if errVerify != nil {
 		log.Fatalf("Verification failed. %s", errVerify)
 	}
+	fmt.Printf("Verify JSON:\r\n%s\r\n\r\n", resVerify)
 
-	// Marshal (convert) returned map string interface to JSON
-	b, err := json.Marshal(resVerify)
-	if err != nil {
-		log.Fatal(err)
+	// Logon to PAS REST API Web Services
+	token, errLogon := pasapi.Logon(hostname, username, password, authType, false)
+	if errLogon != nil {
+		log.Fatalf("Authentication failed. %s", errLogon)
 	}
-	fmt.Printf("Verify JSON:\r\n%s\r\n\r\n", string(b))
+	fmt.Printf("Session Token:\r\n%s\r\n\r\n", token)
 
-	// Authenticate with PAS REST API Web Services
-	token, errAuth := pasapi.Authenticate(hostname, username, password, authType)
-	if errAuth != nil {
-		log.Fatalf("Authentication failed. %s", errAuth)
+	// Logoff PAS REST API Web Services
+	success, errLogoff := pasapi.Logoff(hostname, token)
+	if errLogoff != nil || success != true {
+		log.Fatalf("Logoff failed. %s", errLogoff)
 	}
-	fmt.Printf("Session Token:\r\n%s\r\n", token)
+	fmt.Println("Successfully logged off PAS REST API Web Services.")
 }

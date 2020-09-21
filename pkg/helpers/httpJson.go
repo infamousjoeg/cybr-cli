@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func getResponse(url string, method string, header http.Header, body string) (http.Response, error) {
+func getResponse(url string, method string, token string, body string) (http.Response, error) {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	httpClient := http.Client{
 		Timeout: time.Second * 30, // Maximum of 30 secs
@@ -27,12 +27,12 @@ func getResponse(url string, method string, header http.Header, body string) (ht
 	}
 
 	// attach the header
-	if header == nil {
-		header = make(http.Header)
-		header.Add("Content-Type", "application/json")
+	req.Header = make(http.Header)
+	req.Header.Add("Content-Type", "application/json")
+	// if token is provided, add header Authorization
+	if token != "" {
+		req.Header.Add("Authorization", token)
 	}
-
-	req.Header = header
 
 	// send request
 	res, err = httpClient.Do(req)
@@ -49,8 +49,8 @@ func getResponse(url string, method string, header http.Header, body string) (ht
 }
 
 // SendRequest is an http request and get response as serialized json map[string]interface{}
-func SendRequest(url string, method string, header http.Header, body string) (map[string]interface{}, error) {
-	res, err := getResponse(url, method, header, body)
+func SendRequest(url string, method string, token string, body string) (map[string]interface{}, error) {
+	res, err := getResponse(url, method, token, body)
 	if err != nil {
 		return nil, err
 	}
@@ -68,8 +68,8 @@ func SendRequest(url string, method string, header http.Header, body string) (ma
 }
 
 // SendRequestRaw is an http request and get response as byte[]
-func SendRequestRaw(url string, method string, header http.Header, body string) ([]byte, error) {
-	res, err := getResponse(url, method, header, body)
+func SendRequestRaw(url string, method string, token string, body string) ([]byte, error) {
+	res, err := getResponse(url, method, token, body)
 	if err != nil {
 		return nil, err
 	}
@@ -83,25 +83,25 @@ func SendRequestRaw(url string, method string, header http.Header, body string) 
 }
 
 // Get a get request and get response as serialized json map[string]interface{}
-func Get(url string, header http.Header) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodGet, header, "")
+func Get(url string, token string) (map[string]interface{}, error) {
+	response, err := SendRequest(url, http.MethodGet, token, "")
 	return response, err
 }
 
 // Post a post request and get response as serialized json map[string]interface{}
-func Post(url string, header http.Header, body string) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodPost, header, body)
+func Post(url string, token string, body string) (map[string]interface{}, error) {
+	response, err := SendRequest(url, http.MethodPost, token, body)
 	return response, err
 }
 
 // Put a put request and get response as serialized json map[string]interface{}
-func Put(url string, header http.Header, body string) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodPut, header, body)
+func Put(url string, token string, body string) (map[string]interface{}, error) {
+	response, err := SendRequest(url, http.MethodPut, token, body)
 	return response, err
 }
 
 // Delete a delete request and get response as serialized json map[string]interface{}
-func Delete(url string, header http.Header) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodDelete, header, "")
+func Delete(url string, token string) (map[string]interface{}, error) {
+	response, err := SendRequest(url, http.MethodDelete, token, "")
 	return response, err
 }
