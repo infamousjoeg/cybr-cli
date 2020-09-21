@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -17,11 +18,12 @@ var (
 
 func main() {
 	// Verify PAS REST API Web Services
-	resVerify, errVerify := pasapi.ServerVerify(hostname)
-	if errVerify != nil {
-		log.Fatalf("Verification failed. %s", errVerify)
+	resVerify := pasapi.ServerVerify(hostname)
+	jsonVerify, err := json.Marshal(&resVerify)
+	if err != nil {
+		log.Fatalf("Unable to marshall struct to JSON for verify. %s", err)
 	}
-	fmt.Printf("Verify JSON:\r\n%s\r\n\r\n", resVerify)
+	fmt.Printf("Verify JSON:\r\n%s\r\n\r\n", jsonVerify)
 
 	// Logon to PAS REST API Web Services
 	token, errLogon := pasapi.Logon(hostname, username, password, authType, false)
