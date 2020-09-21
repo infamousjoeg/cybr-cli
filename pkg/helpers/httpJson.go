@@ -28,11 +28,11 @@ func getResponse(url string, method string, header http.Header, body string) (ht
 
 	// attach the header
 	if header == nil {
-		req.Header = make(http.Header)
-		req.Header.Add("Content-Type", "application/json")
+		header = make(http.Header)
+		header.Add("Content-Type", "application/json")
 	}
 
-	header = req.Header
+	req.Header = header
 
 	// send request
 	res, err = httpClient.Do(req)

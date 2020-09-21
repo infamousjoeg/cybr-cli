@@ -109,8 +109,6 @@ func GetSafesUserIsMemberOf(hostname string, token string, username string) ([]s
 // ServerVerify is an unauthenticated endpoint for testing Web Service availability
 func ServerVerify(hostname string) (map[string]interface{}, error) {
 	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Verify", hostname)
-	header := make(http.Header)
-	header.Set("Content-Type", "application/json")
-	response, err := httpJson.Get(url, header)
+	response, err := httpJson.SendRequest(url, "GET", nil, "")
 	return response, err
 }
