@@ -32,7 +32,7 @@ func getResponse(url string, method string, header http.Header, body string) (ht
 		req.Header.Add("Content-Type", "application/json")
 	}
 
-	req.Header = header
+	header = req.Header
 
 	// send request
 	res, err = httpClient.Do(req)
