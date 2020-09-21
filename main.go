@@ -19,6 +19,7 @@ var (
 func main() {
 	// Verify PAS REST API Web Services
 	resVerify := pasapi.ServerVerify(hostname)
+	// Marshal struct data into JSON format for pretty print
 	jsonVerify, err := json.Marshal(&resVerify)
 	if err != nil {
 		log.Fatalf("Unable to marshall struct to JSON for verify. %s", err)
