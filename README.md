@@ -3,17 +3,49 @@
 
 ## Usage
 
-### Import into project
+### Command-Line Interface (CLI)
 
-`github.com/infamousjoeg/pas-api-go/pkg/api`
+This is a work in progress...
+
+#### Install from Source
+
+```shell
+$ git clone https://github.com/infamousjoeg/pas-api-go.git
+$ ./install
+$ cybr help
+cybr is a command-line interface utility created by CyberArk that
+wraps the PAS REST API and eases the user experience for automators
+and automation to easily interact with CyberArk Privileged Access
+Security.
+
+Usage:
+  cybr [command]
+
+Available Commands:
+  help        Help about any command
+  version     Display current version
+
+Flags:
+  -h, --help   help for cybr
+
+Use "cybr [command] --help" for more information about a command.
+```
+
+### Application
+
+Full example available at [dev/main.go]().
+
+#### Import into project
+
+`github.com/infamousjoeg/pas-api-go/pkg/cybr/api`
 
 ```go
 package main
 
-import pasapi "github.com/infamousjoeg/pas-api-go/pkg/api"
+import pasapi "github.com/infamousjoeg/pas-api-go/pkg/cybr/api"
 ```
 
-### Logon to the PAS REST API Web Service
+#### Logon to the PAS REST API Web Service
 
 ```go
 package main
@@ -23,7 +55,7 @@ import (
 	"log"
 	"os"
 
-	pasapi "github.com/infamousjoeg/pas-api-go/pkg/api"
+	pasapi "github.com/infamousjoeg/pas-api-go/pkg/cybr/api"
 )
 
 var (
@@ -42,7 +74,7 @@ func main() {
 	fmt.Printf("Session Token:\r\n%s\r\n\r\n", token)
 ```
 
-### Call functions by referencing `pasapi` and "dot-referencing"
+#### Call functions by referencing `pasapi` and "dot-referencing"
 
 ```go
 package main
@@ -53,7 +85,7 @@ import (
 	"log"
 	"os"
 
-	pasapi "github.com/infamousjoeg/pas-api-go/pkg/api"
+	pasapi "github.com/infamousjoeg/pas-api-go/pkg/cybr/api"
 )
 
 // Declare variables (using Summon so they are env vars)
@@ -100,7 +132,7 @@ func main() {
 ### Successful Output
 
 ```shell
-$ summon go run main.go
+$ summon go run dev/main.go
 
 Verify JSON:
 {"ApplicationName":"PasswordVault","AuthenticationMethods":[{"Enabled":false,"Id":"windows"},{"Enabled":false,"Id":"pki"},{"Enabled":true,"Id":"cyberark"},{"Enabled":false,"Id":"oraclesso"},{"Enabled":false,"Id":"rsa"},{"Enabled":true,"Id":"radius"},{"Enabled":true,"Id":"ldap"},{"Enabled":true,"Id":"saml"}],"ServerId":"e00e8q16-b637-11e9-8329-ccd02f0167674","ServerName":"Vault"}

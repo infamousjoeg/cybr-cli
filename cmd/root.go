@@ -1,4 +1,4 @@
-package cybr
+package cmd
 
 import (
 	"fmt"
@@ -14,9 +14,9 @@ var rootCmd = &cobra.Command{
 	Use:   "cybr",
 	Short: "cybr is CyberArk's PAS command-line interface utility",
 	Long: `cybr is a command-line interface utility created by CyberArk that
-		wraps the PAS REST API and eases the user experience for automators
-		and automation to easily interact with CyberArk Privileged Access
-		Security.`,
+wraps the PAS REST API and eases the user experience for automators
+and automation to easily interact with CyberArk Privileged Access
+Security.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

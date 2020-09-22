@@ -1,4 +1,4 @@
-package cybr
+package main
 
 import "github.com/infamousjoeg/pas-api-go/cmd"
 

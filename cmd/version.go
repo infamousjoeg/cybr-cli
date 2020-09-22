@@ -1,4 +1,4 @@
-package cybr
+package cmd
 
 import (
 	"fmt"
