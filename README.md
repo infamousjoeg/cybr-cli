@@ -1,6 +1,84 @@
 # pas-api-go
 @CyberArk Privileged Access Security (PAS) REST API Client Library
 
+## Usage
+
+### Import into project
+
+`github.com/infamousjoeg/pas-api-go/pkg/api`
+
+```go
+package main
+
+import pasapi "github.com/infamousjoeg/pas-api-go/pkg/api"
+```
+
+### Logon to the PAS REST API Web Service
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+
+	pasapi "github.com/infamousjoeg/pas-api-go/pkg/api"
+)
+
+var (
+	hostname = os.Getenv("PAS_HOSTNAME")
+	username = os.Getenv("PAS_USERNAME")
+	password = os.Getenv("PAS_PASSWORD")
+	authType = os.Getenv("PAS_AUTH_TYPE")
+)
+
+func main() {
+	// Logon to PAS REST API Web Services
+	token, errLogon := pasapi.Logon(hostname, username, password, authType, false)
+	if errLogon != nil {
+		log.Fatalf("Authentication failed. %s", errLogon)
+	}
+	fmt.Printf("Session Token:\r\n%s\r\n\r\n", token)
+```
+
+### Call functions by referencing `pasapi` and "dot-referencing"
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+
+	pasapi "github.com/infamousjoeg/pas-api-go/pkg/api"
+)
+
+// Declare variables (using Summon so they are env vars)
+var (
+	hostname = os.Getenv("PAS_HOSTNAME")
+	username = os.Getenv("PAS_USERNAME")
+	password = os.Getenv("PAS_PASSWORD")
+	authType = os.Getenv("PAS_AUTH_TYPE")
+)
+
+// Start main function
+func main() {
+   // Verify PAS REST API Web Services
+   // --> pasapi.ServerVerify is a "dot-reference"
+	resVerify := pasapi.ServerVerify(hostname)
+   // Marshal (convert) struct data into JSON format for pretty print
+   // Otherwise, we "dot-reference" e.g. jsonVerify.ApplicationName would equal 'PasswordVault'
+	jsonVerify, err := json.Marshal(&resVerify)
+	if err != nil {
+		log.Fatalf("Unable to marshal struct to JSON for verify. %s", err)
+	}
+   fmt.Printf("Verify JSON:\r\n%s\r\n\r\n", jsonVerify)
+}
+```
+
 ## Required Environment Variables
 
 | Variable Name | Description |
