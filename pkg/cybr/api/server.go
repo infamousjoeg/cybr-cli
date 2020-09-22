@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	httpJson "github.com/infamousjoeg/pas-api-go/pkg/helpers"
+	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers"
 )
 
 // VerifyResponse contains all response data from /verify endpoint

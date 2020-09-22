@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	httpJson "github.com/infamousjoeg/pas-api-go/pkg/helpers"
+	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers"
 )
 
 //ListApplicationsResponse contains all applications and app data returned

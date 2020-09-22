@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 
-	httpJson "github.com/infamousjoeg/pas-api-go/pkg/helpers"
+	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers"
 )
 
 // Logon to PAS REST API Web Service
