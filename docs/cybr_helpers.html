@@ -1,0 +1,278 @@
+using module mode; GOMOD=/Users/joegarcia/go/src/github.com/infamousjoeg/pas-api-go/go.mod
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#375EAB">
+
+  <title>httpjson - Go Documentation Server</title>
+
+<link type="text/css" rel="stylesheet" href="/lib/godoc/style.css">
+
+<script>window.initFuncs = [];</script>
+<script src="/lib/godoc/jquery.js" defer></script>
+
+
+
+<script>var goVersion = "go1.15";</script>
+<script src="/lib/godoc/godocs.js" defer></script>
+</head>
+<body>
+
+<div id='lowframe' style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
+...
+</div><!-- #lowframe -->
+
+<div id="topbar" class="wide"><div class="container">
+<div class="top-heading" id="heading-wide"><a href="/pkg/">Go Documentation Server</a></div>
+<div class="top-heading" id="heading-narrow"><a href="/pkg/">GoDoc</a></div>
+<a href="#" id="menu-button"><span id="menu-button-arrow">&#9661;</span></a>
+<form method="GET" action="/search">
+<div id="menu">
+
+<span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/><path d="M0 0h24v24H0z" fill="none"/></svg></span></button></span>
+</div>
+</form>
+
+</div></div>
+
+
+
+<div id="page" class="wide">
+<div class="container">
+
+
+  <h1>
+    Package httpjson
+    <span class="text-muted"></span>
+  </h1>
+
+
+
+
+
+
+
+<div id="nav"></div>
+
+
+<!--
+	Copyright 2009 The Go Authors. All rights reserved.
+	Use of this source code is governed by a BSD-style
+	license that can be found in the LICENSE file.
+-->
+<!--
+	Note: Static (i.e., not template-generated) href and id
+	attributes start with "pkg-" to make it impossible for
+	them to conflict with generated attributes (some of which
+	correspond to Go identifiers).
+-->
+
+	<script>
+	document.ANALYSIS_DATA = null;
+	document.CALLGRAPH = null;
+	</script>
+
+	
+		
+		<div id="short-nav">
+			<dl>
+			<dd><code>import "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers"</code></dd>
+			</dl>
+			<dl>
+			<dd><a href="#pkg-overview" class="overviewLink">Overview</a></dd>
+			<dd><a href="#pkg-index" class="indexLink">Index</a></dd>
+			
+			
+			</dl>
+		</div>
+		<!-- The package's Name is printed as title by the top-level template -->
+		<div id="pkg-overview" class="toggleVisible">
+			<div class="collapsed">
+				<h2 class="toggleButton" title="Click to show Overview section">Overview ▹</h2>
+			</div>
+			<div class="expanded">
+				<h2 class="toggleButton" title="Click to hide Overview section">Overview ▾</h2>
+				
+				
+			</div>
+		</div>
+
+		<div id="pkg-index" class="toggleVisible">
+		<div class="collapsed">
+			<h2 class="toggleButton" title="Click to show Index section">Index ▹</h2>
+		</div>
+		<div class="expanded">
+			<h2 class="toggleButton" title="Click to hide Index section">Index ▾</h2>
+
+		<!-- Table of contents for API; must be named manual-nav to turn off auto nav. -->
+			<div id="manual-nav">
+			<dl>
+			
+			
+			
+				
+				<dd><a href="#Delete">func Delete(url string, token string) (map[string]interface{}, error)</a></dd>
+			
+				
+				<dd><a href="#Get">func Get(url string, token string) (map[string]interface{}, error)</a></dd>
+			
+				
+				<dd><a href="#Post">func Post(url string, token string, body interface{}) (map[string]interface{}, error)</a></dd>
+			
+				
+				<dd><a href="#Put">func Put(url string, token string, body interface{}) (map[string]interface{}, error)</a></dd>
+			
+				
+				<dd><a href="#SendRequest">func SendRequest(url string, method string, token string, body interface{}) (map[string]interface{}, error)</a></dd>
+			
+				
+				<dd><a href="#SendRequestRaw">func SendRequestRaw(url string, method string, token string, body interface{}) ([]byte, error)</a></dd>
+			
+			
+			
+			</dl>
+			</div><!-- #manual-nav -->
+
+		
+
+		
+			<h3>Package files</h3>
+			<p>
+			<span style="font-size:90%">
+			
+				<a href="/src/github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson.go">httpjson.go</a>
+			
+			</span>
+			</p>
+		
+		</div><!-- .expanded -->
+		</div><!-- #pkg-index -->
+
+		
+
+		
+		
+		
+			
+			
+			<h2 id="Delete">func <a href="/src/github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson.go?s=3223:3292#L109">Delete</a>
+				<a class="permalink" href="#Delete">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func Delete(url <a href="/pkg/builtin/#string">string</a>, token <a href="/pkg/builtin/#string">string</a>) (map[<a href="/pkg/builtin/#string">string</a>]interface{}, <a href="/pkg/builtin/#error">error</a>)</pre>
+			<p>
+Delete a delete request and get response as serialized json map[string]interface{}
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Get">func <a href="/src/github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson.go?s=2465:2531#L91">Get</a>
+				<a class="permalink" href="#Get">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func Get(url <a href="/pkg/builtin/#string">string</a>, token <a href="/pkg/builtin/#string">string</a>) (map[<a href="/pkg/builtin/#string">string</a>]interface{}, <a href="/pkg/builtin/#error">error</a>)</pre>
+			<p>
+Get a get request and get response as serialized json map[string]interface{}
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Post">func <a href="/src/github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson.go?s=2703:2788#L97">Post</a>
+				<a class="permalink" href="#Post">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func Post(url <a href="/pkg/builtin/#string">string</a>, token <a href="/pkg/builtin/#string">string</a>, body interface{}) (map[<a href="/pkg/builtin/#string">string</a>]interface{}, <a href="/pkg/builtin/#error">error</a>)</pre>
+			<p>
+Post a post request and get response as serialized json map[string]interface{}
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="Put">func <a href="/src/github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson.go?s=2961:3045#L103">Put</a>
+				<a class="permalink" href="#Put">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func Put(url <a href="/pkg/builtin/#string">string</a>, token <a href="/pkg/builtin/#string">string</a>, body interface{}) (map[<a href="/pkg/builtin/#string">string</a>]interface{}, <a href="/pkg/builtin/#error">error</a>)</pre>
+			<p>
+Put a put request and get response as serialized json map[string]interface{}
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="SendRequest">func <a href="/src/github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson.go?s=1540:1647#L59">SendRequest</a>
+				<a class="permalink" href="#SendRequest">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func SendRequest(url <a href="/pkg/builtin/#string">string</a>, method <a href="/pkg/builtin/#string">string</a>, token <a href="/pkg/builtin/#string">string</a>, body interface{}) (map[<a href="/pkg/builtin/#string">string</a>]interface{}, <a href="/pkg/builtin/#error">error</a>)</pre>
+			<p>
+SendRequest is an http request and get response as serialized json map[string]interface{}
+</p>
+
+			
+			
+
+		
+			
+			
+			<h2 id="SendRequestRaw">func <a href="/src/github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson.go?s=2055:2149#L77">SendRequestRaw</a>
+				<a class="permalink" href="#SendRequestRaw">&#xb6;</a>
+				
+				
+			</h2>
+			<pre>func SendRequestRaw(url <a href="/pkg/builtin/#string">string</a>, method <a href="/pkg/builtin/#string">string</a>, token <a href="/pkg/builtin/#string">string</a>, body interface{}) ([]<a href="/pkg/builtin/#byte">byte</a>, <a href="/pkg/builtin/#error">error</a>)</pre>
+			<p>
+SendRequestRaw is an http request and get response as byte[]
+</p>
+
+			
+			
+
+		
+		
+	
+
+	
+
+
+
+
+
+
+
+<div id="footer">
+Build version go1.15.<br>
+Except as <a href="https://developers.google.com/site-policies#restrictions">noted</a>,
+the content of this page is licensed under the
+Creative Commons Attribution 3.0 License,
+and code is licensed under a <a href="/LICENSE">BSD license</a>.<br>
+<a href="/doc/tos.html">Terms of Service</a> |
+<a href="http://www.google.com/intl/en/policies/privacy/">Privacy Policy</a>
+</div>
+
+</div><!-- .container -->
+</div><!-- #page -->
+</body>
+</html>
