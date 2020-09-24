@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers"
 )
@@ -23,14 +22,14 @@ type AuthenticationMethods struct {
 }
 
 // ServerVerify is an unauthenticated endpoint for testing Web Service availability
-func ServerVerify(hostname string) *VerifyResponse {
-	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Verify", hostname)
-	response, err := httpJson.SendRequest(url, "GET", "", "")
+func (c Client) ServerVerify() (*VerifyResponse, error) {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Verify", c.Hostname)
+	response, err := httpJson.SendRequest(url, "GET", "", nil)
 	if err != nil {
-		log.Fatalf("Error verifying PAS REST API Web Service. %s", err)
+		return &VerifyResponse{}, fmt.Errorf("Error verifying PAS REST API Web Service. %s", err)
 	}
 	jsonString, _ := json.Marshal(response)
 	VerifyResponse := VerifyResponse{}
-	json.Unmarshal(jsonString, &VerifyResponse)
-	return &VerifyResponse
+	err = json.Unmarshal(jsonString, &VerifyResponse)
+	return &VerifyResponse, err
 }

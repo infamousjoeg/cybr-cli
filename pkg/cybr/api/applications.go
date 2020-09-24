@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers"
@@ -31,16 +30,16 @@ type ListApplication struct {
 }
 
 // ListApplications returns all Application Identities setup in PAS
-func ListApplications(hostname string, token string, location string, subLocations bool) *ListApplicationsResponse {
-	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications?Location=%s&IncludeSublocations=%t", hostname, location, subLocations)
-	response, err := httpJson.Get(url, token)
+func (c Client) ListApplications(location string) (*ListApplicationsResponse, error) {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications?Location=%s", c.Hostname, location)
+	response, err := httpJson.Get(url, c.sessionToken)
 	if err != nil {
-		log.Fatalf("Error listing applications. %s", err)
+		return &ListApplicationsResponse{}, fmt.Errorf("Error listing applications in location '%s'. %s", location, err)
 	}
 	jsonString, _ := json.Marshal(response)
 	ListApplicationsResponse := ListApplicationsResponse{}
-	json.Unmarshal(jsonString, &ListApplicationsResponse)
-	return &ListApplicationsResponse
+	err = json.Unmarshal(jsonString, &ListApplicationsResponse)
+	return &ListApplicationsResponse, err
 }
 
 // ListApplicationAuthenticationMethodsResponse contains all auth methods for a specific App ID
@@ -55,19 +54,19 @@ type ListAuthentication struct {
 	AuthType             string `json:"AuthType"`
 	AuthValue            string `json:"AuthValue"`
 	Comment              string `json:"Comment,omitempty"`
-	IsFolder             string `json:"IsFolder,omitempty"`
+	IsFolder             bool   `json:"IsFolder,omitempty"`
 	AuthID               int    `json:"authID"`
 }
 
 // ListApplicationAuthenticationMethods returns all auth methods for a specific Application Identity
-func ListApplicationAuthenticationMethods(hostname string, token string, appID string) *ListApplicationAuthenticationMethodsResponse {
-	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications", hostname, appID)
-	response, err := httpJson.Get(url, token)
+func (c Client) ListApplicationAuthenticationMethods(appID string) (*ListApplicationAuthenticationMethodsResponse, error) {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications", c.Hostname, appID)
+	response, err := httpJson.Get(url, c.sessionToken)
 	if err != nil {
-		log.Fatalf("Error listing %s authentication methods. %s", appID, err)
+		return &ListApplicationAuthenticationMethodsResponse{}, fmt.Errorf("Error listing application's '%s' authentication methods. %s", appID, err)
 	}
 	jsonString, _ := json.Marshal(response)
 	ListApplicationAuthenticationMethodsResponse := ListApplicationAuthenticationMethodsResponse{}
-	json.Unmarshal(jsonString, &ListApplicationAuthenticationMethodsResponse)
-	return &ListApplicationAuthenticationMethodsResponse
+	err = json.Unmarshal(jsonString, &ListApplicationAuthenticationMethodsResponse)
+	return &ListApplicationAuthenticationMethodsResponse, err
 }

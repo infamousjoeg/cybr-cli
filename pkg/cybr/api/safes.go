@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers"
 )
@@ -23,16 +22,16 @@ type ListSafe struct {
 }
 
 // ListSafes CyberArk user has access to
-func ListSafes(hostname string, token string) *ListSafesResponse {
-	url := fmt.Sprintf("%s/PasswordVault/api/safes", hostname)
-	response, err := httpJson.Get(url, token)
+func (c Client) ListSafes() (*ListSafesResponse, error) {
+	url := fmt.Sprintf("%s/PasswordVault/api/safes", c.Hostname)
+	response, err := httpJson.Get(url, c.sessionToken)
 	if err != nil {
-		log.Fatalf("Error listing safes for current CyberArk user. %s", err)
+		return &ListSafesResponse{}, fmt.Errorf("Failed to list safes. %s", err)
 	}
 	jsonString, _ := json.Marshal(response)
 	ListSafesResponse := ListSafesResponse{}
-	json.Unmarshal(jsonString, &ListSafesResponse)
-	return &ListSafesResponse
+	err = json.Unmarshal(jsonString, &ListSafesResponse)
+	return &ListSafesResponse, err
 }
 
 // ListSafeMembersResponse contains data of all members of a specific safe
@@ -69,14 +68,14 @@ type Permissions struct {
 }
 
 // ListSafeMembers List all members of a safe
-func ListSafeMembers(hostname string, token string, safeName string) *ListSafeMembersResponse {
-	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s/Members", hostname, safeName)
-	response, err := httpJson.Get(url, token)
+func (c Client) ListSafeMembers(safeName string) (*ListSafeMembersResponse, error) {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s/Members", c.Hostname, safeName)
+	response, err := httpJson.Get(url, c.sessionToken)
 	if err != nil {
-		log.Fatalf("Error listing safe members for %s safe. %s", safeName, err)
+		return &ListSafeMembersResponse{}, fmt.Errorf("Failed to list members of safe '%s'. %s", safeName, err)
 	}
 	jsonString, _ := json.Marshal(response)
 	ListSafeMembersResponse := ListSafeMembersResponse{}
-	json.Unmarshal(jsonString, &ListSafeMembersResponse)
-	return &ListSafeMembersResponse
+	err = json.Unmarshal(jsonString, &ListSafeMembersResponse)
+	return &ListSafeMembersResponse, err
 }
