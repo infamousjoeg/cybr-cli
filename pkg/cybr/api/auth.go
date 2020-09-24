@@ -7,6 +7,7 @@ import (
 	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers"
 )
 
+// LogonRequest contains the body of the Logon function's request
 type LogonRequest struct {
 	Username          string `json:"username"`
 	Password          string `json:"password"`
