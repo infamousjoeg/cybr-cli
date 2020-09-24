@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -13,62 +12,79 @@ var (
 	hostname = os.Getenv("PAS_HOSTNAME")
 	username = os.Getenv("PAS_USERNAME")
 	password = os.Getenv("PAS_PASSWORD")
-	authType = os.Getenv("PAS_AUTH_TYPE")
 )
 
 func main() {
-	// Verify PAS REST API Web Services
-	resVerify := pasapi.ServerVerify(hostname)
-	// Marshal struct data into JSON format for pretty print
-	jsonVerify, err := json.Marshal(&resVerify)
+	client := pasapi.Client{
+		Hostname: hostname,
+		AuthType: "cyberark",
+	}
+
+	response, err := client.ServerVerify()
 	if err != nil {
-		log.Fatalf("Unable to marshal struct to JSON for verify. %s", err)
+		log.Fatalf("Failed to get ServerVerify information for the PVWA. %s", err)
+		return
 	}
-	fmt.Printf("Verify JSON:\r\n%s\r\n\r\n", jsonVerify)
+	fmt.Printf("Server ID: %s\nServer name: %s\n", response.ServerID, response.ServerName)
 
-	// Logon to PAS REST API Web Services
-	token, errLogon := pasapi.Logon(hostname, username, password, authType, false)
-	if errLogon != nil {
-		log.Fatalf("Authentication failed. %s", errLogon)
+	credentials := pasapi.LogonRequest{
+		Username: username,
+		Password: password,
 	}
-	fmt.Printf("Session Token:\r\n%s\r\n\r\n", token)
 
-	// List Safes
-	resListSafes := pasapi.ListSafes(hostname, token)
-	jsonListSafes, err := json.Marshal(resListSafes)
+	err = client.Logon(credentials)
 	if err != nil {
-		log.Fatalf("Unable to marshal struct to JSON for List Safes. %s", err)
+		log.Fatalf("Failed to Logon to the PVWA. %s", err)
+		return
 	}
-	fmt.Printf("List Safes JSON:\r\n%s\r\n\r\n", jsonListSafes)
 
-	// List Safe Members
-	resListSafeMembers := pasapi.ListSafeMembers(hostname, token, "D-Win-DomainAdmins")
-	jsonListSafeMembers, err := json.Marshal(resListSafeMembers)
+	safes, err := client.ListSafes()
 	if err != nil {
-		log.Fatalf("Unable to marshal struct to JSON for List Safe Members. %s", err)
+		log.Fatalf("%s", err)
+		return
 	}
-	fmt.Printf("List Safe Members JSON:\r\n%s\r\n\r\n", jsonListSafeMembers)
 
-	// List Applications
-	resListApplications := pasapi.ListApplications(hostname, token, "\\", true)
-	jsonListApplications, err := json.Marshal(resListApplications)
+	// Lets iterate over each safe
+	for _, s := range safes.Safes {
+		// Get the members of each safe
+		members, err := client.ListSafeMembers(s.SafeName)
+		if err != nil {
+			log.Fatalf("Failed to list members of safe '%s'. %s", s.SafeName, err)
+			return
+		}
+
+		// Iterate each member in this safe and print out safe and members
+		fmt.Printf("%s members\n", s.SafeName)
+		for _, m := range members.Members {
+			fmt.Printf("\t- %s\n", m.Username)
+		}
+	}
+
+	apps, err := client.ListApplications("\\")
 	if err != nil {
-		log.Fatalf("Unable to marshal struct to JSON for List Applications. %s", err)
+		log.Fatalf("%s", err)
+		return
 	}
-	fmt.Printf("List Applications JSON:\r\n%s\r\n\r\n", jsonListApplications)
 
-	// List Application Authentication Methods
-	resListApplicationAuthenticationMethods := pasapi.ListApplicationAuthenticationMethods(hostname, token, "Ansible")
-	jsonListApplicationAuthenticationMethods, err := json.Marshal(resListApplicationAuthenticationMethods)
+	// Iterate through the applications
+	for _, a := range apps.Application {
+		// Get authentication methods for each appliucation
+		authMethods, err := client.ListApplicationAuthenticationMethods(a.AppID)
+		if err != nil {
+			log.Fatalf("Failed to list auth methods for application '%s'. %s", a.AppID, err)
+			return
+		}
+
+		// Print out app ID and authentication method types and values
+		fmt.Printf("%s authentication methods\n", a.AppID)
+		for _, m := range authMethods.Authentication {
+			fmt.Printf("\t- %s = %s\n", m.AuthType, m.AuthValue)
+		}
+	}
+
+	err = client.Logoff()
 	if err != nil {
-		log.Fatalf("Unable to marshal struct to JSON for List Application Authentication Methods. %s", err)
+		log.Fatalf("Failed to log off. %s", err)
+		return
 	}
-	fmt.Printf("List Application Authentication Methods JSON:\r\n%s\r\n\r\n", jsonListApplicationAuthenticationMethods)
-
-	// Logoff PAS REST API Web Services
-	success, errLogoff := pasapi.Logoff(hostname, token)
-	if errLogoff != nil || success != true {
-		log.Fatalf("Logoff failed. %s", errLogoff)
-	}
-	fmt.Println("Successfully logged off PAS REST API Web Services.")
 }
