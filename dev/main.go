@@ -9,14 +9,14 @@ import (
 )
 
 var (
-	hostname = os.Getenv("PAS_HOSTNAME")
+	baseURL  = os.Getenv("PAS_BASE_URL")
 	username = os.Getenv("PAS_USERNAME")
 	password = os.Getenv("PAS_PASSWORD")
 )
 
 func main() {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  baseURL,
 		AuthType: "cyberark",
 	}
 
