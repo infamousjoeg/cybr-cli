@@ -46,17 +46,19 @@ func main() {
 
 	// Lets iterate over each safe
 	for _, s := range safes.Safes {
-		// Get the members of each safe
-		members, err := client.ListSafeMembers(s.SafeName)
-		if err != nil {
-			log.Fatalf("Failed to list members of safe '%s'. %s", s.SafeName, err)
-			return
-		}
+		if s.SafeName != "PVWAPublicData" {
+			// Get the members of each safe
+			members, err := client.ListSafeMembers(s.SafeName)
+			if err != nil {
+				log.Fatalf("Failed to list members of safe '%s'. %s", s.SafeName, err)
+				return
+			}
 
-		// Iterate each member in this safe and print out safe and members
-		fmt.Printf("%s members\n", s.SafeName)
-		for _, m := range members.Members {
-			fmt.Printf("\t- %s\n", m.Username)
+			// Iterate each member in this safe and print out safe and members
+			fmt.Printf("%s members\n", s.SafeName)
+			for _, m := range members.Members {
+				fmt.Printf("\t- %s\n", m.Username)
+			}
 		}
 	}
 
