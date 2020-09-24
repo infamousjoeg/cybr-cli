@@ -55,7 +55,7 @@ type ListAuthentication struct {
 	AuthValue            string `json:"AuthValue"`
 	Comment              string `json:"Comment,omitempty"`
 	IsFolder             bool   `json:"IsFolder,omitempty"`
-	AuthID               int    `json:"authID"`
+	AuthID               string `json:"authID"`
 }
 
 // ListApplicationAuthenticationMethods returns all auth methods for a specific Application Identity
