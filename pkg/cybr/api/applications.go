@@ -31,8 +31,8 @@ type ListApplication struct {
 
 // ListApplications returns all Application Identities setup in PAS
 func (c Client) ListApplications(location string) (*ListApplicationsResponse, error) {
-	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications?Location=%s", c.Hostname, location)
-	response, err := httpJson.Get(url, c.sessionToken)
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications?Location=%s", c.BaseURL, location)
+	response, err := httpJson.Get(url, c.SessionToken)
 	if err != nil {
 		return &ListApplicationsResponse{}, fmt.Errorf("Error listing applications in location '%s'. %s", location, err)
 	}
@@ -60,8 +60,8 @@ type ListAuthentication struct {
 
 // ListApplicationAuthenticationMethods returns all auth methods for a specific Application Identity
 func (c Client) ListApplicationAuthenticationMethods(appID string) (*ListApplicationAuthenticationMethodsResponse, error) {
-	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications", c.Hostname, appID)
-	response, err := httpJson.Get(url, c.sessionToken)
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications", c.BaseURL, appID)
+	response, err := httpJson.Get(url, c.SessionToken)
 	if err != nil {
 		return &ListApplicationAuthenticationMethodsResponse{}, fmt.Errorf("Error listing application's '%s' authentication methods. %s", appID, err)
 	}

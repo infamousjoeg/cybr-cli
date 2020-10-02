@@ -9,7 +9,7 @@ import (
 
 func TestListApplicationSuccess(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 
@@ -35,7 +35,7 @@ func TestListApplicationSuccess(t *testing.T) {
 
 func TestListApplicationInvalidLocation(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 
@@ -57,7 +57,7 @@ func TestListApplicationInvalidLocation(t *testing.T) {
 
 func TestListApplicationAuthenticationMethodsSuccess(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 
@@ -79,7 +79,7 @@ func TestListApplicationAuthenticationMethodsSuccess(t *testing.T) {
 
 func TestListApplicationAuthenticationMethodsInvalidApplicationID(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 

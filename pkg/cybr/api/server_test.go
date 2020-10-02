@@ -8,7 +8,7 @@ import (
 
 func TestServerVerifySuccess(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 
@@ -24,7 +24,7 @@ func TestServerVerifySuccess(t *testing.T) {
 
 func TestServerVerifyInvalidHostName(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: "https://invalidHostName",
+		BaseURL:  "https://invalidHostName",
 		AuthType: "cyberark",
 	}
 

@@ -7,7 +7,41 @@
 
 ### Command-Line Interface (CLI)
 
-This is a work in progress...
+#### logon
+
+```shell
+$ cybr logon -u username -a cyberark-or-ldap -b https://pvwa.example.com
+```
+
+Logon to the PAS REST API as the username you provide using the authentication method you choose. At this time, only `cyberark` and `ldap` authentication methods are supported.
+
+Upon successful logon, a file will be created in your user's home directory at `.cybr/config`. It is an encoded file that cannot be read in plain-text. This holds your current session information.
+
+#### logoff
+
+```shell
+$ cybr logoff
+```
+
+Logoff the PAS REST API as the username you provided during logon.
+
+Upon successful logoff, the config file located in your user's home directory at `.cybr/config` will be removed and the session token stored within will be expired.
+
+#### version
+
+```shell
+$ cybr version
+```
+
+Displays the current version of the `cybr` CLI.
+
+#### help
+
+```shell
+$ cybr help [command]
+```
+
+Displays help text for the `cybr` CLI.  If an optional `[command]` is provided, the help text for that command will be displayed instead.
 
 #### Install from Source
 
@@ -25,6 +59,8 @@ Usage:
 
 Available Commands:
   help        Help about any command
+  logoff      Logoff the PAS REST API
+  logon       Logon to PAS REST API
   version     Display current version
 
 Flags:

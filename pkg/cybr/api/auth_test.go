@@ -9,7 +9,7 @@ import (
 
 func TestCyberarkLogonSuccess(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 
@@ -26,7 +26,7 @@ func TestCyberarkLogonSuccess(t *testing.T) {
 
 func TestCyberarkLogonInvalidCreds(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 
@@ -43,7 +43,7 @@ func TestCyberarkLogonInvalidCreds(t *testing.T) {
 
 func TestCyberarkLogonInvalidHostName(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: "https://invalidhostname",
+		BaseURL:  "https://invalidhostname",
 		AuthType: "cyberark",
 	}
 
@@ -60,7 +60,7 @@ func TestCyberarkLogonInvalidHostName(t *testing.T) {
 
 func TestLogonInvalidAuthType(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "notGood",
 	}
 
@@ -81,7 +81,7 @@ func TestLogonInvalidAuthType(t *testing.T) {
 
 func TestCyberarkLogoffSuccess(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 
@@ -103,7 +103,7 @@ func TestCyberarkLogoffSuccess(t *testing.T) {
 
 func TestCyberarkLogoffFailNotLoggedIn(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 

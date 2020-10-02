@@ -9,7 +9,7 @@ import (
 
 func TestListSafesSuccess(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 
@@ -35,7 +35,7 @@ func TestListSafesSuccess(t *testing.T) {
 
 func TestListSafeMembersSuccess(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 
@@ -61,7 +61,7 @@ func TestListSafeMembersSuccess(t *testing.T) {
 
 func TestListSafeMembersInvalidSafeName(t *testing.T) {
 	client := pasapi.Client{
-		Hostname: hostname,
+		BaseURL:  hostname,
 		AuthType: "cyberark",
 	}
 
