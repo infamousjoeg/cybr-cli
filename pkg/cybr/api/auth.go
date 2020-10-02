@@ -29,7 +29,7 @@ func (c *Client) Logon(req LogonRequest) error {
 		return fmt.Errorf("Failed to authenticate to the PAS REST API. %s", err)
 	}
 
-	c.sessionToken = strings.Trim(string(token), "\"")
+	c.SessionToken = strings.Trim(string(token), "\"")
 	return nil
 }
 
@@ -37,7 +37,7 @@ func (c *Client) Logon(req LogonRequest) error {
 func (c Client) Logoff() error {
 	// Set URL for request
 	url := fmt.Sprintf("%s/PasswordVault/api/auth/logoff", c.BaseURL)
-	_, err := httpJson.Post(url, c.sessionToken, nil)
+	_, err := httpJson.Post(url, c.SessionToken, nil)
 	if err != nil {
 		return fmt.Errorf("Unable to logoff PAS REST API Web Service. %s", err)
 	}

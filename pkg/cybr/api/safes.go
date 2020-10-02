@@ -24,7 +24,7 @@ type ListSafe struct {
 // ListSafes CyberArk user has access to
 func (c Client) ListSafes() (*ListSafesResponse, error) {
 	url := fmt.Sprintf("%s/PasswordVault/api/safes", c.BaseURL)
-	response, err := httpJson.Get(url, c.sessionToken)
+	response, err := httpJson.Get(url, c.SessionToken)
 	if err != nil {
 		return &ListSafesResponse{}, fmt.Errorf("Failed to list safes. %s", err)
 	}
@@ -70,7 +70,7 @@ type Permissions struct {
 // ListSafeMembers List all members of a safe
 func (c Client) ListSafeMembers(safeName string) (*ListSafeMembersResponse, error) {
 	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s/Members", c.BaseURL, safeName)
-	response, err := httpJson.Get(url, c.sessionToken)
+	response, err := httpJson.Get(url, c.SessionToken)
 	if err != nil {
 		return &ListSafeMembersResponse{}, fmt.Errorf("Failed to list members of safe '%s'. %s", safeName, err)
 	}

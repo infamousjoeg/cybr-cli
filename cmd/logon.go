@@ -27,6 +27,10 @@ var logonCmd = &cobra.Command{
 	Example Usage:
 	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if Username == "" || AuthenticationType == "" || BaseURL == "" {
+			log.Fatalf("Missing required parameters for logon command.")
+			return
+		}
 		// Get secret value from STDIN
 		fmt.Println("Enter password: ")
 		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
@@ -48,6 +52,12 @@ var logonCmd = &cobra.Command{
 		err = client.Logon(credentials)
 		if err != nil {
 			log.Fatalf("Failed to Logon to the PVWA. %s", err)
+			return
+		}
+
+		err = client.SetConfig()
+		if err != nil {
+			log.Fatalf("Failed to create configuration file. %s", err)
 			return
 		}
 
