@@ -1,14 +1,10 @@
 package cmd
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
-	"os"
 
 	pasapi "github.com/infamousjoeg/pas-api-go/pkg/cybr/api"
-	"github.com/kataras/tablewriter"
-	"github.com/landoop/tableprinter"
+	"github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/prettyprint"
 	"github.com/spf13/cobra"
 )
 
@@ -28,6 +24,7 @@ var safesCmd = &cobra.Command{
 		client, err := pasapi.GetConfig()
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
+			return
 		}
 		// List All Safes
 		safes, err := client.ListSafes()
@@ -35,39 +32,66 @@ var safesCmd = &cobra.Command{
 			log.Fatalf("Failed to retrieve a list of all safes. %s", err)
 			return
 		}
+		// Pretty print returned object as JSON blob
+		prettyprint.PrintJSON(safes)
+	},
+}
 
-		// This is where I start to attempt a pretty print using tableprinter
-		// https://github.com/lensesio/tableprinter#examples
-		// I start by taking the returned safes whatever it's called and marshal to []byte
-		bSafes, err := json.Marshal(safes)
+var listCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List all safes",
+	Long: `List all safes the logged on user can read from PAS REST API.
+	
+	Example Usage:
+	$ cybr safes list`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Get config file written to local file system
+		client, err := pasapi.GetConfig()
 		if err != nil {
-			log.Fatalf("Failed to marshal the list of all safes. %s", err)
+			log.Fatalf("Failed to read configuration file. %s", err)
 			return
 		}
+		// List All Safes
+		safes, err := client.ListSafes()
+		if err != nil {
+			log.Fatalf("Failed to retrieve a list of all safes. %s", err)
+			return
+		}
+		// Pretty print returned object as JSON blob
+		prettyprint.PrintJSON(safes)
+	},
+}
 
-		// This is for debugging so I can see what's returned
-		fmt.Printf("%s\n\n", string(bSafes))
-
-		// This initializes the tableprinter to print to Stdout
-		printer := tableprinter.New(os.Stdout)
-
-		// Optionally, customize the table, import of the underline 'tablewriter' package is required for that.
-		printer.BorderTop, printer.BorderBottom, printer.BorderLeft, printer.BorderRight = true, true, true, true
-		printer.CenterSeparator = "│"
-		printer.ColumnSeparator = "│"
-		printer.RowSeparator = "─"
-		printer.HeaderBgColor = tablewriter.BgBlackColor
-		printer.HeaderFgColor = tablewriter.FgGreenColor
-
-		// Here is where I print the []byte type var bSafes
-		// You can also do printer.PrintJSON if it's a string of legit JSON, but this seems to return
-		// maps for each JSON entry in the Safes array...
-		printer.Print(bSafes)
-
+var listMembersCmd = &cobra.Command{
+	Use:   "member list",
+	Short: "List all safe members on safes or specific safe",
+	Long: `List all safe members on safes or a specific safe that
+	the user logged on can read from PAS REST API.
+	
+	Example Usage:
+	$ cybr safes member list -s SafeName`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Get config file written to local file system
+		client, err := pasapi.GetConfig()
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+		// List all Safe Members for specific safe ""
+		members, err := client.ListSafeMembers(Safe)
+		if err != nil {
+			log.Fatalf("Failed to retrieve a list of all safe members for %s. %s", Safe, err)
+			return
+		}
+		// Pretty print returned object as JSON blob
+		prettyprint.PrintJSON(members)
 	},
 }
 
 func init() {
-	safesCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Safe name to filter request on")
+	listMembersCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Safe name to filter request on")
+	listMembersCmd.MarkFlagRequired("safe")
+	safesCmd.AddCommand(listCmd)
+	safesCmd.AddCommand(listMembersCmd)
 	rootCmd.AddCommand(safesCmd)
 }
