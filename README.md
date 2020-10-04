@@ -27,6 +27,32 @@ Logoff the PAS REST API as the username you provided during logon.
 
 Upon successful logoff, the config file located in your user's home directory at `.cybr/config` will be removed and the session token stored within will be expired.
 
+#### safes
+
+```shell
+$ cybr safes
+```
+
+List all safes the username you are logged on as has access to read.
+
+##### list
+
+```shell
+$ cybr safes list
+```
+
+List all safes the username you are logged on as has access to read.
+
+##### member list
+
+```shell
+$ cybr safes member list -s SafeName
+```
+
+Required Option: `-s` or `--safe`
+
+List all safe members on the safe given.
+
 #### version
 
 ```shell
@@ -61,6 +87,7 @@ Available Commands:
   help        Help about any command
   logoff      Logoff the PAS REST API
   logon       Logon to PAS REST API
+  safes       Safe actions for PAS REST API
   version     Display current version
 
 Flags:
