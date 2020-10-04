@@ -27,10 +27,6 @@ var logonCmd = &cobra.Command{
 	Example Usage:
 	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if Username == "" || AuthenticationType == "" || BaseURL == "" {
-			log.Fatalf("Missing required parameters for logon command.")
-			return
-		}
 		// Get secret value from STDIN
 		fmt.Println("Enter password: ")
 		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
@@ -67,7 +63,10 @@ var logonCmd = &cobra.Command{
 
 func init() {
 	logonCmd.Flags().StringVarP(&Username, "username", "u", "", "Username to logon PAS REST API using")
+	logonCmd.MarkFlagRequired("username")
 	logonCmd.Flags().StringVarP(&AuthenticationType, "authType", "a", "", "Authentication method to logon using")
+	logonCmd.MarkFlagRequired("authType")
 	logonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Base URL to send Logon request to")
+	logonCmd.MarkFlagRequired("base-url")
 	rootCmd.AddCommand(logonCmd)
 }
