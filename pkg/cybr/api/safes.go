@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson"
+	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
 )
 
 // ListSafesResponse contains an array of all safes the current user can read

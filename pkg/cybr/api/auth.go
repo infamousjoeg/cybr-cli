@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson"
+	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
 )
 
 // LogonRequest contains the body of the Logon function's request

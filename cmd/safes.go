@@ -3,8 +3,8 @@ package cmd
 import (
 	"log"
 
-	pasapi "github.com/infamousjoeg/pas-api-go/pkg/cybr/api"
-	"github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/prettyprint"
+	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/spf13/cobra"
 )
 

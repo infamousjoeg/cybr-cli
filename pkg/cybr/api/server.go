@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson"
+	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
 )
 
 // VerifyResponse contains all response data from /verify endpoint

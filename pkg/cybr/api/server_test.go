@@ -3,7 +3,7 @@ package api_test
 import (
 	"testing"
 
-	pasapi "github.com/infamousjoeg/pas-api-go/pkg/cybr/api"
+	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
 )
 
 func TestServerVerifySuccess(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"log"
 	"syscall"
 
-	pasapi "github.com/infamousjoeg/pas-api-go/pkg/cybr/api"
+	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )

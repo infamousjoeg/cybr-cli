@@ -1,6 +1,6 @@
 package main
 
-import "github.com/infamousjoeg/pas-api-go/cmd"
+import "github.com/infamousjoeg/cybr-cli/cmd"
 
 func main() {
 	cmd.Execute()

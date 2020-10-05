@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	httpJson "github.com/infamousjoeg/pas-api-go/pkg/cybr/helpers/httpjson"
+	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
 )
 
 //ListApplicationsResponse contains all applications and app data returned

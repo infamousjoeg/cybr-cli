@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/infamousjoeg/pas-api-go/pkg/cybr"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr"
 	"github.com/spf13/cobra"
 )
 
