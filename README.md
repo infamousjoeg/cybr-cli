@@ -1,7 +1,7 @@
 # pas-api-go
 @CyberArk Privileged Access Security (PAS) REST API Client Library
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=infamousjoeg_pas-api-go&metric=alert_status)](https://sonarcloud.io/dashboard?id=infamousjoeg_pas-api-go)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=infamousjoeg_pas-api-go&metric=alert_status)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3ALint) [![CodeQL](https://github.com/infamousjoeg/cybr-cli/workflows/CodeQL/badge.svg)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3ACodeQL)
 
 ## Usage
 
