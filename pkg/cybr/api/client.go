@@ -10,6 +10,7 @@ import (
 type Client struct {
 	BaseURL      string
 	AuthType     string
+	InsecureTLS  bool
 	SessionToken string
 }
 

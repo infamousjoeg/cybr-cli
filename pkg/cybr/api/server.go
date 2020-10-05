@@ -24,7 +24,7 @@ type AuthenticationMethods struct {
 // ServerVerify is an unauthenticated endpoint for testing Web Service availability
 func (c Client) ServerVerify() (*VerifyResponse, error) {
 	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Verify", c.BaseURL)
-	response, err := httpJson.SendRequest(url, "GET", "", nil)
+	response, err := httpJson.SendRequest(url, "GET", "", nil, c.InsecureTLS)
 	if err != nil {
 		return &VerifyResponse{}, fmt.Errorf("Error verifying PAS REST API Web Service. %s", err)
 	}

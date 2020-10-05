@@ -15,6 +15,8 @@ var (
 	Username string
 	// AuthenticationType to be used to logon PAS REST API
 	AuthenticationType string
+	// InsecureTLS is a boolean value whether to verify TLS or not
+	InsecureTLS bool
 	// BaseURL to send PAS REST API logon request to
 	BaseURL string
 )
@@ -25,7 +27,9 @@ var logonCmd = &cobra.Command{
 	Long: `Authenticate to PAS REST API using the provided authentication type.
 	
 	Example Usage:
-	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com`,
+	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com
+	To bypass TLS verification:
+	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com -i`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get secret value from STDIN
 		fmt.Println("Enter password: ")
@@ -36,8 +40,9 @@ var logonCmd = &cobra.Command{
 		}
 
 		client := pasapi.Client{
-			BaseURL:  BaseURL,
-			AuthType: AuthenticationType,
+			BaseURL:     BaseURL,
+			AuthType:    AuthenticationType,
+			InsecureTLS: InsecureTLS,
 		}
 
 		credentials := pasapi.LogonRequest{
@@ -64,8 +69,9 @@ var logonCmd = &cobra.Command{
 func init() {
 	logonCmd.Flags().StringVarP(&Username, "username", "u", "", "Username to logon PAS REST API using")
 	logonCmd.MarkFlagRequired("username")
-	logonCmd.Flags().StringVarP(&AuthenticationType, "authType", "a", "", "Authentication method to logon using")
+	logonCmd.Flags().StringVarP(&AuthenticationType, "auth-type", "a", "", "Authentication method to logon using")
 	logonCmd.MarkFlagRequired("authType")
+	logonCmd.Flags().BoolVarP(&InsecureTLS, "insecure-tls", "i", false, "If detected, TLS will not be verified")
 	logonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Base URL to send Logon request to")
 	logonCmd.MarkFlagRequired("base-url")
 	rootCmd.AddCommand(logonCmd)
