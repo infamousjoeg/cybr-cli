@@ -60,4 +60,4 @@ jobs:
         with:
           name: Release Executables
           path: |
-            ./bin/*_authenticator*
+            ./bin/*_cybr*

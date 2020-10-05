@@ -1,4 +1,4 @@
-name: cybr-cli CD
+name: Release Binary
 
 on:
   release:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   release:
-    name: Release Executables
+    name: Release Binaries
     runs-on: ubuntu-latest
     strategy:
       matrix:
