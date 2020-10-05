@@ -27,6 +27,11 @@ var logoffCmd = &cobra.Command{
 			log.Fatalf("Failed to log off. %s", err)
 			return
 		}
+		// Remove the config file written to local file system
+		err = client.RemoveConfig()
+		if err != nil {
+			log.Fatalf("Failed to remove configuration file. %s", err)
+		}
 
 		fmt.Println("Successfully logged off PAS.")
 	},
