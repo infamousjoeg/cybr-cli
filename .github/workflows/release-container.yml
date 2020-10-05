@@ -17,27 +17,27 @@ jobs:
       with:
         path: 'release.json'
         prop_path: 'version'
-      - name: Build Docker Container Package
-        run: |
-          docker build -t nfmsjoeg/cybr-cli:$TAG_NAME .
-          docker save nfmsjoeg/cybr-cli:$TAG_NAME > ./bin/docker_cybr.tar
-        env:
-          TAG_NAME: ${{ steps.client_version.outputs.prop }}
-      - name: Build and Push Docker Container to DockerHub
-        uses: docker/build-push-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: nfmsjoeg/cybr-cli
-          tags: ${{ steps.client_version.outputs.prop }}
-      - name: Build and Push Docker Container to GitHub Packages
-        uses: docker/build-push-action@v1
-        with:
-          username: infamousjoeg
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: infamousjoeg/cybr-cli/cybr-cli
-          tags: ${{ steps.client_version.outputs.prop }}
-        env:
-          DOCKERHUB_USERNAME: infamousjoeg
-          DOCKERHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build Docker Container Package
+      run: |
+        docker build -t nfmsjoeg/cybr-cli:$TAG_NAME .
+        docker save nfmsjoeg/cybr-cli:$TAG_NAME > ./bin/docker_cybr.tar
+      env:
+        TAG_NAME: ${{ steps.client_version.outputs.prop }}
+    - name: Build and Push Docker Container to DockerHub
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        repository: nfmsjoeg/cybr-cli
+        tags: ${{ steps.client_version.outputs.prop }}
+    - name: Build and Push Docker Container to GitHub Packages
+      uses: docker/build-push-action@v1
+      with:
+        username: infamousjoeg
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        repository: infamousjoeg/cybr-cli/cybr-cli
+        tags: ${{ steps.client_version.outputs.prop }}
+      env:
+        DOCKERHUB_USERNAME: infamousjoeg
+        DOCKERHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
