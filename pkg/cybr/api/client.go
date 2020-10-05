@@ -104,7 +104,8 @@ func (c *Client) RemoveConfig() error {
 		return fmt.Errorf("ACL error. %s", err)
 	}
 
-	err = os.Remove(userHome + "/.cybr/config")
+	fullPath := userHome + "/.cybr/config"
+	err = os.Remove(fullPath)
 	if err != nil {
 		return fmt.Errorf("Failed to remove configuration file at %s/.cybr/config. %s", userHome, err)
 	}
