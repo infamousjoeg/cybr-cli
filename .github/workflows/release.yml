@@ -1,0 +1,63 @@
+name: cybr-cli CD
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    name: Release Executables
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64]
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v2
+    - name: Read version from release.json
+      uses: notiz-dev/github-action-json-property@release
+      id: client_version
+      with:
+        path: 'release.json'
+        prop_path: 'version'
+    - name: Read go_version from release.json
+      uses: notiz-dev/github-action-json-property@release
+      id: go_version
+      with:
+        path: 'release.json'
+        prop_path: 'go_version'
+    - name: Build cybr CLI binaries
+      uses: wangyoucao577/go-release-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: "https://dl.google.com/go/go${{ steps.go_version.outputs.prop }}.linux-amd64.tar.gz"
+        project_path: "./"
+        binary_name: "cybr"
+        extra_files: LICENSE README.md SECURITY.md
+      - name: Build Docker Container Package
+        run: |
+          docker build -t nfmsjoeg/cybr-cli:$TAG_NAME .
+          docker save andrewcopeland/authenticator:$TAG_NAME > ./bin/docker_authenticator.tar
+        env:
+          TAG_NAME: ${{ steps.client_version.outputs.prop }}
+      - name: Build and Push Docker Container to DockerHub
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: nfmsjoeg/cybr-cli
+          tags: ${{ steps.client_version.outputs.prop }}
+      - name: Build and Push Docker Container to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: infamousjoeg
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: infamousjoeg/cybr-cli/cybr-cli
+          tags: ${{ steps.client_version.outputs.prop }}
+        env:
+          DOCKERHUB_USERNAME: infamousjoeg
+          DOCKERHUB_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
