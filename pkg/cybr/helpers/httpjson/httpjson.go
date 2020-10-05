@@ -23,8 +23,12 @@ func bodyToBytes(body interface{}) ([]byte, error) {
 	return content, nil
 }
 
-func getResponse(url string, method string, token string, body interface{}) (http.Response, error) {
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+func getResponse(url string, method string, token string, body interface{}, insecureTLS bool) (http.Response, error) {
+	if insecureTLS {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	} else {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: false}
+	}
 	httpClient := http.Client{
 		Timeout: time.Second * 30, // Maximum of 30 secs
 	}
@@ -66,8 +70,8 @@ func getResponse(url string, method string, token string, body interface{}) (htt
 }
 
 // SendRequest is an http request and get response as serialized json map[string]interface{}
-func SendRequest(url string, method string, token string, body interface{}) (map[string]interface{}, error) {
-	res, err := getResponse(url, method, token, body)
+func SendRequest(url string, method string, token string, body interface{}, insecureTLS bool) (map[string]interface{}, error) {
+	res, err := getResponse(url, method, token, body, insecureTLS)
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +88,8 @@ func SendRequest(url string, method string, token string, body interface{}) (map
 }
 
 // SendRequestRaw is an http request and get response as byte[]
-func SendRequestRaw(url string, method string, token string, body interface{}) ([]byte, error) {
-	res, err := getResponse(url, method, token, body)
+func SendRequestRaw(url string, method string, token string, body interface{}, insecureTLS bool) ([]byte, error) {
+	res, err := getResponse(url, method, token, body, insecureTLS)
 	if err != nil {
 		return nil, err
 	}
@@ -98,25 +102,25 @@ func SendRequestRaw(url string, method string, token string, body interface{}) (
 }
 
 // Get a get request and get response as serialized json map[string]interface{}
-func Get(url string, token string) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodGet, token, "")
+func Get(url string, token string, insecureTLS bool) (map[string]interface{}, error) {
+	response, err := SendRequest(url, http.MethodGet, token, "", insecureTLS)
 	return response, err
 }
 
 // Post a post request and get response as serialized json map[string]interface{}
-func Post(url string, token string, body interface{}) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodPost, token, body)
+func Post(url string, token string, body interface{}, insecureTLS bool) (map[string]interface{}, error) {
+	response, err := SendRequest(url, http.MethodPost, token, body, insecureTLS)
 	return response, err
 }
 
 // Put a put request and get response as serialized json map[string]interface{}
-func Put(url string, token string, body interface{}) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodPut, token, body)
+func Put(url string, token string, body interface{}, insecureTLS bool) (map[string]interface{}, error) {
+	response, err := SendRequest(url, http.MethodPut, token, body, insecureTLS)
 	return response, err
 }
 
 // Delete a delete request and get response as serialized json map[string]interface{}
-func Delete(url string, token string) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodDelete, token, "")
+func Delete(url string, token string, insecureTLS bool) (map[string]interface{}, error) {
+	response, err := SendRequest(url, http.MethodDelete, token, "", insecureTLS)
 	return response, err
 }
