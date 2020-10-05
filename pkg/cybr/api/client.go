@@ -42,7 +42,7 @@ func (c *Client) SetConfig() error {
 	// Check if .cybr directory already exists, create if not
 	if _, err = os.Stat(userHome + "/.cybr"); os.IsNotExist(err) {
 		// Create .cybr folder in user home directory
-		err = os.Mkdir(userHome+"/.cybr", 0733)
+		err = os.Mkdir(userHome+"/.cybr", 0766)
 		if err != nil {
 			return fmt.Errorf("Could not create folder %s/.cybr on local file system. %s", userHome, err)
 		}
@@ -58,7 +58,7 @@ func (c *Client) SetConfig() error {
 	// Create config file in user home directory
 	dataFile, err := os.Create(userHome + "/.cybr/config")
 	if err != nil {
-		return fmt.Errorf("Could not create configuration file at %s.cybr/config. %s", userHome, err)
+		return fmt.Errorf("Could not create configuration file at %s/.cybr/config. %s", userHome, err)
 	}
 
 	// serialize the data

@@ -1,7 +1,33 @@
-# cybr-cli
+# cybr-cli <!-- omit in toc -->
 @CyberArk Privileged Access Security (PAS) REST API Client Library
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=infamousjoeg_pas-api-go&metric=alert_status)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3ALint) [![CodeQL](https://github.com/infamousjoeg/cybr-cli/workflows/CodeQL/badge.svg)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3ACodeQL)
+
+## Table of Contents <!-- omit in toc -->
+
+- [Usage](#usage)
+	- [Command-Line Interface (CLI)](#command-line-interface-cli)
+		- [logon](#logon)
+		- [logoff](#logoff)
+		- [safes](#safes)
+			- [list](#list)
+			- [member list](#member-list)
+		- [version](#version)
+		- [help](#help)
+	- [Install from Source](#install-from-source)
+	- [Docker Container](#docker-container)
+		- [Run Container Indefinitely](#run-container-indefinitely)
+		- [Run Container Ephemerally (Recommended)](#run-container-ephemerally-recommended)
+			- [One-Time Use](#one-time-use)
+			- [One-Time Use w/ Saved Config](#one-time-use-w-saved-config)
+			- [Using with jq](#using-with-jq)
+	- [Application](#application)
+		- [Import into project](#import-into-project)
+		- [Logon to the PAS REST API Web Service](#logon-to-the-pas-rest-api-web-service)
+		- [Call functions by referencing `pasapi` and "dot-referencing"](#call-functions-by-referencing-pasapi-and-dot-referencing)
+- [Required Environment Variables](#required-environment-variables)
+- [Testing](#testing)
+	- [Successful Output](#successful-output)
 
 ## Usage
 
@@ -69,7 +95,7 @@ $ cybr help [command]
 
 Displays help text for the `cybr` CLI.  If an optional `[command]` is provided, the help text for that command will be displayed instead.
 
-#### Install from Source
+### Install from Source
 
 ```shell
 $ git clone https://github.com/infamousjoeg/pas-api-go.git
@@ -94,6 +120,140 @@ Flags:
   -h, --help   help for cybr
 
 Use "cybr [command] --help" for more information about a command.
+```
+
+### Docker Container
+
+The `cybr` CLI is also available within a lightweight container for ephemeral use, if necessary.
+
+#### Run Container Indefinitely
+
+```shell
+$ docker run --name cybr-cli -d --restart always \
+  --entrypoint sleep \
+  nfmsjoeg/cybr-cli:latest \
+  infinity
+```
+
+Running indefinitely allows you to stay inside the container with the `cybr` CLI.
+
+```shell
+$ docker exec -it cybr-cli /bin/bash
+cybr@6e1c196a84a6:/app$ cybr version
+cybr v0.0.2-alpha
+```
+
+#### Run Container Ephemerally (Recommended)
+
+##### One-Time Use
+
+```shell
+$ docker run --rm -it nfmsjoeg/cybr-cli:latest /bin/bash
+cybr@6e1c196a84a6:/app$
+```
+
+##### One-Time Use w/ Saved Config
+
+```shell
+$ docker run --rm -it \
+  -v cybr-cli:/home/cybr/.cybr \
+  nfmsjoeg/cybr-cli:latest \
+  logon -u username -a cyberark -b https://pvwa.example.com
+Enter password:
+Successfully logged onto PAS as user jgarcia.
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+$ docker run --rm \
+  -v cybr-cli:/home/cybr/.cybr \
+  nfmsjoeg/cybr-cli:latest \
+  safes list
+{
+    "Safes": [
+        {
+            "SafeUrlId": "VaultInternal",
+            "SafeName": "VaultInternal",
+            "Location": "\\"
+        },
+        {
+            "SafeUrlId": "Notification%20Engine",
+            "SafeName": "Notification Engine",
+            "Location": "\\"
+        },
+        {
+            "SafeUrlId": "PVWAReports",
+            "SafeName": "PVWAReports",
+            "Location": "\\"
+        },
+        {
+            "SafeUrlId": "PVWATicketingSystem",
+            "SafeName": "PVWATicketingSystem",
+            "Location": "\\"
+        },
+        {
+            "SafeUrlId": "PVWAPublicData",
+            "SafeName": "PVWAPublicData",
+            "Location": "\\"
+        },
+        {
+            "SafeUrlId": "PasswordManager",
+            "SafeName": "PasswordManager",
+            "Location": "\\"
+        },
+        {
+            "SafeUrlId": "PasswordManager_Pending",
+            "SafeName": "PasswordManager_Pending",
+            "Location": "\\"
+        },
+        {
+            "SafeUrlId": "AccountsFeedADAccounts",
+            "SafeName": "AccountsFeedADAccounts",
+            "Location": "\\"
+        },
+        {
+            "SafeUrlId": "AccountsFeedDiscoveryLogs",
+            "SafeName": "AccountsFeedDiscoveryLogs",
+            "Location": "\\"
+        }
+	]
+}
+```
+
+##### Using with jq
+
+You can also pipe output to `jq` [[download]](https://stedolan.github.io/jq/) to easily parse the returned JSON responses:
+
+```shell
+$ docker run --rm \
+  -v cybr-cli:/home/cybr/.cybr \
+  nfmsjoeg/cybr-cli:latest \
+  safes list | jq '.Safes[] | {SafeName}'
+{
+  "SafeName": "VaultInternal"
+}
+{
+  "SafeName": "Notification Engine"
+}
+{
+  "SafeName": "PVWAReports"
+}
+{
+  "SafeName": "PVWATicketingSystem"
+}
+{
+  "SafeName": "PVWAPublicData"
+}
+{
+  "SafeName": "PasswordManager"
+}
+{
+  "SafeName": "PasswordManager_Pending"
+}
+{
+  "SafeName": "AccountsFeedADAccounts"
+}
+{
+  "SafeName": "AccountsFeedDiscoveryLogs"
+}
 ```
 
 ### Application

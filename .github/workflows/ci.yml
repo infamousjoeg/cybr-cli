@@ -1,0 +1,63 @@
+name: cybr-cli CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches-ignore: [master]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+      - name: Lint All
+        uses: Jerome1337/golint-action@v1.0.2
+        with:
+          golint-path: './...'
+
+  build:
+    name: Build Binaries
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+      - name: Setup go version 1.15
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.15.2'
+      - name: Get current date & time
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d_%H%M%S')"
+      - name: Export GO111MODULE environment variable
+        run: export GO111MODULE=on
+      - name: Create ./bin/ directory
+        run: mkdir -p bin
+      - name: Build Binaries
+        run: |
+          CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o ./bin/${{ matrix.goos }}_cybr .
+      - name: Build Docker Container Package
+        run: |
+          docker build -t nfmsjoeg/cybr-cli:$TAG_NAME .
+          docker save nfmsjoeg/cybr-cli:$TAG_NAME > ./bin/docker_authenticator.tar
+        env:
+          TAG_NAME: alpha-${{ steps.date.outputs.date }}
+      - name: Upload Artifacts to Workflow
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: Release Executables
+          path: |
+            ./bin/*_cybr*
