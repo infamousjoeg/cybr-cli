@@ -6,28 +6,31 @@
 ## Table of Contents <!-- omit in toc -->
 
 - [Usage](#usage)
-	- [Command-Line Interface (CLI)](#command-line-interface-cli)
-		- [logon](#logon)
-		- [logoff](#logoff)
-		- [safes](#safes)
-			- [list](#list)
-			- [member list](#member-list)
-		- [version](#version)
-		- [help](#help)
-	- [Install from Source](#install-from-source)
-	- [Docker Container](#docker-container)
-		- [Run Container Indefinitely](#run-container-indefinitely)
-		- [Run Container Ephemerally (Recommended)](#run-container-ephemerally-recommended)
-			- [One-Time Use](#one-time-use)
-			- [One-Time Use w/ Saved Config](#one-time-use-w-saved-config)
-			- [Using with jq](#using-with-jq)
-	- [Application](#application)
-		- [Import into project](#import-into-project)
-		- [Logon to the PAS REST API Web Service](#logon-to-the-pas-rest-api-web-service)
-		- [Call functions by referencing `pasapi` and "dot-referencing"](#call-functions-by-referencing-pasapi-and-dot-referencing)
+  - [Command-Line Interface (CLI)](#command-line-interface-cli)
+    - [logon](#logon)
+    - [logoff](#logoff)
+    - [safes](#safes)
+      - [list](#list)
+      - [member list](#member-list)
+    - [applications](#applications)
+      - [list](#list-1)
+      - [methods list](#methods-list)
+    - [version](#version)
+    - [help](#help)
+  - [Install from Source](#install-from-source)
+  - [Docker Container](#docker-container)
+    - [Run Container Indefinitely](#run-container-indefinitely)
+    - [Run Container Ephemerally (Recommended)](#run-container-ephemerally-recommended)
+      - [One-Time Use](#one-time-use)
+      - [One-Time Use w/ Saved Config](#one-time-use-w-saved-config)
+      - [Using with jq](#using-with-jq)
+  - [Application](#application)
+    - [Import into project](#import-into-project)
+    - [Logon to the PAS REST API Web Service](#logon-to-the-pas-rest-api-web-service)
+    - [Call functions by referencing `pasapi` and "dot-referencing"](#call-functions-by-referencing-pasapi-and-dot-referencing)
 - [Required Environment Variables](#required-environment-variables)
 - [Testing](#testing)
-	- [Successful Output](#successful-output)
+  - [Successful Output](#successful-output)
 
 ## Usage
 
@@ -38,6 +41,11 @@
 ```shell
 $ cybr logon -u username -a cyberark-or-ldap -b https://pvwa.example.com
 ```
+
+__Required Options:__
+* `-u` or `--username`
+* `-a` or `--auth-type`
+* `-b` or `--base-url`
 
 Logon to the PAS REST API as the username you provide using the authentication method you choose. At this time, only `cyberark` and `ldap` authentication methods are supported.
 
@@ -75,9 +83,45 @@ List all safes the username you are logged on as has access to read.
 $ cybr safes member list -s SafeName
 ```
 
-Required Option: `-s` or `--safe`
+__Required Option:__ `-s` or `--safe`
 
 List all safe members on the safe given.
+
+#### applications
+
+```shell
+$ cybr applications
+```
+
+List all applications the username you are logged on as has access to read.
+
+```shell
+$ cybr applications -l \\Applications
+```
+
+__Optional Option:__ `-l` or `--location`
+
+List only applications located within \Applications the username you are logged on as has access to read.
+
+##### list
+
+```shell
+$ cybr applications list
+```
+
+__Optional Option:__ `-l` or `--location`
+
+List all applications the username you are logged on as has access to read.
+
+##### methods list
+
+```shell
+$ cybr applications methods list -a AppID
+```
+
+__Required Option:__ `-a` or `--app-id`
+
+List all authentication methods configured for the application identity given.
 
 #### version
 
@@ -110,11 +154,12 @@ Usage:
   cybr [command]
 
 Available Commands:
-  help        Help about any command
-  logoff      Logoff the PAS REST API
-  logon       Logon to PAS REST API
-  safes       Safe actions for PAS REST API
-  version     Display current version
+  applications Applications actions for PAS REST API
+  help         Help about any command
+  logoff       Logoff the PAS REST API
+  logon        Logon to PAS REST API
+  safes        Safe actions for PAS REST API
+  version      Display current version
 
 Flags:
   -h, --help   help for cybr
