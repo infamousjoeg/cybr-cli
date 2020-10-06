@@ -37,7 +37,7 @@ var safesCmd = &cobra.Command{
 	},
 }
 
-var listCmd = &cobra.Command{
+var listSafesCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all safes",
 	Long: `List all safes the logged on user can read from PAS REST API.
@@ -91,7 +91,7 @@ var listMembersCmd = &cobra.Command{
 func init() {
 	listMembersCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Safe name to filter request on")
 	listMembersCmd.MarkFlagRequired("safe")
-	safesCmd.AddCommand(listCmd)
+	safesCmd.AddCommand(listSafesCmd)
 	safesCmd.AddCommand(listMembersCmd)
 	rootCmd.AddCommand(safesCmd)
 }
