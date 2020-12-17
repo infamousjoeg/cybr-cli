@@ -29,6 +29,8 @@ var (
 	AutoPurgeEnabled bool
 	// SafeLocation is the location the safe will be created in the Secure Digital Vault (default: \\)
 	SafeLocation string
+	// TargetSafeName is used by the Update Safe endpoint to refer to
+	TargetSafeName string
 )
 
 var safesCmd = &cobra.Command{
@@ -166,7 +168,40 @@ var deleteSafeCmd = &cobra.Command{
 			log.Fatalf("Failed to delete the safe named %s. %s", SafeName, err)
 			return
 		}
+
 		fmt.Printf("Successfully deleted safe %s.", SafeName)
+	},
+}
+
+var updateSafeCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Update a safe",
+	Long: `Update a safe via the PAS REST API. Only the options provided will be modified.
+	
+	Example Usage:
+	$ cybr safes update -t TargetSafeName -s NewSafeName -d NewDesc`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Get config file written to local file system
+		client, err := pasapi.GetConfig()
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+		// Build body of the request
+		body := pasapi.UpdateSafeRequest{
+			TargetSafeName: TargetSafeName,
+			Description:    Description,
+			OLACEnabled:    OLACEnabled,
+			ManagingCPM:    ManagingCPM,
+		}
+		// Update the safe
+		response, err := client.UpdateSafe(SafeName, body)
+		if err != nil {
+			log.Fatalf("Failed to update the safe named %s. %s", SafeName, err)
+			return
+		}
+		// Pretty print returned object as JSON blob
+		prettyprint.PrintJSON(response)
 	},
 }
 
@@ -178,8 +213,8 @@ func init() {
 	addSafeCmd.Flags().StringVarP(&Description, "desc", "d", "", "Description of the safe created")
 	addSafeCmd.Flags().BoolVarP(&OLACEnabled, "olac", "O", false, "Enable object-level access control (OLAC) on safe (cannot be reversed)")
 	addSafeCmd.Flags().StringVarP(&ManagingCPM, "cpm", "", "PasswordManager", "Set the Managing CPM user to something other than PasswordManager")
-	addSafeCmd.Flags().IntVarP(&NumberOfDaysRetention, "days", "", 0, "Number of days to retain password versions for")
-	addSafeCmd.Flags().BoolVarP(&AutoPurgeEnabled, "auto-purge", "p", false, "Whether to automatically purge accounts when non-compliant")
+	addSafeCmd.Flags().IntVarP(&NumberOfDaysRetention, "days", "", 7, "Number of days to retain password versions for")
+	addSafeCmd.Flags().BoolVarP(&AutoPurgeEnabled, "auto-purge", "P", false, "Whether to automatically purge accounts after a number of records is met")
 	addSafeCmd.Flags().StringVarP(&SafeLocation, "location", "l", "\\", "The location of the Safe in the Secure Digital Vault")
 	addSafeCmd.MarkFlagRequired("safe")
 	addSafeCmd.MarkFlagRequired("desc")
@@ -187,9 +222,17 @@ func init() {
 	deleteSafeCmd.Flags().StringVarP(&SafeName, "safe", "s", "", "Safe name to delete")
 	deleteSafeCmd.MarkFlagRequired("safe")
 
+	updateSafeCmd.Flags().StringVarP(&TargetSafeName, "target-safe", "t", "", "Safe name to update")
+	updateSafeCmd.Flags().StringVarP(&SafeName, "safe", "s", "", "New safe name to change to")
+	updateSafeCmd.Flags().StringVarP(&Description, "desc", "d", "", "New description to change to")
+	updateSafeCmd.Flags().BoolVarP(&OLACEnabled, "olac", "O", false, "Enable object-level access control (OLAC) on safe (cannot be disabled)")
+	updateSafeCmd.Flags().StringVarP(&ManagingCPM, "cpm", "", "", "New managing CPM user to change to")
+	updateSafeCmd.MarkFlagRequired("target-safe")
+
 	safesCmd.AddCommand(listSafesCmd)
 	safesCmd.AddCommand(listMembersCmd)
 	safesCmd.AddCommand(addSafeCmd)
 	safesCmd.AddCommand(deleteSafeCmd)
+	safesCmd.AddCommand(updateSafeCmd)
 	rootCmd.AddCommand(safesCmd)
 }

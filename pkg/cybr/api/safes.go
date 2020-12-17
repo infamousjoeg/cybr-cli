@@ -112,3 +112,34 @@ func (c Client) DeleteSafe(safeName string) error {
 	}
 	return nil
 }
+
+// UpdateSafeRequest contains the body of the Update Safe function's request
+type UpdateSafeRequest struct {
+	TargetSafeName string `json:"SafeName"`
+	Description    string `json:"Description,omitempty"`
+	OLACEnabled    bool   `json:"OLACEnabled,omitempty"`
+	ManagingCPM    string `json:"ManagingCPM,omitempty"`
+}
+
+// UpdateSafeResponse contains the response to the Update Safe function's request
+type UpdateSafeResponse struct {
+	SafeName                  string `json:"SafeName"`
+	Description               string `json:"Description"`
+	NumberOfDaysRetention     int    `json:"NumberOfDaysRetention"`
+	NumberOfVersionsRetention int    `json:"NumberOfVersionsRetention"`
+	OLACEnabled               bool   `json:"OLACEnabled"`
+}
+
+// UpdateSafe will update the safe's properties that are given for modification
+func (c Client) UpdateSafe(safeName string, body UpdateSafeRequest) (*UpdateSafeResponse, error) {
+	// Set URL for request
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s", c.BaseURL, safeName)
+	response, err := httpJson.Put(url, c.SessionToken, body, c.InsecureTLS)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to update the safe named %s. %s", safeName, err)
+	}
+	jsonString, _ := json.Marshal(response)
+	UpdateSafeResponse := UpdateSafeResponse{}
+	err = json.Unmarshal(jsonString, &UpdateSafeResponse)
+	return &UpdateSafeResponse, nil
+}
