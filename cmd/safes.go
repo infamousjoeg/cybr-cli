@@ -27,7 +27,7 @@ var (
 	NumberOfDaysRetention int
 	// AutoPurgeEnabled is a boolean value as to whether to remove non-compliant accounts automatically
 	AutoPurgeEnabled bool
-	// Location is the location the safe will be created in the Secure Digital Vault (default: \\)
+	// SafeLocation is the location the safe will be created in the Secure Digital Vault (default: \\)
 	SafeLocation string
 )
 
@@ -144,22 +144,52 @@ var addSafeCmd = &cobra.Command{
 	},
 }
 
+var deleteSafeCmd = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete a safe",
+	Long: `Delete a safe via the PAS REST API. If the safe has a retention policy
+	of days that is greater than 0, the safe will be marked for deletion until
+	the amount of days assigned are met.
+	
+	Example Usage:
+	$ cybr safes delete -s SafeName`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Get config file written to local file system
+		client, err := pasapi.GetConfig()
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+		// Delete the safe
+		err = client.DeleteSafe(SafeName)
+		if err != nil {
+			log.Fatalf("Failed to delete the safe named %s. %s", SafeName, err)
+			return
+		}
+		fmt.Printf("Successfully deleted safe %s.", SafeName)
+	},
+}
+
 func init() {
 	listMembersCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Safe name to filter request on")
 	listMembersCmd.MarkFlagRequired("safe")
 
 	addSafeCmd.Flags().StringVarP(&SafeName, "safe", "s", "", "Safe name to create")
-	addSafeCmd.MarkFlagRequired("safe")
 	addSafeCmd.Flags().StringVarP(&Description, "desc", "d", "", "Description of the safe created")
-	addSafeCmd.MarkFlagRequired("desc")
 	addSafeCmd.Flags().BoolVarP(&OLACEnabled, "olac", "O", false, "Enable object-level access control (OLAC) on safe (cannot be reversed)")
 	addSafeCmd.Flags().StringVarP(&ManagingCPM, "cpm", "", "PasswordManager", "Set the Managing CPM user to something other than PasswordManager")
 	addSafeCmd.Flags().IntVarP(&NumberOfDaysRetention, "days", "", 0, "Number of days to retain password versions for")
 	addSafeCmd.Flags().BoolVarP(&AutoPurgeEnabled, "auto-purge", "p", false, "Whether to automatically purge accounts when non-compliant")
 	addSafeCmd.Flags().StringVarP(&SafeLocation, "location", "l", "\\", "The location of the Safe in the Secure Digital Vault")
+	addSafeCmd.MarkFlagRequired("safe")
+	addSafeCmd.MarkFlagRequired("desc")
+
+	deleteSafeCmd.Flags().StringVarP(&SafeName, "safe", "s", "", "Safe name to delete")
+	deleteSafeCmd.MarkFlagRequired("safe")
 
 	safesCmd.AddCommand(listSafesCmd)
 	safesCmd.AddCommand(listMembersCmd)
 	safesCmd.AddCommand(addSafeCmd)
+	safesCmd.AddCommand(deleteSafeCmd)
 	rootCmd.AddCommand(safesCmd)
 }

@@ -101,3 +101,14 @@ func (c Client) AddSafe(body AddSafeRequest) error {
 	}
 	return nil
 }
+
+// DeleteSafe will remove the safeName given to the function via PAS REST API
+func (c Client) DeleteSafe(safeName string) error {
+	// Set URL for request
+	url := fmt.Sprintf("%s/PasswordVault/api/safes/%s", c.BaseURL, safeName)
+	_, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS)
+	if err != nil {
+		return fmt.Errorf("Unable to delete the safe named %s. %s", safeName, err)
+	}
+	return nil
+}

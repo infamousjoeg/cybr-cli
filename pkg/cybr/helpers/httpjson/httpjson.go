@@ -76,6 +76,10 @@ func SendRequest(url string, method string, token string, body interface{}, inse
 		return nil, err
 	}
 
+	if res.StatusCode == 204 {
+		return nil, nil
+	}
+
 	// Map response body to a map interface
 	decoder := json.NewDecoder(res.Body)
 	var data map[string]interface{}
