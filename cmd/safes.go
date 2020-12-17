@@ -189,15 +189,15 @@ var updateSafeCmd = &cobra.Command{
 		}
 		// Build body of the request
 		body := pasapi.UpdateSafeRequest{
-			TargetSafeName: TargetSafeName,
-			Description:    Description,
-			OLACEnabled:    OLACEnabled,
-			ManagingCPM:    ManagingCPM,
+			SafeName:    SafeName,
+			Description: Description,
+			OLACEnabled: OLACEnabled,
+			ManagingCPM: ManagingCPM,
 		}
 		// Update the safe
-		response, err := client.UpdateSafe(SafeName, body)
+		response, err := client.UpdateSafe(TargetSafeName, body)
 		if err != nil {
-			log.Fatalf("Failed to update the safe named %s. %s", SafeName, err)
+			log.Fatalf("Failed to update the safe named %s. %s", TargetSafeName, err)
 			return
 		}
 		// Pretty print returned object as JSON blob

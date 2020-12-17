@@ -115,10 +115,10 @@ func (c Client) DeleteSafe(safeName string) error {
 
 // UpdateSafeRequest contains the body of the Update Safe function's request
 type UpdateSafeRequest struct {
-	TargetSafeName string `json:"SafeName"`
-	Description    string `json:"Description,omitempty"`
-	OLACEnabled    bool   `json:"OLACEnabled,omitempty"`
-	ManagingCPM    string `json:"ManagingCPM,omitempty"`
+	SafeName    string `json:"SafeName,omitempty"`
+	Description string `json:"Description,omitempty"`
+	OLACEnabled bool   `json:"OLACEnabled,omitempty"`
+	ManagingCPM string `json:"ManagingCPM,omitempty"`
 }
 
 // UpdateSafeResponse contains the response to the Update Safe function's request
@@ -131,12 +131,12 @@ type UpdateSafeResponse struct {
 }
 
 // UpdateSafe will update the safe's properties that are given for modification
-func (c Client) UpdateSafe(safeName string, body UpdateSafeRequest) (*UpdateSafeResponse, error) {
+func (c Client) UpdateSafe(targetSafeName string, body UpdateSafeRequest) (*UpdateSafeResponse, error) {
 	// Set URL for request
-	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s", c.BaseURL, safeName)
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s", c.BaseURL, targetSafeName)
 	response, err := httpJson.Put(url, c.SessionToken, body, c.InsecureTLS)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to update the safe named %s. %s", safeName, err)
+		return nil, fmt.Errorf("Unable to update the safe named %s. %s", targetSafeName, err)
 	}
 	jsonString, _ := json.Marshal(response)
 	UpdateSafeResponse := UpdateSafeResponse{}
