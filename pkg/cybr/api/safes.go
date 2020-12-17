@@ -41,8 +41,8 @@ type ListSafeMembersResponse struct {
 
 // Members contains all safe member username/group name and their permissions
 type Members struct {
-	Permissions Permissions `json:"Permissions"`
-	Username    string      `json:"UserName"`
+	Permissions []Permissions `json:"Permissions"`
+	Username    string        `json:"UserName"`
 }
 
 // Permissions contains the permissions of each safe member
@@ -78,4 +78,26 @@ func (c Client) ListSafeMembers(safeName string) (*ListSafeMembersResponse, erro
 	ListSafeMembersResponse := ListSafeMembersResponse{}
 	err = json.Unmarshal(jsonString, &ListSafeMembersResponse)
 	return &ListSafeMembersResponse, err
+}
+
+// AddSafeRequest contains the body of the Add Safe function's request
+type AddSafeRequest struct {
+	SafeName              string `json:"SafeName"`
+	Description           string `json:"Description"`
+	OLACEnabled           bool   `json:"OLACEnabled,omitempty"`
+	ManagingCPM           string `json:"ManagingCPM"`
+	NumberOfDaysRetention int    `json:"NumberOfDaysRetention,omitempty"`
+	AutoPurgeEnabled      bool   `json:"AutoPurgeEnabled,omitempty"`
+	SafeLocation          string `json:"Location,omitempty"`
+}
+
+// AddSafe to Secure Digital Vault via PAS REST API
+func (c Client) AddSafe(body AddSafeRequest) error {
+	// Set URL for request
+	url := fmt.Sprintf("%s/PasswordVault/api/safes", c.BaseURL)
+	_, err := httpJson.Post(url, c.SessionToken, body, c.InsecureTLS)
+	if err != nil {
+		return fmt.Errorf("Unable to add the safe named %s. %s", body.SafeName, err)
+	}
+	return nil
 }
