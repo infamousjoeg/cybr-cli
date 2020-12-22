@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 
 	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
 )
@@ -69,7 +70,7 @@ type Permissions struct {
 
 // ListSafeMembers List all members of a safe
 func (c Client) ListSafeMembers(safeName string) (*ListSafeMembersResponse, error) {
-	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s/Members", c.BaseURL, safeName)
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s/Members", c.BaseURL, url.QueryEscape(safeName))
 	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS)
 	if err != nil {
 		return &ListSafeMembersResponse{}, fmt.Errorf("Failed to list members of safe '%s'. %s", safeName, err)
@@ -105,7 +106,7 @@ func (c Client) AddSafe(body AddSafeRequest) error {
 // DeleteSafe will remove the safeName given to the function via PAS REST API
 func (c Client) DeleteSafe(safeName string) error {
 	// Set URL for request
-	url := fmt.Sprintf("%s/PasswordVault/api/safes/%s", c.BaseURL, safeName)
+	url := fmt.Sprintf("%s/PasswordVault/api/safes/%s", c.BaseURL, url.QueryEscape(safeName))
 	_, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS)
 	if err != nil {
 		return fmt.Errorf("Unable to delete the safe named %s. %s", safeName, err)
