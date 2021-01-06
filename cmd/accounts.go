@@ -190,7 +190,6 @@ var addAccountsCmd = &cobra.Command{
 			log.Fatalf("Failed to parse platform properties. %s", err)
 		}
 
-		// TODO: currently not handling platform properties because discussion needs to happen on how it should look
 		newAccount := pasapi.AddAccountRequest{
 			Name:       Name,
 			Address:    Address,
