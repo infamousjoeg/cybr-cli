@@ -72,15 +72,17 @@ func getResponse(url string, method string, token string, body interface{}, inse
 // SendRequest is an http request and get response as serialized json map[string]interface{}
 func SendRequest(url string, method string, token string, body interface{}, insecureTLS bool) (map[string]interface{}, error) {
 	res, err := getResponse(url, method, token, body, insecureTLS)
-	if err != nil {
-		return nil, err
-	}
 
 	// Map response body to a map interface
 	decoder := json.NewDecoder(res.Body)
 	var data map[string]interface{}
-	err = decoder.Decode(&data)
-	if err != nil {
+	decodeError := decoder.Decode(&data)
+	// No error and no body returned
+	if decodeError == io.EOF {
+		return nil, nil
+	}
+
+	if decodeError != nil {
 		return nil, fmt.Errorf("Failed to decode response body. %s", err)
 	}
 
