@@ -181,13 +181,9 @@ func TestAddAccountInvalidSafeName(t *testing.T) {
 		Secret:     "superSecret",
 	}
 
-	addedAccount, err := client.AddAccount(account)
-	if err != nil {
-		t.Errorf("Failed to add account. %s", err)
-	}
-
-	if addedAccount.UserName != account.UserName {
-		t.Errorf("The added account has a different username than the provided account. This should not occur")
+	_, err = client.AddAccount(account)
+	if err == nil {
+		t.Errorf("Added account to invalid safe name. This should not happen")
 	}
 }
 
