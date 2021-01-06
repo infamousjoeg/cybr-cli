@@ -32,7 +32,7 @@ var logonCmd = &cobra.Command{
 	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com -i`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get secret value from STDIN
-		fmt.Println("Enter password: ")
+		fmt.Print("Enter password: ")
 		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
 		if err != nil {
 			log.Fatalln("An error occurred trying to read password from " +
