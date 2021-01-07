@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"time"
 
 	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
@@ -69,4 +70,81 @@ func (c Client) ListApplicationAuthenticationMethods(appID string) (*ListApplica
 	ListApplicationAuthenticationMethodsResponse := ListApplicationAuthenticationMethodsResponse{}
 	err = json.Unmarshal(jsonString, &ListApplicationAuthenticationMethodsResponse)
 	return &ListApplicationAuthenticationMethodsResponse, err
+}
+
+// AddApplicationRequest request for adding application
+type AddApplicationRequest struct {
+	Application Application `json:"application"`
+}
+
+// Application is used when adding an application
+type Application struct {
+	AppID               string `json:"AppID"`
+	Description         string `json:"Description,omitempty"`
+	Location            string `json:"Location,omitempty"`
+	AccessPermittedFrom int    `json:"AccessPermittedFrom"`
+	AccessPermittedTo   int    `json:"AccessPermittedTo"`
+	ExpirationDate      string `json:"ExpirationDate,omitempty"`
+	Disabled            string `json:"Disabled,omitempty"`
+	BusinessOwnerFName  string `json:"BusinessOwnerFName,omitempty"`
+	BusinessOwnerLName  string `json:"BusinessOwnerLName,omitempty"`
+	BusinessOwnerEmail  string `json:"BusinessOwnerEmail,omitempty"`
+	BusinessOwnerPhone  string `json:"BusinessOwnerPhone,omitempty"`
+}
+
+// AddApplication add an applications to PAS
+func (c Client) AddApplication(application AddApplicationRequest) error {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications", c.BaseURL)
+	response, err := httpJson.Post(url, c.SessionToken, application, c.InsecureTLS)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Error adding application '%s' authentication methods. %s. %s", application.Application.AppID, string(returnedError), err)
+	}
+	return nil
+}
+
+// DeleteApplication delete an applications to PAS
+func (c Client) DeleteApplication(appID string) error {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s", c.BaseURL, url.QueryEscape(appID))
+	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Error deleting application '%s' authentication methods. %s. %s", appID, string(returnedError), err)
+	}
+	return nil
+}
+
+// AddApplicationAuthenticationRequest request to add authentication method to application
+type AddApplicationAuthenticationRequest struct {
+	Authentication ApplicationAuthenticationMethod `json:"authentication"`
+}
+
+// ApplicationAuthenticationMethod represents an application authentication method
+type ApplicationAuthenticationMethod struct {
+	AuthType             string `json:"AuthType"`
+	AuthValue            string `json:"AuthValue"`
+	IsFolder             bool   `json:"IsFolder,omitempty"`
+	AllowInternalScripts bool   `json:"AllowInternalScripts,omitempty"`
+}
+
+// AddApplicationAuthenticationMethod add authentication method to an application
+func (c Client) AddApplicationAuthenticationMethod(appID string, authenticationMethod AddApplicationAuthenticationRequest) error {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications/", c.BaseURL, url.QueryEscape(appID))
+	response, err := httpJson.Post(url, c.SessionToken, authenticationMethod, c.InsecureTLS)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Error adding application authentication method to '%s'. %s. %s", appID, string(returnedError), err)
+	}
+	return nil
+}
+
+// DeleteApplicationAuthenticationMethod delete an applications authentication method
+func (c Client) DeleteApplicationAuthenticationMethod(appID string, authnMethodID string) error {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications/%s", c.BaseURL, url.QueryEscape(appID), url.QueryEscape(authnMethodID))
+	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Error deleting application '%s' authentication methods. %s. %s", appID, string(returnedError), err)
+	}
+	return nil
 }
