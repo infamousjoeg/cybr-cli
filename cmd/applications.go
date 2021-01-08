@@ -22,8 +22,8 @@ var (
 	IsFolder bool
 	// AllowInternalScripts allow internal script
 	AllowInternalScripts bool
-	// Description app description
-	Description string
+	// Desc app description
+	Desc string
 	// AccessPermittedFrom application access starting from
 	AccessPermittedFrom int
 	// AccessPermittedTo application access end at
@@ -140,7 +140,7 @@ var addApplicationCmd = &cobra.Command{
 			Application: pasapi.Application{
 				AppID:               AppID,
 				Location:            Location,
-				Description:         Description,
+				Description:         Desc,
 				AccessPermittedFrom: AccessPermittedFrom,
 				AccessPermittedTo:   AccessPermittedTo,
 				ExpirationDate:      ExpirationDate,
@@ -256,7 +256,7 @@ func init() {
 	addApplicationCmd.MarkFlagRequired("app-id")
 	addApplicationCmd.Flags().StringVarP(&Location, "location", "l", "", "Application location")
 	addApplicationCmd.MarkFlagRequired("location")
-	addApplicationCmd.Flags().StringVarP(&Description, "description", "d", "", "Application description")
+	addApplicationCmd.Flags().StringVarP(&Desc, "description", "d", "", "Application description")
 	addApplicationCmd.Flags().IntVarP(&AccessPermittedFrom, "access-permited-from", "f", 0, "Access permitted for the application. e.g. 0-23")
 	addApplicationCmd.Flags().IntVarP(&AccessPermittedTo, "access-permited-to", "t", 23, "Access permitted to the application. e.g. 0-23")
 	addApplicationCmd.Flags().StringVarP(&ExpirationDate, "expiration-date", "e", "", "When application will expire")
