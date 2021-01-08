@@ -98,3 +98,118 @@ func TestListApplicationAuthenticationMethodsInvalidApplicationID(t *testing.T) 
 		t.Errorf("Expecting 404 status code. %s", err)
 	}
 }
+
+func TestAddDeleteApplicationSuccess(t *testing.T) {
+	client := pasapi.Client{
+		BaseURL:  hostname,
+		AuthType: "cyberark",
+	}
+
+	creds := pasapi.LogonRequest{
+		Username: username,
+		Password: password,
+	}
+
+	err := client.Logon(creds)
+	if err != nil {
+		t.Errorf("Failed to logon. %s", err)
+	}
+
+	newApplication := pasapi.AddApplicationRequest{
+		Application: pasapi.Application{
+			AppID:               "test-api-app1",
+			Description:         "Some type of description",
+			Location:            "\\",
+			AccessPermittedFrom: 0,
+			AccessPermittedTo:   23,
+		},
+	}
+
+	err = client.AddApplication(newApplication)
+	if err != nil {
+		t.Errorf("Failed to add application. %s", err)
+	}
+
+	err = client.DeleteApplication(newApplication.Application.AppID)
+	if err != nil {
+		t.Errorf("Failed to delete application. %s", err)
+	}
+}
+
+func TestDeleteApplicationInvalidAppID(t *testing.T) {
+	client := pasapi.Client{
+		BaseURL:  hostname,
+		AuthType: "cyberark",
+	}
+
+	creds := pasapi.LogonRequest{
+		Username: username,
+		Password: password,
+	}
+
+	err := client.Logon(creds)
+	if err != nil {
+		t.Errorf("Failed to logon. %s", err)
+	}
+
+	err = client.DeleteApplication("invalid-app-id")
+	if err == nil {
+		t.Errorf("Delete application but it should not exist. This should not happen")
+	}
+}
+
+func TestAddDeleteApplicationAuthenticationMethodsSuccess(t *testing.T) {
+	client := pasapi.Client{
+		BaseURL:  hostname,
+		AuthType: "cyberark",
+	}
+
+	creds := pasapi.LogonRequest{
+		Username: username,
+		Password: password,
+	}
+
+	err := client.Logon(creds)
+	if err != nil {
+		t.Errorf("Failed to logon. %s", err)
+	}
+
+	newApplication := pasapi.AddApplicationRequest{
+		Application: pasapi.Application{
+			AppID:               "test-api-method-app1",
+			Description:         "Some type of description",
+			Location:            "\\",
+			AccessPermittedFrom: 0,
+			AccessPermittedTo:   23,
+		},
+	}
+
+	err = client.AddApplication(newApplication)
+	if err != nil {
+		t.Errorf("Failed to add application. %s", err)
+	}
+
+	newAuthnMethod := pasapi.AddApplicationAuthenticationRequest{
+		Authentication: pasapi.ApplicationAuthenticationMethod{
+			AuthType:             "path",
+			AuthValue:            "/some/path",
+			IsFolder:             false,
+			AllowInternalScripts: false,
+		},
+	}
+
+	err = client.AddApplicationAuthenticationMethod(newApplication.Application.AppID, newAuthnMethod)
+	if err != nil {
+		t.Errorf("Failed to add application authentication method. %s", err)
+	}
+
+	err = client.DeleteApplicationAuthenticationMethod(newApplication.Application.AppID, "1")
+	if err != nil {
+		t.Errorf("Failed to delete application authentication method. %s", err)
+	}
+
+	err = client.DeleteApplication(newApplication.Application.AppID)
+	if err != nil {
+		t.Errorf("Failed to delete application. %s", err)
+	}
+}
