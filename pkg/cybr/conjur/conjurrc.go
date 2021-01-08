@@ -19,6 +19,7 @@ appliance_url: {{ APPLIANCE_URL }}
 cert_file: "{{ CERT_FILE }}"
 `
 
+// GetHomeDirectory gets the proper user home directory regardless of GOOS
 func GetHomeDirectory() (string, error) {
 	usr, err := user.Current()
 	if err != nil {
