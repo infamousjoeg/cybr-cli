@@ -97,13 +97,13 @@ var listApplicationsCmd = &cobra.Command{
 }
 
 var listMethodsCmd = &cobra.Command{
-	Use:   "methods list",
+	Use:   "list-authn",
 	Short: "List all authn methods on a specific application",
 	Long: `List all authentication methods on a specific application
 	that the user logged on can read from PAS REST API.
 	
 	Example Usage:
-	$ cybr applications methods list -a AppID`,
+	$ cybr applications list-authn -a AppID`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
 		client, err := pasapi.GetConfig()
@@ -187,12 +187,12 @@ var deleteApplicationCmd = &cobra.Command{
 }
 
 var addApplicationAuthenticationMethodCmd = &cobra.Command{
-	Use:   "authn-add",
+	Use:   "add-authn",
 	Short: "Add an authentication method to an application",
 	Long: `Add an authentication method to an application to PAS.
 	
 	Example Usage:
-	$ cybr applications authn add -a AppID -t path -v /some/path`,
+	$ cybr applications add-authn -a AppID -t path -v /some/path`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := pasapi.GetConfig()
 		if err != nil {
@@ -220,12 +220,12 @@ var addApplicationAuthenticationMethodCmd = &cobra.Command{
 }
 
 var deleteApplicationAuthenticationMethodCmd = &cobra.Command{
-	Use:   "authn-delete",
+	Use:   "delete-authn",
 	Short: "Delete an authentication method of an application",
 	Long: `Delete an authentication method of an application to PAS.
 	
 	Example Usage:
-	$ cybr applications authn delete -a AppID -i 1`,
+	$ cybr applications delete-authn -a AppID -i 1`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := pasapi.GetConfig()
 		if err != nil {
