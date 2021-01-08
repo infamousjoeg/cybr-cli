@@ -12,12 +12,13 @@ var (
 	baseURL  = os.Getenv("PAS_BASE_URL")
 	username = os.Getenv("PAS_USERNAME")
 	password = os.Getenv("PAS_PASSWORD")
+	authType = os.Getenv("PAS_AUTH_TYPE")
 )
 
 func main() {
 	client := pasapi.Client{
 		BaseURL:  baseURL,
-		AuthType: "cyberark",
+		AuthType: authType,
 	}
 
 	response, err := client.ServerVerify()
@@ -50,8 +51,7 @@ func main() {
 			// Get the members of each safe
 			members, err := client.ListSafeMembers(s.SafeName)
 			if err != nil {
-				log.Fatalf("Failed to list members of safe '%s'. %s", s.SafeName, err)
-				return
+				fmt.Printf("Failed to list members of safe '%s'. %s", s.SafeName, err)
 			}
 
 			// Iterate each member in this safe and print out safe and members
