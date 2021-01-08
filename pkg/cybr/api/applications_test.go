@@ -71,7 +71,7 @@ func TestListApplicationAuthenticationMethodsSuccess(t *testing.T) {
 		t.Errorf("Failed to logon. %s", err)
 	}
 
-	_, err = client.ListApplicationAuthenticationMethods("test")
+	_, err = client.ListApplicationAuthenticationMethods("test-list-authn")
 	if err != nil {
 		t.Errorf("Failed to list application authentication methods. %s", err)
 	}
