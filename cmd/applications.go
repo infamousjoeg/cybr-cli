@@ -53,22 +53,6 @@ var applicationsCmd = &cobra.Command{
 	List All Applications at Root: $ cybr applications list
 	List All Applications at \Applications: $ cybr applications list -l \\Applications
 	List All Authentication Methods: $ cybr applications methods list -a AppID`,
-	Run: func(cmd *cobra.Command, args []string) {
-		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
-		if err != nil {
-			log.Fatalf("Failed to read configuration file. %s", err)
-			return
-		}
-		// List All Safes
-		apps, err := client.ListApplications(Location)
-		if err != nil {
-			log.Fatalf("Failed to retrieve a list of all applications. %s", err)
-			return
-		}
-		// Pretty print returned object as JSON blob
-		prettyprint.PrintJSON(apps)
-	},
 }
 
 var listApplicationsCmd = &cobra.Command{
@@ -286,7 +270,6 @@ func init() {
 	deleteApplicationAuthenticationMethodCmd.Flags().StringVarP(&AppAuthnMethodID, "auth-method-id", "i", "", "Application authentication method ID to be deleted")
 	deleteApplicationAuthenticationMethodCmd.MarkFlagRequired("auth-method-id")
 
-	applicationsCmd.Flags().StringVarP(&Location, "location", "l", "\\", "Location of the application in EPV")
 	applicationsCmd.AddCommand(listApplicationsCmd)
 	applicationsCmd.AddCommand(listMethodsCmd)
 	applicationsCmd.AddCommand(addApplicationCmd)
