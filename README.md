@@ -11,9 +11,14 @@
     - [logoff](#logoff)
     - [safes](#safes)
       - [list](#list)
+      - [add](#add)
+      - [update](#update)
+      - [delete](#delete)
       - [member list](#member-list)
     - [applications](#applications)
       - [list](#list-1)
+      - [add](#add-1)
+      - [delete](#delete-1)
       - [methods list](#methods-list)
     - [version](#version)
     - [help](#help)
@@ -42,10 +47,12 @@
 $ cybr logon -u username -a cyberark-or-ldap -b https://pvwa.example.com
 ```
 
-__Required Options:__
-* `-u` or `--username`
-* `-a` or `--auth-type`
-* `-b` or `--base-url`
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-u|--username|☑||Logon username|jgarcia|
+|-a|--auth-type|☑||Authentication method|ldap|
+|-b|--base-url|☑||URL to /PasswordVault|https://pvwa.example.com|
+|-i|--insecure-tls||false|Whether to validate TLS|false|
 
 Logon to the PAS REST API as the username you provide using the authentication method you choose. At this time, only `cyberark` and `ldap` authentication methods are supported.
 
@@ -67,7 +74,7 @@ Upon successful logoff, the config file located in your user's home directory at
 $ cybr safes
 ```
 
-List all safes the username you are logged on as has access to read.
+Display help for the `cybr safes` command.
 
 ##### list
 
@@ -77,13 +84,61 @@ $ cybr safes list
 
 List all safes the username you are logged on as has access to read.
 
+##### add
+
+```shell
+$ cybr safes add -s SafeName -d Description --cpm ManagingCPM --days 0
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-s|--safe|☑||Safe name to create|P-WIN-ADMINS-DOMAIN|
+|-d|--desc|☑||Description of the safe created||
+|-O|--olac||false|Enable object-level access control|false|
+||--cpm||PasswordManager|Set the Managing CPM user|PasswordManager1|
+||--days||7|Number of days to retain password versions for|0|
+|-P|--auto-purge||false|This should not be needed|false|
+|-l|--location||\\|The location of the Safe in the Secure Digital Vault|\\|
+
+Add a safe and configure it's retention and location.
+
+##### update
+
+```shell
+$ cybr safes update -t TargetSafeName -s NewSafeName -d NewDesc
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-t|--target-safe|☑||Safe name to update|
+|-s|--safe|||New name of safe|P-WIN-ADMINS-DOMAIN|
+|-d|--desc|||New description of safe||
+|-O|--olac||false|Enable object-level access control on safe (this is not reversible)|false|
+||--cpm|||New managing CPM user to change to|PasswordManager2|
+
+Update a safe. Only the options provided will be modified.
+
+##### delete
+
+```shell
+$ cybr safes delete -s SafeName
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-s|--safe|☑||Safe name to delete|P-WIN-ADMINS-DOMAIN|
+
+Delete a safe. If the safe has a retention policy of days that is greater than 0, the safe will be marked for deletion until the amount of days assigned are met.
+
 ##### member list
 
 ```shell
 $ cybr safes member list -s SafeName
 ```
 
-__Required Option:__ `-s` or `--safe`
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-s|--safe|☑||Safe name to list members from|P-WIN-ADMINS-DOMAIN|
 
 List all safe members on the safe given.
 
@@ -93,15 +148,7 @@ List all safe members on the safe given.
 $ cybr applications
 ```
 
-List all applications the username you are logged on as has access to read.
-
-```shell
-$ cybr applications -l \\Applications
-```
-
-__Optional Option:__ `-l` or `--location`
-
-List only applications located within \Applications the username you are logged on as has access to read.
+Display help for the `cybr applications` command.
 
 ##### list
 
@@ -109,9 +156,45 @@ List only applications located within \Applications the username you are logged 
 $ cybr applications list
 ```
 
-__Optional Option:__ `-l` or `--location`
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-l|--location||\\|Location of application in EPV|\\|
 
 List all applications the username you are logged on as has access to read.
+
+##### add
+
+```shell
+$ cybr applications add -a AppID -l "\\"
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-a|--app-id|☑||Application ID|Ansible|
+|-l|--location|☑||Application location|\\|
+|-d|--description||Application description||
+|-f|--access-permitted-from||0|Access permitted for the application (0-23)|0|
+|-t|--access-permitted-to||23|Access permitted for the application (0-23)|23|
+|-e|--expiration-date|||When application will expire||
+|-i|--disabled|||Disable the application, e.g. yes/no|yes|
+|-r|--business-owner-first-name|||Application business owner first name|Joe|
+|-n|--business-owner-last-name|||Application business owner last name|Garcia|
+|-m|--business-owner-email|||Application business owner email|email@example.com|
+|-p|--business-owner-phone|||Application business owner phone|555-555-1234|
+
+Add an application identity.
+
+##### delete
+
+```shell
+$ cybr applications delete -a AppID
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-a|--app-id|☑||Application ID|Ansible|
+
+Delete an application identity.
 
 ##### methods list
 
@@ -119,9 +202,13 @@ List all applications the username you are logged on as has access to read.
 $ cybr applications methods list -a AppID
 ```
 
-__Required Option:__ `-a` or `--app-id`
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-a|--app-id|☑||Application ID|Ansible|
 
 List all authentication methods configured for the application identity given.
+
+
 
 #### version
 
