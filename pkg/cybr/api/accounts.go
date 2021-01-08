@@ -42,20 +42,21 @@ type GetAccountResponse struct {
 type SecretManagement struct {
 	AutomaticManagementEnabled bool   `json:"automaticManagementEnabled"`
 	Status                     string `json:"status"`
+	ManualManagementReason     string `json:"manualManagementReason,omitempty"`
 	LastModifiedTime           int    `json:"lastModifiedTime,omitempty"`
 }
 
 // AddAccountRequest request used to create an account
 type AddAccountRequest struct {
-	Name                      string                 `json:"name,omitempty"`
-	Address                   string                 `json:"address"`
-	UserName                  string                 `json:"userName"`
-	PlatformID                string                 `json:"platformId"`
-	SafeName                  string                 `json:"safeName"`
-	SecretType                string                 `json:"secretType"`
-	Secret                    string                 `json:"secret"`
-	PlatformAccountProperties map[string]interface{} `json:"platformAccountProperties,omitempty"`
-	SecretManagement          SecretManagement       `json:"secretManagement,omitempty"`
+	Name                      string            `json:"name,omitempty"`
+	Address                   string            `json:"address"`
+	UserName                  string            `json:"userName"`
+	PlatformID                string            `json:"platformId"`
+	SafeName                  string            `json:"safeName"`
+	SecretType                string            `json:"secretType"`
+	Secret                    string            `json:"secret"`
+	PlatformAccountProperties map[string]string `json:"platformAccountProperties,omitempty"`
+	SecretManagement          SecretManagement  `json:"secretManagement,omitempty"`
 }
 
 // ListAccounts CyberArk user has access to
