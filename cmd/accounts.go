@@ -106,7 +106,7 @@ var getAccountsCmd = &cobra.Command{
 	Long: `Get a specific account from PAS REST API.
 	
 	Example Usage:
-	$ cybr accounts get 24_1`,
+	$ cybr accounts get -i 24_1`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := pasapi.GetConfig()
 		if err != nil {

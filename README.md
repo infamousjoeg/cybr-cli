@@ -1,7 +1,7 @@
 # cybr-cli <!-- omit in toc -->
 @CyberArk Privileged Access Security (PAS) REST API Client Library
 
-[![cybr-cli CI](https://github.com/infamousjoeg/cybr-cli/workflows/cybr-cli%20CI/badge.svg)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3A%22cybr-cli+CI%22) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=infamousjoeg_pas-api-go&metric=alert_status)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3ALint) [![CodeQL](https://github.com/infamousjoeg/cybr-cli/workflows/CodeQL/badge.svg)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3ACodeQL)
+[![cybr-cli CI](https://github.com/infamousjoeg/cybr-cli/workflows/cybr-cli%20CI/badge.svg)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3A%22cybr-cli+CI%22) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=infamousjoeg_pas-api-go&metric=alert_status)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3ALint) [![CodeQL](https://github.com/infamousjoeg/cybr-cli/workflows/CodeQL/badge.svg)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3ACodeQL) [![](https://img.shields.io/github/downloads/infamousjoeg/cybr-cli/latest/total?color=blue&label=Download%20Latest%20Release&logo=github)](https://github.com/infamousjoeg/cybr-cli/releases/latest)
 
 ## Table of Contents <!-- omit in toc -->
 
@@ -9,17 +9,24 @@
   - [Command-Line Interface (CLI)](#command-line-interface-cli)
     - [logon](#logon)
     - [logoff](#logoff)
-    - [safes](#safes)
+    - [accounts](#accounts)
       - [list](#list)
+      - [get](#get)
       - [add](#add)
-      - [update](#update)
       - [delete](#delete)
-      - [member list](#member-list)
-    - [applications](#applications)
+    - [safes](#safes)
       - [list](#list-1)
       - [add](#add-1)
+      - [update](#update)
       - [delete](#delete-1)
-      - [methods list](#methods-list)
+      - [member list](#member-list)
+    - [applications](#applications)
+      - [list](#list-2)
+      - [add](#add-2)
+      - [delete](#delete-2)
+      - [list-authn](#list-authn)
+      - [add-authn](#add-authn)
+      - [delete-authn](#delete-authn)
     - [version](#version)
     - [help](#help)
   - [Install from Source](#install-from-source)
@@ -33,9 +40,11 @@
     - [Import into project](#import-into-project)
     - [Logon to the PAS REST API Web Service](#logon-to-the-pas-rest-api-web-service)
     - [Call functions by referencing `pasapi` and "dot-referencing"](#call-functions-by-referencing-pasapi-and-dot-referencing)
-- [Required Environment Variables](#required-environment-variables)
+      - [Environment Variables Used](#environment-variables-used)
 - [Testing](#testing)
-  - [Successful Output](#successful-output)
+- [Maintainers](#maintainers)
+- [Contributions](#contributions)
+- [License](#license)
 
 ## Usage
 
@@ -68,6 +77,80 @@ Logoff the PAS REST API as the username you provided during logon.
 
 Upon successful logoff, the config file located in your user's home directory at `.cybr/config` will be removed and the session token stored within will be expired.
 
+#### accounts
+
+```shell
+$ cybr accounts
+```
+
+Display help for the `cybr accounts` command.
+
+##### list
+
+```shell
+$ cybr accounts list
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-s|--search|||List of keywords to search for in accounts, separated by space|"domain windows Test-Safe"|
+|-t|--search-type||contains|Get accounts that either contain or start with the value specified in the Search parameter. Valid values: contains (default) or startswith|startswith|
+|-r|--sort|||Property or properties by which to sort returned accounts, followed by asc (default) or desc to control sort direction. Separate multiple properties with commas, up to a maximum of three (3) properties|"name,address,port desc"|
+|-o|--offset||0|Offset of the first account that is returned in the collection of results|51|
+|-l|--limit||50|Maximum number of returned accounts. If not specified, the default value is 50. The maximum number that can be specified is 1000|200|
+|-f|--filter|||Search accounts filtered by safename or modificationTime|"safename eq Test-Safe"|
+
+List all accounts the logged on user can read.
+
+##### get
+
+```shell
+$ cybr accounts get -i 24_1
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-i|--account-id|☑||Account ID (not name) to get account details for|24_1|
+
+_**Note:** The Account ID is a unique primary key within the Secure Digital Vault for CyberArk PAS. This is NOT equivalent to the object `name` or account `username` properties._
+
+Get account object details based on Account ID specified for the account.
+
+##### add
+
+```shell
+$ cybr accounts add -s SafeName -p PlatformID -u Username -a 10.0.0.1 -t password -s SuperSecret
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-n|--name|||The name of the account object being created. Will use auto-generated name if not provided|DeviceType-PlatformName-SafeName-Username|
+|-a|--address|☑||Address of the account object|10.0.0.1|
+|-u|--username|☑||Username of the account object|root|
+|-p|--platform-id|☑||Platform ID of the account object|WinDomain|
+|-s|--safe|☑||Safe name to store the account object within|Test-Safe|
+|-t|--secret-type|☑||Secret type of the account object. e.g. password, accessKey, sshKey|password|
+|-c|--secret|☑||Secret of the account object|SuperSecret|
+|-e|--platform-properties|||Extra platform properties|port=22,UseSudoOnReconcile=yes,CustomField=customValue|
+|-m|--automatic-management||false|If set, will automatically manage the onboarded account|true|
+|-r|--manual-management-reason|||The reason the account object is not being managed|"Testing onboarding"|
+
+Add an account object to a safe.
+
+##### delete
+
+```shell
+$ cybr accounts delete -i 24_1
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-i|--account-id|☑||Account ID (not name) to delete|24_1|
+
+_**Note:** The Account ID is a unique primary key within the Secure Digital Vault for CyberArk PAS. This is NOT equivalent to the object `name` or account `username` properties._
+
+Delete a specific account object from within a safe. The account will be marked for deletion until the safe's retention policy period has expired.
+
 #### safes
 
 ```shell
@@ -82,7 +165,11 @@ Display help for the `cybr safes` command.
 $ cybr safes list
 ```
 
-List all safes the username you are logged on as has access to read.
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-s|--safe|||Safe name to target specifically|P-WIN-ADMINS-DOMAIN|
+
+List all safes the username you are logged on as has access to read. If the `-s` or `--safe` optional flag is given, only that targeted safe's details will be returned.
 
 ##### add
 
@@ -196,10 +283,10 @@ $ cybr applications delete -a AppID
 
 Delete an application identity.
 
-##### methods list
+##### list-authn
 
 ```shell
-$ cybr applications methods list -a AppID
+$ cybr applications list-authn -a AppID
 ```
 
 |Short|Long|Required|Default Value|Description|Example|
@@ -208,7 +295,34 @@ $ cybr applications methods list -a AppID
 
 List all authentication methods configured for the application identity given.
 
+##### add-authn
 
+```shell
+$ cybr applications add-authn -a AppID -t path -v /some/path
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-a|--app-id|☑||Application ID|Ansible|
+|-t|--auth-type|☑||Application authentication method type|allowedMachines|
+|-v|--auth-value|☑||Application authentication method type value|10.0.0.1|
+|-f|--is-folder||false|Application is a folder|true|
+|-s|--allow-internal-scripts||false|Allow internal scripts|true|
+
+Add an authentication method to an application identity.
+
+##### delete-authn
+
+```shell
+$ cybr applications delete-authn -a AppID -i 1
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-a|--app-id|☑||Application ID|Ansible|
+|-i|--auth-method-id|☑|Application authentication method ID to be deleted|1|
+
+Delete an authentication method of an application identity.
 
 #### version
 
@@ -232,26 +346,6 @@ Displays help text for the `cybr` CLI.  If an optional `[command]` is provided, 
 $ git clone https://github.com/infamousjoeg/pas-api-go.git
 $ ./install
 $ cybr help
-cybr is a command-line interface utility created by CyberArk that
-wraps the PAS REST API and eases the user experience for automators
-and automation to easily interact with CyberArk Privileged Access
-Security.
-
-Usage:
-  cybr [command]
-
-Available Commands:
-  applications Applications actions for PAS REST API
-  help         Help about any command
-  logoff       Logoff the PAS REST API
-  logon        Logon to PAS REST API
-  safes        Safe actions for PAS REST API
-  version      Display current version
-
-Flags:
-  -h, --help   help for cybr
-
-Use "cybr [command] --help" for more information about a command.
 ```
 
 ### Docker Container
@@ -272,7 +366,7 @@ Running indefinitely allows you to stay inside the container with the `cybr` CLI
 ```shell
 $ docker exec -it cybr-cli /bin/bash
 cybr@6e1c196a84a6:/app$ cybr version
-cybr v0.0.2-alpha
+cybr v0.0.4-alpha
 ```
 
 #### Run Container Ephemerally (Recommended)
@@ -416,7 +510,7 @@ import (
 )
 
 var (
-	hostname = os.Getenv("PAS_HOSTNAME")
+	hostname = os.Getenv("PAS_BASE_URL")
 	username = os.Getenv("PAS_USERNAME")
 	password = os.Getenv("PAS_PASSWORD")
 	authType = os.Getenv("PAS_AUTH_TYPE")
@@ -447,7 +541,7 @@ import (
 
 // Declare variables (using Summon so they are env vars)
 var (
-	hostname = os.Getenv("PAS_HOSTNAME")
+	hostname = os.Getenv("PAS_BASE_URL")
 	username = os.Getenv("PAS_USERNAME")
 	password = os.Getenv("PAS_PASSWORD")
 	authType = os.Getenv("PAS_AUTH_TYPE")
@@ -468,11 +562,11 @@ func main() {
 }
 ```
 
-## Required Environment Variables
+##### Environment Variables Used
 
 | Variable Name | Description |
 | --- | --- |
-| `PAS_HOSTNAME` | Base URL for PAS REST API Web Service |
+| `PAS_BASE_URL` | Base URL for PAS REST API Web Service |
 | `PAS_USERNAME` | Username to authn to PAS REST API |
 | `PAS_PASSWORD` | Password associated with `PAS_USERNAME` |
 | `PAS_AUTH_TYPE` | Authentication method to use (cyberark or ldap) |
@@ -486,28 +580,21 @@ func main() {
    1. If you did not complete the optional Step #2, you will use literal strings for `PAS_USERNAME` and `PAS_PASSWORD` similar to the values of `PAS_HOSTNAME` and `PAS_AUTH_TYPE`.
 4. Run [main.go]() with the command: `summon go run main.go`.
 
-### Successful Output
+## Maintainers
 
-```shell
-$ summon go run dev/main.go
+[@infamousjoeg](https://github.com/infamousjoeg)
 
-Verify JSON:
-{"ApplicationName":"PasswordVault","AuthenticationMethods":[{"Enabled":false,"Id":"windows"},{"Enabled":false,"Id":"pki"},{"Enabled":true,"Id":"cyberark"},{"Enabled":false,"Id":"oraclesso"},{"Enabled":false,"Id":"rsa"},{"Enabled":true,"Id":"radius"},{"Enabled":true,"Id":"ldap"},{"Enabled":true,"Id":"saml"}],"ServerId":"e00e8q16-b637-11e9-8329-ccd02f0167674","ServerName":"Vault"}
+[![Buy me a coffee][buymeacoffee-shield]][buymeacoffee]
 
-Session Token:
-ZDRjNjNjNGItMVPjMS00MzRhLWIyNWMtYzI3MjMzZDFjNDg0OzNCRjk4NDEyMjEyNzgyOUI7MDAwMDAwMDJFN0ZERDcyNzJENUM3MkNDRjdBNUNDQ0UxQjY1QTYyMTkyMTlDQ0I0NTdGMjgxNDkxOTc1RTQxMjc1MkRFRTRFMDAwMDAwMDA7
+[buymeacoffee]: https://www.buymeacoffee.com/infamousjoeg
+[buymeacoffee-shield]: https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png
 
-List Safes JSON:
-{"Safes":[{"SafeUrlId":"VaultInternal","SafeName":"VaultInternal","Location":"\\"},{"SafeUrlId":"Notification%20Engine","SafeName":"Notification Engine","Location":"\\"},{"SafeUrlId":"PVWAReports","SafeName":"PVWAReports","Location":"\\"},{"SafeUrlId":"PVWATicketingSystem","SafeName":"PVWATicketingSystem","Location":"\\"},{"SafeUrlId":"PVWAPublicData","SafeName":"PVWAPublicData","Location":"\\"},{"SafeUrlId":"PasswordManager","SafeName":"PasswordManager","Location":"\\"},{"SafeUrlId":"PasswordManager_Pending","SafeName":"PasswordManager_Pending","Location":"\\"},{"SafeUrlId":"AccountsFeedADAccounts","SafeName":"AccountsFeedADAccounts","Location":"\\"},{"SafeUrlId":"AccountsFeedDiscoveryLogs","SafeName":"AccountsFeedDiscoveryLogs","Location":"\\"},{"SafeUrlId":"D-Nix-Root","SafeName":"D-Nix-Root","Location":"\\"},{"SafeUrlId":"D-Win-DomainAdmins","SafeName":"D-Win-DomainAdmins","Location":"\\"},{"SafeUrlId":"D-Win-LocalAdmins","SafeName":"D-Win-LocalAdmins","Location":"\\"},{"SafeUrlId":"D-AWS-AccessKeys","SafeName":"D-AWS-AccessKeys","Location":"\\"},{"SafeUrlId":"D-Nix-AWSEC2-Keypairs","SafeName":"D-Nix-AWSEC2-Keypairs","Location":"\\"},{"SafeUrlId":"D-App-CyberArk-API","SafeName":"D-App-CyberArk-API","Location":"\\"},{"SafeUrlId":"D-MySQL-Users","SafeName":"D-MySQL-Users","Location":"\\"},{"SafeUrlId":"D-Nix-AWS-EC2","SafeName":"D-Nix-AWS-EC2","Location":"\\"},{"SafeUrlId":"PSMUniversalConnectors","SafeName":"PSMUniversalConnectors","Location":"\\"},{"SafeUrlId":"D-App-Docker-Registry","SafeName":"D-App-Docker-Registry","Location":"\\"},{"SafeUrlId":"D-Win-SvcAccts","SafeName":"D-Win-SvcAccts","Location":"\\"},{"SafeUrlId":"D-Nix-Root-2","SafeName":"D-Nix-Root-2","Description":"REST API Summit Toronto","Location":"\\"},{"SafeUrlId":"DemoSafe","SafeName":"DemoSafe","Location":"\\"},{"SafeUrlId":"Version1Safe","SafeName":"Version1Safe","Location":"\\"},{"SafeUrlId":"DemoSafe1","SafeName":"DemoSafe1","Location":"\\"},{"SafeUrlId":"Dummy-Safe","SafeName":"Dummy-Safe","Description":"Dummy safe","Location":"\\"}]}
+[@AndrewCopeland](https://github.com/AndrewCopeland)
 
-List Safe Members JSON:
-{"members":[{"Permissions":{"Add":true,"AddRenameFolder":true,"BackupSafe":true,"Delete":true,"DeleteFolder":true,"ListContent":true,"ManageSafe":true,"ManageSafeMembers":true,"MoveFilesAndFolders":true,"Rename":true,"RestrictedRetrieve":true,"Retrieve":true,"Unlock":true,"Update":true,"UpdateMetadata":true,"ValidateSafeContent":true,"ViewAudit":true,"ViewMembers":true},"UserName":"jgarcia"},{"Permissions":{"Add":true,"AddRenameFolder":true,"BackupSafe":true,"Delete":true,"DeleteFolder":true,"ListContent":true,"ManageSafe":true,"ManageSafeMembers":true,"MoveFilesAndFolders":true,"Rename":true,"RestrictedRetrieve":true,"Retrieve":true,"Unlock":true,"Update":true,"UpdateMetadata":true,"ValidateSafeContent":true,"ViewAudit":true,"ViewMembers":true},"UserName":"Master"},{"Permissions":{"Add":true,"AddRenameFolder":true,"BackupSafe":true,"Delete":true,"DeleteFolder":true,"ListContent":true,"ManageSafe":true,"ManageSafeMembers":true,"MoveFilesAndFolders":true,"Rename":true,"RestrictedRetrieve":true,"Retrieve":true,"Unlock":true,"Update":true,"UpdateMetadata":true,"ValidateSafeContent":true,"ViewAudit":true,"ViewMembers":true},"UserName":"Batch"},{"Permissions":{"Add":false,"AddRenameFolder":false,"BackupSafe":true,"Delete":false,"DeleteFolder":false,"ListContent":false,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":false,"Rename":false,"RestrictedRetrieve":false,"Retrieve":false,"Unlock":false,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":false,"ViewMembers":false},"UserName":"Backup Users"},{"Permissions":{"Add":false,"AddRenameFolder":false,"BackupSafe":false,"Delete":false,"DeleteFolder":false,"ListContent":true,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":false,"Rename":false,"RestrictedRetrieve":false,"Retrieve":false,"Unlock":false,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":true},"UserName":"Auditors"},{"Permissions":{"Add":false,"AddRenameFolder":true,"BackupSafe":false,"Delete":false,"DeleteFolder":true,"ListContent":false,"ManageSafe":true,"ManageSafeMembers":false,"MoveFilesAndFolders":true,"Rename":false,"RestrictedRetrieve":false,"Retrieve":false,"Unlock":true,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":false,"ViewMembers":false},"UserName":"Operators"},{"Permissions":{"Add":false,"AddRenameFolder":false,"BackupSafe":true,"Delete":false,"DeleteFolder":false,"ListContent":false,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":false,"Rename":false,"RestrictedRetrieve":false,"Retrieve":false,"Unlock":false,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":false,"ViewMembers":false},"UserName":"DR Users"},{"Permissions":{"Add":false,"AddRenameFolder":false,"BackupSafe":false,"Delete":false,"DeleteFolder":false,"ListContent":true,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":false,"Rename":false,"RestrictedRetrieve":false,"Retrieve":false,"Unlock":false,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":true},"UserName":"Notification Engines"},{"Permissions":{"Add":false,"AddRenameFolder":false,"BackupSafe":false,"Delete":false,"DeleteFolder":false,"ListContent":true,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":false,"Rename":false,"RestrictedRetrieve":false,"Retrieve":false,"Unlock":false,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":true},"UserName":"PVWAGWAccounts"},{"Permissions":{"Add":true,"AddRenameFolder":true,"BackupSafe":false,"Delete":true,"DeleteFolder":true,"ListContent":true,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":true,"Rename":true,"RestrictedRetrieve":true,"Retrieve":true,"Unlock":true,"Update":true,"UpdateMetadata":true,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":false},"UserName":"PasswordManager"},{"Permissions":{"Add":false,"AddRenameFolder":false,"BackupSafe":false,"Delete":false,"DeleteFolder":false,"ListContent":true,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":false,"Rename":false,"RestrictedRetrieve":true,"Retrieve":false,"Unlock":false,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":false},"UserName":"D-Win-DomainAdmin_Users"},{"Permissions":{"Add":false,"AddRenameFolder":false,"BackupSafe":false,"Delete":false,"DeleteFolder":false,"ListContent":true,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":false,"Rename":false,"RestrictedRetrieve":false,"Retrieve":false,"Unlock":false,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":true},"UserName":"D-Win-DomainAdmin_Auditors"},{"Permissions":{"Add":true,"AddRenameFolder":false,"BackupSafe":true,"Delete":true,"DeleteFolder":false,"ListContent":true,"ManageSafe":true,"ManageSafeMembers":true,"MoveFilesAndFolders":false,"Rename":true,"RestrictedRetrieve":true,"Retrieve":true,"Unlock":true,"Update":true,"UpdateMetadata":true,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":true},"UserName":"D-Win-DomainAdmin_Admins"},{"Permissions":{"Add":true,"AddRenameFolder":true,"BackupSafe":true,"Delete":true,"DeleteFolder":true,"ListContent":true,"ManageSafe":true,"ManageSafeMembers":true,"MoveFilesAndFolders":true,"Rename":true,"RestrictedRetrieve":true,"Retrieve":true,"Unlock":true,"Update":true,"UpdateMetadata":true,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":true},"UserName":"Vault Admins"},{"Permissions":{"Add":false,"AddRenameFolder":false,"BackupSafe":false,"Delete":false,"DeleteFolder":false,"ListContent":true,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":false,"Rename":false,"RestrictedRetrieve":true,"Retrieve":true,"Unlock":false,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":true},"UserName":"AIMWebService"},{"Permissions":{"Add":false,"AddRenameFolder":false,"BackupSafe":false,"Delete":false,"DeleteFolder":false,"ListContent":true,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":false,"Rename":false,"RestrictedRetrieve":true,"Retrieve":true,"Unlock":false,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":true},"UserName":"SlackBot"},{"Permissions":{"Add":false,"AddRenameFolder":false,"BackupSafe":false,"Delete":false,"DeleteFolder":false,"ListContent":true,"ManageSafe":false,"ManageSafeMembers":false,"MoveFilesAndFolders":false,"Rename":false,"RestrictedRetrieve":true,"Retrieve":true,"Unlock":false,"Update":false,"UpdateMetadata":false,"ValidateSafeContent":false,"ViewAudit":true,"ViewMembers":true},"UserName":"Prov_PASAAS-PVWA"}]}
+## Contributions
 
-List Applications JSON:
-{"application":[{"AccessPermittedFrom":0,"AccessPermittedTo":24,"AllowExtendedAuthenticationRestrict":false,"AppID":"DemoApp","BusinessOwnerEmail":"","BusinessOwnerFName":"","BusinessOwnerLName":"","BusinessOwnerPhone":"","Description":"","Disabled":false,"ExpirationDate":"0001-01-01T00:00:00Z","Location":"\\"},{"AccessPermittedFrom":0,"AccessPermittedTo":24,"AllowExtendedAuthenticationRestrict":false,"AppID":"AIMWebService","BusinessOwnerEmail":"","BusinessOwnerFName":"","BusinessOwnerLName":"","BusinessOwnerPhone":"","Description":"","Disabled":false,"ExpirationDate":"0001-01-01T00:00:00Z","Location":"\\Applications"},{"AccessPermittedFrom":0,"AccessPermittedTo":24,"AllowExtendedAuthenticationRestrict":false,"AppID":"SlackBot","BusinessOwnerEmail":"","BusinessOwnerFName":"","BusinessOwnerLName":"","BusinessOwnerPhone":"","Description":"","Disabled":false,"ExpirationDate":"0001-01-01T00:00:00Z","Location":"\\Applications"},{"AccessPermittedFrom":0,"AccessPermittedTo":24,"AllowExtendedAuthenticationRestrict":false,"AppID":"Ansible","BusinessOwnerEmail":"","BusinessOwnerFName":"","BusinessOwnerLName":"","BusinessOwnerPhone":"","Description":"","Disabled":false,"ExpirationDate":"0001-01-01T00:00:00Z","Location":"\\Applications"},{"AccessPermittedFrom":0,"AccessPermittedTo":24,"AllowExtendedAuthenticationRestrict":false,"AppID":"AD Automation","BusinessOwnerEmail":"","BusinessOwnerFName":"","BusinessOwnerLName":"","BusinessOwnerPhone":"","Description":"","Disabled":false,"ExpirationDate":"0001-01-01T00:00:00Z","Location":"\\Applications"},{"AccessPermittedFrom":0,"AccessPermittedTo":24,"AllowExtendedAuthenticationRestrict":false,"AppID":"DockerRegistry","BusinessOwnerEmail":"","BusinessOwnerFName":"","BusinessOwnerLName":"","BusinessOwnerPhone":"","Description":"","Disabled":false,"ExpirationDate":"0001-01-01T00:00:00Z","Location":"\\Applications"},{"AccessPermittedFrom":0,"AccessPermittedTo":24,"AllowExtendedAuthenticationRestrict":false,"AppID":"AnsibleCP","BusinessOwnerEmail":"","BusinessOwnerFName":"","BusinessOwnerLName":"","BusinessOwnerPhone":"","Description":"","Disabled":false,"ExpirationDate":"0001-01-01T00:00:00Z","Location":"\\Applications"},{"AccessPermittedFrom":0,"AccessPermittedTo":24,"AllowExtendedAuthenticationRestrict":false,"AppID":"pyAIM","BusinessOwnerEmail":"","BusinessOwnerFName":"","BusinessOwnerLName":"","BusinessOwnerPhone":"","Description":"","Disabled":false,"ExpirationDate":"0001-01-01T00:00:00Z","Location":"\\Applications"},{"AccessPermittedFrom":0,"AccessPermittedTo":24,"AllowExtendedAuthenticationRestrict":false,"AppID":"IDaptive","BusinessOwnerEmail":"","BusinessOwnerFName":"","BusinessOwnerLName":"","BusinessOwnerPhone":"","Description":"","Disabled":false,"ExpirationDate":"0001-01-01T00:00:00Z","Location":"\\Applications"}]}
+Pull Requests are currently being accepted.  Please read and follow the guidelines laid out in [CONTRIBUTING.md]().
 
-List Application Authentication Methods JSON:
-{"authentication":[{"AppID":"Ansible","AuthType":"certificateSerialNumber","AuthValue":"5e00000044f3868cc4ce21134c000000000004","authID":0},{"AppID":"Ansible","AuthType":"machineAddress","AuthValue":"12.233.234.444","authID":0},{"AppID":"Ansible","AuthType":"machineAddress","AuthValue":"54.142.78.106","authID":0},{"AppID":"Ansible","AuthType":"machineAddress","AuthValue":"54.235.118.11","authID":0},{"AppID":"Ansible","AuthType":"certificateattr","AuthValue":"","authID":0}]}
+## License
 
-Successfully logged off PAS REST API Web Services.
-```
+[Apache 2.0](LICENSE)
