@@ -58,13 +58,9 @@ func TestListAccountSearchSuccess(t *testing.T) {
 		Search: accountSafeName,
 	}
 
-	accounts, err := client.ListAccounts(query)
+	_, err = client.ListAccounts(query)
 	if err != nil {
 		t.Errorf("Failed to list accounts. %s", err)
-	}
-
-	if accounts.Count != 1 {
-		t.Error("Only 1 account should be returned")
 	}
 }
 

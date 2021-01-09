@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -73,6 +74,9 @@ func getResponse(url string, method string, token string, body interface{}, inse
 func SendRequest(url string, method string, token string, body interface{}, insecureTLS bool) (map[string]interface{}, error) {
 	res, err := getResponse(url, method, token, body, insecureTLS)
 
+	if err != nil && strings.Contains(err.Error(), "Failed to send request") {
+		return nil, err
+	}
 	if res.StatusCode == 204 {
 		return nil, nil
 	}
@@ -81,6 +85,7 @@ func SendRequest(url string, method string, token string, body interface{}, inse
 	decoder := json.NewDecoder(res.Body)
 	var data map[string]interface{}
 	decodeError := decoder.Decode(&data)
+
 	// No error and no body returned
 	if decodeError == io.EOF {
 		return nil, nil

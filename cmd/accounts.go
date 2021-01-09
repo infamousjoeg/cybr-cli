@@ -65,21 +65,6 @@ var accountsCmd = &cobra.Command{
 	Example Usage:
 	List all accounts: $ cybr accounts list
 	Get a Account details: $ cybr accounts get 234_1`,
-	Run: func(cmd *cobra.Command, args []string) {
-		client, err := pasapi.GetConfig()
-		if err != nil {
-			log.Fatalf("Failed to read configuration file. %s", err)
-			return
-		}
-
-		apps, err := client.ListAccounts(&pasapi.ListAccountQueryParams{})
-		if err != nil {
-			log.Fatalf("Failed to retrieve a list of all accounts. %s", err)
-			return
-		}
-
-		prettyprint.PrintJSON(apps)
-	},
 }
 
 var listAccountsCmd = &cobra.Command{
@@ -121,7 +106,7 @@ var getAccountsCmd = &cobra.Command{
 	Long: `Get a specific account from PAS REST API.
 	
 	Example Usage:
-	$ cybr accounts get 24_1`,
+	$ cybr accounts get -i 24_1`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := pasapi.GetConfig()
 		if err != nil {

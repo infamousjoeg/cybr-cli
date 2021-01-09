@@ -42,8 +42,8 @@ type ListSafeMembersResponse struct {
 
 // Members contains all safe member username/group name and their permissions
 type Members struct {
-	Permissions []Permissions `json:"Permissions"`
-	Username    string        `json:"UserName"`
+	Permissions Permissions `json:"Permissions"`
+	Username    string      `json:"UserName"`
 }
 
 // Permissions contains the permissions of each safe member

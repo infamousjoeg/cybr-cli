@@ -42,22 +42,6 @@ var safesCmd = &cobra.Command{
 	List All Safes: $ cybr safes list
 	List Safe Members: $ cybr safes member list -s SafeName
 	Add Safe: $ cybr safes add -s SafeName -d Description --cpm ManagingCPM --days 0`,
-	Run: func(cmd *cobra.Command, args []string) {
-		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
-		if err != nil {
-			log.Fatalf("Failed to read configuration file. %s", err)
-			return
-		}
-		// List All Safes
-		safes, err := client.ListSafes()
-		if err != nil {
-			log.Fatalf("Failed to retrieve a list of all safes. %s", err)
-			return
-		}
-		// Pretty print returned object as JSON blob
-		prettyprint.PrintJSON(safes)
-	},
 }
 
 var listSafesCmd = &cobra.Command{
