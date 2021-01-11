@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"syscall"
 
 	"github.com/cyberark/conjur-api-go/conjurapi"
@@ -310,6 +311,46 @@ var conjurListResourcesCmd = &cobra.Command{
 	},
 }
 
+var conjurRotateAPIKeyCmd = &cobra.Command{
+	Use:   "rotate-api-key",
+	Short: "Rotate my or other host/user api key",
+	Long: `Replaces the API key of another role you can update with a new, securely random API key. The new API key is returned as the response body.
+
+
+	
+	Example Usage:
+	$ cybr conjur rotate-api-key
+	$ cybr conjur rotate-api-key -l admin
+	$ cybr conjur rotate-api-key -l host/some/application`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, loginPair, err := conjur.GetConjurClient()
+		if err != nil {
+			log.Fatalf("Failed to initialize conjur client. %s", err)
+		}
+
+		login := Username
+		if login == "" {
+			login = loginPair.Login
+		}
+
+		// Create fully qualified name, if not starts with `host/` then assume user
+		if strings.HasPrefix(login, "host/") {
+			login = strings.Replace(login, "host/", "host:", 1)
+		} else {
+			login = "user:" + login
+		}
+
+		login = client.GetConfig().Account + ":" + login
+
+		newAPIKey, err := client.RotateAPIKey(login)
+		if err != nil {
+			log.Fatalf("Failed to rotate api key for '%s'. %s", login, err)
+		}
+
+		fmt.Println(string(newAPIKey))
+	},
+}
+
 func init() {
 	// Logon command
 	conjurLogonCmd.Flags().StringVarP(&Username, "login", "l", "", "Conjur login name")
@@ -359,6 +400,9 @@ func init() {
 	conjurListResourcesCmd.Flags().IntVarP(&Offset, "offset", "o", 0, "Show full object information")
 	conjurListResourcesCmd.Flags().BoolVarP(&InspectResources, "inspect", "i", false, "Show full object information")
 
+	// rotate-api-key
+	conjurRotateAPIKeyCmd.Flags().StringVarP(&Username, "login", "l", "", "Replaces the API key of another role you can update with a new, securely random API key. The new API key is returned as the response body. e.g. admin, host/someApp")
+
 	conjurCmd.AddCommand(conjurLogonCmd)
 	conjurCmd.AddCommand(conjurNonInteractiveLogonCmd)
 	conjurCmd.AddCommand(conjurAppendPolicyCmd)
@@ -369,5 +413,6 @@ func init() {
 	conjurCmd.AddCommand(conjurEnableAuthnCmd)
 	conjurCmd.AddCommand(conjurInfoCmd)
 	conjurCmd.AddCommand(conjurListResourcesCmd)
+	conjurCmd.AddCommand(conjurRotateAPIKeyCmd)
 	rootCmd.AddCommand(conjurCmd)
 }
