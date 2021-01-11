@@ -40,7 +40,8 @@ func CreateNetRc(username string, password string) error {
 		netrcContent = strings.Replace(netrcContent, "{{ PASSWORD }}", password, 1)
 		netrcContent = strings.Replace(netrcContent, "{{ APPLIANCE_URL }}", url, 1)
 
-		err = ioutil.WriteFile(netrcFileName, []byte(netrcContent), 0600)
+		os.Remove(netrcFileName)
+		err = ioutil.WriteFile(netrcFileName, []byte(netrcContent), 0400)
 		if err != nil {
 			return fmt.Errorf("Failed to write file '%s'. %s", netrcFileName, err)
 		}
