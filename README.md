@@ -54,7 +54,7 @@
 ### MacOS
 
 ```shell
-$ brew install conceal
+$ brew install cybr-cli
 ```
 
 ### Windows or Linux
