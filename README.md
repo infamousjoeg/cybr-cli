@@ -5,6 +5,9 @@
 
 ## Table of Contents <!-- omit in toc -->
 
+- [Install](#install)
+  - [MacOS](#macos)
+  - [Windows & Linux](#windows-or-linux)
 - [Usage](#usage)
   - [Command-Line Interface (CLI)](#command-line-interface-cli)
     - [logon](#logon)
@@ -45,6 +48,18 @@
 - [Maintainers](#maintainers)
 - [Contributions](#contributions)
 - [License](#license)
+
+## Install
+
+### MacOS
+
+```shell
+$ brew install conceal
+```
+
+### Windows or Linux
+
+Download from the [Releases](https://github.com/infamousjoeg/cybr-cli/releases) page.
 
 ## Usage
 
