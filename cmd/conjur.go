@@ -132,7 +132,7 @@ var conjurLogonCmd = &cobra.Command{
 
 var conjurNonInteractiveLogonCmd = &cobra.Command{
 	Use:   "logon-non-interactive",
-	Short: "Logon to Conjur non-interactivelyy",
+	Short: "Logon to Conjur non-interactively",
 	Long: `Authenticate to Conjur using API Key or password non-interactively 
 	
 	Example Usage:
