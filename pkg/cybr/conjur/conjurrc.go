@@ -19,15 +19,6 @@ appliance_url: {{ APPLIANCE_URL }}
 cert_file: "{{ CERT_FILE }}"
 `
 
-// GetHomeDirectory gets the proper user home directory regardless of GOOS
-func GetHomeDirectory() (string, error) {
-	usr, err := user.Current()
-	if err != nil {
-		return "", fmt.Errorf("Failed to find user's home directory. %s", err)
-	}
-	return usr.HomeDir, err
-}
-
 func getPem(url string) (string, error) {
 	conf := &tls.Config{
 		InsecureSkipVerify: true,
@@ -105,8 +96,7 @@ func createConjurRcFile(account string, url string, certFileName string, conjurr
 	return err
 }
 
-// GetURLFromConjurRc retrieve conjur url from the ~/.conjurrc file
-func GetURLFromConjurRc(conjurrcFileName string) string {
+func getFieldFromConjurRc(conjurrcFileName string, fieldName string) string {
 	file, err := os.Open(conjurrcFileName)
 	if err != nil {
 		log.Fatal(err)
@@ -116,10 +106,10 @@ func GetURLFromConjurRc(conjurrcFileName string) string {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.HasPrefix(line, "appliance_url: ") {
-			url := strings.SplitN(line, ": ", 2)[1]
-			url = strings.Trim(strings.Trim(url, "\n"), "\r")
-			return url
+		if strings.HasPrefix(line, fieldName+": ") {
+			result := strings.SplitN(line, ": ", 2)[1]
+			result = strings.Trim(strings.Trim(result, "\n"), "\r")
+			return result
 		}
 	}
 
@@ -130,29 +120,23 @@ func GetURLFromConjurRc(conjurrcFileName string) string {
 	return ""
 }
 
+// GetHomeDirectory gets the proper user home directory regardless of GOOS
+func GetHomeDirectory() (string, error) {
+	usr, err := user.Current()
+	if err != nil {
+		return "", fmt.Errorf("Failed to find user's home directory. %s", err)
+	}
+	return usr.HomeDir, err
+}
+
+// GetURLFromConjurRc retrieve conjur url from the ~/.conjurrc file
+func GetURLFromConjurRc(conjurrcFileName string) string {
+	return getFieldFromConjurRc(conjurrcFileName, "appliance_url")
+}
+
 // GetAccountFromConjurRc retrieve conjur account from the ~/.conjurrc file
 func GetAccountFromConjurRc(conjurrcFileName string) string {
-	file, err := os.Open(conjurrcFileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, "account: ") {
-			account := strings.SplitN(line, ": ", 2)[1]
-			account = strings.Trim(strings.Trim(account, "\n"), "\r")
-			return account
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	return ""
+	return getFieldFromConjurRc(conjurrcFileName, "account")
 }
 
 // CreateConjurRc creates a ~/.conjurrc file
