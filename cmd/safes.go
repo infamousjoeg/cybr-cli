@@ -82,6 +82,7 @@ var safesCmd = &cobra.Command{
 	List All Safes: $ cybr safes list
 	List Safe Members: $ cybr safes member list -s SafeName
 	Add Safe: $ cybr safes add -s SafeName -d Description --cpm ManagingCPM --days 0`,
+	Aliases: []string{"safe"},
 }
 
 var listSafesCmd = &cobra.Command{

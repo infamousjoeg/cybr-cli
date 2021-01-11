@@ -65,6 +65,7 @@ var accountsCmd = &cobra.Command{
 	Example Usage:
 	List all accounts: $ cybr accounts list
 	Get a Account details: $ cybr accounts get 234_1`,
+	Aliases: []string{"account"},
 }
 
 var listAccountsCmd = &cobra.Command{
