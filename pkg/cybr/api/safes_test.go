@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
 )
 
@@ -134,5 +135,111 @@ func TestRemoveSafeFail(t *testing.T) {
 	err = client.DeleteSafe(safeName)
 	if err == nil {
 		t.Errorf("Client returned successful safe deletion even though safe '%s' should not exist", safeName)
+	}
+}
+
+func TestAddRemoveSafeMemberSuccess(t *testing.T) {
+	client := pasapi.Client{
+		BaseURL:  hostname,
+		AuthType: "cyberark",
+	}
+
+	creds := pasapi.LogonRequest{
+		Username: username,
+		Password: password,
+	}
+
+	err := client.Logon(creds)
+	if err != nil {
+		t.Errorf("Failed to logon. %s", err)
+	}
+
+	safeName := "PasswordManager"
+	memberName := "test-add-member"
+
+	retrieveAccounts := pasapi.PermissionKeyValue{
+		Key:   "RetrieveAccounts",
+		Value: true,
+	}
+
+	addMember := api.AddSafeMemberRequest{
+		Member: pasapi.AddSafeMember{
+			MemberName:  memberName,
+			SearchIn:    "Vault",
+			Permissions: []pasapi.PermissionKeyValue{retrieveAccounts},
+		},
+	}
+
+	err = client.AddSafeMember(safeName, addMember)
+	if err != nil {
+		t.Errorf("Failed to add member to safe. %s", err)
+	}
+
+	err = client.RemoveSafeMember(safeName, memberName)
+	if err != nil {
+		t.Errorf("Failed to remove member from safe. %s", err)
+	}
+}
+
+func TestAddMemberInvalidMemberName(t *testing.T) {
+	client := pasapi.Client{
+		BaseURL:  hostname,
+		AuthType: "cyberark",
+	}
+
+	creds := pasapi.LogonRequest{
+		Username: username,
+		Password: password,
+	}
+
+	err := client.Logon(creds)
+	if err != nil {
+		t.Errorf("Failed to logon. %s", err)
+	}
+
+	safeName := "PasswordManager"
+	memberName := "notReal"
+
+	retrieveAccounts := pasapi.PermissionKeyValue{
+		Key:   "RetrieveAccounts",
+		Value: true,
+	}
+
+	addMember := api.AddSafeMemberRequest{
+		Member: pasapi.AddSafeMember{
+			MemberName:  memberName,
+			SearchIn:    "Vault",
+			Permissions: []pasapi.PermissionKeyValue{retrieveAccounts},
+		},
+	}
+
+	err = client.AddSafeMember(safeName, addMember)
+	if err == nil {
+		t.Errorf("Added a non-existent member. This should not happen")
+	}
+}
+
+func TestRemoveMemberInvalidMemberName(t *testing.T) {
+	client := pasapi.Client{
+		BaseURL:  hostname,
+		AuthType: "cyberark",
+	}
+
+	creds := pasapi.LogonRequest{
+		Username: username,
+		Password: password,
+	}
+
+	err := client.Logon(creds)
+	if err != nil {
+		t.Errorf("Failed to logon. %s", err)
+	}
+
+	safeName := "PasswordManager"
+	memberName := "notReal"
+
+	err = client.RemoveSafeMember(safeName, memberName)
+	if err == nil {
+		t.Errorf("Removed a non-existent member. This should not happen")
 	}
 }
