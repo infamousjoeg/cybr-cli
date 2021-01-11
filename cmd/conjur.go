@@ -2,15 +2,9 @@ package cmd
 
 import (
 	"bufio"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
-	"strings"
 	"syscall"
 
 	"github.com/cyberark/conjur-api-go/conjurapi"
@@ -42,38 +36,16 @@ var (
 
 	// ServiceID used for enabling authenticator
 	ServiceID string
+
+	// Kind resource kind variable, policy, user, host, group, etc
+	Kind string
+
+	// InspectResources inspect the resources and provide more info per resource
+	InspectResources bool
 )
 
-func getConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
-	homeDir, err := conjur.GetHomeDirectory()
-	if err != nil {
-		return nil, nil, fmt.Errorf("%s", err)
-	}
-
-	netrcPath := fmt.Sprintf("%s/.netrc", homeDir)
-	conjurrcPath := fmt.Sprintf("%s/.conjurrc", homeDir)
-	Account = conjur.GetAccountFromConjurRc(conjurrcPath)
-	BaseURL = conjur.GetURLFromConjurRc(conjurrcPath)
-	certPath := fmt.Sprintf("%s/conjur-%s.pem", homeDir, Account)
-
-	config := conjurapi.Config{
-		Account:      Account,
-		ApplianceURL: BaseURL,
-		SSLCertPath:  certPath,
-		NetRCPath:    netrcPath,
-	}
-
-	loginPair, err := conjurapi.LoginPairFromNetRC(config)
-	if err != nil {
-		return nil, nil, fmt.Errorf("Failed to retrieve credentials from ~/.netrc. %s", err)
-	}
-
-	client, err := conjurapi.NewClientFromKey(config, *loginPair)
-	return client, loginPair, err
-}
-
 func loadPolicy(policyBranch string, policyFilePath string, policyMode conjurapi.PolicyMode) {
-	client, _, err := getConjurClient()
+	client, _, err := conjur.GetConjurClient()
 	if err != nil {
 		log.Fatalf("Failed to initialize conjur client. %s", err)
 	}
@@ -88,75 +60,6 @@ func loadPolicy(policyBranch string, policyFilePath string, policyMode conjurapi
 		log.Fatalf("Failed to load policy. %v. %s", response, err)
 	}
 	prettyprint.PrintJSON(response)
-}
-
-func enableAuthenticator(serviceID string) {
-	client, loginPair, err := getConjurClient()
-	if err != nil {
-		log.Fatalf("Failed to initialize conjur client. %s", err)
-	}
-
-	sessionToken, err := client.Authenticate(*loginPair)
-	if err != nil {
-		log.Fatalf("Failed to authenticate to conjur. %s", err)
-	}
-
-	config := client.GetConfig()
-	httpClient := client.GetHttpClient()
-	url := fmt.Sprintf("%s/%s/%s", config.ApplianceURL, serviceID, url.QueryEscape(config.Account))
-	req, err := http.NewRequest("PATCH", url, strings.NewReader("enabled=true"))
-	if err != nil {
-		log.Fatalf("Failed to create request for enable authenticator '%s'. %s", url, err)
-	}
-
-	req.Header.Add("Authorization", fmt.Sprintf("Token token=\"%s\"", base64.StdEncoding.EncodeToString(sessionToken)))
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		log.Fatalf("Failed to enabled authenticator '%s'. %s", serviceID, err)
-	}
-
-	if resp.StatusCode > 204 || resp.StatusCode < 200 {
-		log.Fatalf("Failed to enable authenticator '%s'. Status code '%d'", serviceID, resp.StatusCode)
-	}
-
-	fmt.Printf("Successfully enabled authenticator '%s'\n", serviceID)
-}
-
-func info() {
-	client, _, err := getConjurClient()
-	if err != nil {
-		log.Fatalf("Failed to initialize conjur client. %s", err)
-	}
-
-	httpClient := client.GetHttpClient()
-	config := client.GetConfig()
-
-	url := fmt.Sprintf("%s/info", config.ApplianceURL)
-
-	resp, err := httpClient.Get(url)
-	if err != nil {
-		log.Fatalf("Failed to get conjur info. %s", err)
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		log.Fatalf("Failed to get conjur info. Invalid status code '%d'", resp.StatusCode)
-	}
-
-	result, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalf("Failed to read conjur info body. %s", err)
-	}
-
-	resultInterface := make(map[string]interface{})
-	err = json.Unmarshal(result, &resultInterface)
-
-	if err != nil {
-		log.Fatalf("Failed to unmarshal conjur info body into json object. %s", err)
-	}
-
-	prettyprint.PrintJSON(resultInterface)
 }
 
 var conjurCmd = &cobra.Command{
@@ -234,7 +137,7 @@ var conjurNonInteractiveLogonCmd = &cobra.Command{
 	Example Usage:
 	$ cybr conjur logon-non-interactive`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, loginPair, err := getConjurClient()
+		client, loginPair, err := conjur.GetConjurClient()
 		if err != nil {
 			log.Fatalf("Failed to initialize conjur client. %s", err)
 		}
@@ -298,7 +201,7 @@ var conjurGetSecretCmd = &cobra.Command{
 	Example Usage:
 	$ cybr conjur get-secret -i id/to/variable`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, _, err := getConjurClient()
+		client, _, err := conjur.GetConjurClient()
 		if err != nil {
 			log.Fatalf("Failed to initialize conjur client. %s", err)
 		}
@@ -324,7 +227,7 @@ var conjurSetSecretCmd = &cobra.Command{
 	Example Usage:
 	$ cybr conjur set-secret -i id/to/variable -v "P@$$word"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, _, err := getConjurClient()
+		client, _, err := conjur.GetConjurClient()
 		if err != nil {
 			log.Fatalf("Failed to initialize conjur client. %s", err)
 		}
@@ -344,11 +247,15 @@ var conjurEnableAuthnCmd = &cobra.Command{
 	Example Usage:
 	$ cybr conjur enable-authn -s authn-iam/prod`,
 	Run: func(cmd *cobra.Command, args []string) {
-		enableAuthenticator(ServiceID)
+		err := conjur.EnableAuthenticator(ServiceID)
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+		fmt.Printf("Successfully enabled authenticator '%s'\n", ServiceID)
 	},
 }
 
-var conjurInfo = &cobra.Command{
+var conjurInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Get info about conjur",
 	Long: `Get info about conjur.
@@ -356,7 +263,50 @@ var conjurInfo = &cobra.Command{
 	Example Usage:
 	$ cybr conjur info`,
 	Run: func(cmd *cobra.Command, args []string) {
-		info()
+		result, err := conjur.Info()
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+		prettyprint.PrintJSON(result)
+	},
+}
+
+var conjurListResourcesCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List conjur resources",
+	Long: `Lists resources within an organization account.
+	
+	Example Usage:
+	$ cybr conjur list --kind variable --search prod`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, _, err := conjur.GetConjurClient()
+		if err != nil {
+			log.Fatalf("Failed to initialize conjur client. %s", err)
+		}
+
+		filter := conjurapi.ResourceFilter{
+			Kind:   Kind,
+			Search: Search,
+			Limit:  Limit,
+			Offset: Offset,
+		}
+
+		resources, err := client.Resources(&filter)
+		if err != nil {
+			log.Fatalf("Failed to list resources. %s", err)
+		}
+
+		if InspectResources {
+			prettyprint.PrintJSON(resources)
+			return
+		}
+
+		// Just display resource ids
+		ids := []string{}
+		for _, r := range resources {
+			ids = append(ids, r["id"].(string))
+		}
+		prettyprint.PrintJSON(ids)
 	},
 }
 
@@ -402,6 +352,13 @@ func init() {
 	conjurEnableAuthnCmd.Flags().StringVarP(&ServiceID, "service-id", "s", "", "The authenticator service ID. e.g. authn-iam/prod or authn-k8s/k8s-cluster-1")
 	conjurEnableAuthnCmd.MarkFlagRequired("service-id")
 
+	// list
+	conjurListResourcesCmd.Flags().StringVarP(&Kind, "kind", "k", "", "Narrows results to only resources of that kind")
+	conjurListResourcesCmd.Flags().StringVarP(&Search, "search", "s", "", "Narrows results to those pertaining to the search query")
+	conjurListResourcesCmd.Flags().IntVarP(&Limit, "limit", "l", 10, "Maximum number of returned resource. Default is 10")
+	conjurListResourcesCmd.Flags().IntVarP(&Offset, "offset", "o", 0, "Show full object information")
+	conjurListResourcesCmd.Flags().BoolVarP(&InspectResources, "inspect", "i", false, "Show full object information")
+
 	conjurCmd.AddCommand(conjurLogonCmd)
 	conjurCmd.AddCommand(conjurNonInteractiveLogonCmd)
 	conjurCmd.AddCommand(conjurAppendPolicyCmd)
@@ -410,6 +367,7 @@ func init() {
 	conjurCmd.AddCommand(conjurGetSecretCmd)
 	conjurCmd.AddCommand(conjurSetSecretCmd)
 	conjurCmd.AddCommand(conjurEnableAuthnCmd)
-	conjurCmd.AddCommand(conjurInfo)
+	conjurCmd.AddCommand(conjurInfoCmd)
+	conjurCmd.AddCommand(conjurListResourcesCmd)
 	rootCmd.AddCommand(conjurCmd)
 }
