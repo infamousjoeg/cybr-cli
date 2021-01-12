@@ -128,7 +128,7 @@ type AddSafeRequest struct {
 	Description           string `json:"Description"`
 	OLACEnabled           bool   `json:"OLACEnabled,omitempty"`
 	ManagingCPM           string `json:"ManagingCPM"`
-	NumberOfDaysRetention int    `json:"NumberOfDaysRetention,omitempty"`
+	NumberOfDaysRetention int    `json:"NumberOfDaysRetention"`
 	AutoPurgeEnabled      bool   `json:"AutoPurgeEnabled,omitempty"`
 	SafeLocation          string `json:"Location,omitempty"`
 }
