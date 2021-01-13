@@ -76,6 +76,7 @@ var conjurLogonCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr conjur logon -a account -b https://conjur.example.com -l admin`,
+	Aliases: []string{"login"},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Print("Enter password: ")
 		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
@@ -137,6 +138,7 @@ var conjurNonInteractiveLogonCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr conjur logon-non-interactive`,
+	Aliases: []string{"login-non-interactive"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client, loginPair, err := conjur.GetConjurClient()
 		if err != nil {
@@ -170,7 +172,7 @@ var conjurUpdatePolicyCmd = &cobra.Command{
 	Use:   "update-policy",
 	Short: "Update policy to conjur",
 	Long: `Modifies an existing Conjur policy. Data may be explicitly deleted using the !delete, !revoke, and !deny statements. 
-	Unlike “replace” mode, no data is ever implicitly delete
+	Unlike “replace” mode, no data is ever implicitly deleted.
 	
 	Example Usage:
 	$ cybr conjur update-policy --branch root --file ./path/to/root.yml`,
@@ -201,6 +203,7 @@ var conjurGetSecretCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr conjur get-secret -i id/to/variable`,
+	Aliases: []string{"get-secrets"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client, _, err := conjur.GetConjurClient()
 		if err != nil {
@@ -227,6 +230,7 @@ var conjurSetSecretCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr conjur set-secret -i id/to/variable -v "P@$$word"`,
+	Aliases: []string{"set-secrets"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client, _, err := conjur.GetConjurClient()
 		if err != nil {
@@ -379,12 +383,12 @@ func init() {
 	conjurReplacePolicyCmd.MarkFlagRequired("file")
 
 	// retrieve-secret
-	conjurGetSecretCmd.Flags().StringVarP(&VariableID, "ID", "i", "", "The variable ID containing the secret")
+	conjurGetSecretCmd.Flags().StringVarP(&VariableID, "id", "i", "", "The variable ID containing the secret")
 	conjurGetSecretCmd.MarkFlagRequired("ID")
 	conjurGetSecretCmd.Flags().BoolVarP(&NoNewLine, "no-new-line", "n", false, "Remove new line")
 
 	// set-secret
-	conjurSetSecretCmd.Flags().StringVarP(&VariableID, "ID", "i", "", "The variable ID being updated")
+	conjurSetSecretCmd.Flags().StringVarP(&VariableID, "id", "i", "", "The variable ID being updated")
 	conjurSetSecretCmd.MarkFlagRequired("ID")
 	conjurSetSecretCmd.Flags().StringVarP(&SecretValue, "secret-value", "v", "", "The new value of the secret")
 	conjurSetSecretCmd.MarkFlagRequired("secret-value")
@@ -397,7 +401,7 @@ func init() {
 	conjurListResourcesCmd.Flags().StringVarP(&Kind, "kind", "k", "", "Narrows results to only resources of that kind")
 	conjurListResourcesCmd.Flags().StringVarP(&Search, "search", "s", "", "Narrows results to those pertaining to the search query")
 	conjurListResourcesCmd.Flags().IntVarP(&Limit, "limit", "l", 10, "Maximum number of returned resource. Default is 10")
-	conjurListResourcesCmd.Flags().IntVarP(&Offset, "offset", "o", 0, "Show full object information")
+	conjurListResourcesCmd.Flags().IntVarP(&Offset, "offset", "o", 0, "Index to start returning results from for pagination")
 	conjurListResourcesCmd.Flags().BoolVarP(&InspectResources, "inspect", "i", false, "Show full object information")
 
 	// rotate-api-key

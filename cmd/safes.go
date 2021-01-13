@@ -117,7 +117,8 @@ var listMembersCmd = &cobra.Command{
 	the user logged on can read from PAS REST API.
 	
 	Example Usage:
-	$ cybr safes member list -s SafeName`,
+	$ cybr safes list-members -s SafeName`,
+	Aliases: []string{"list-member"},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
 		client, err := pasapi.GetConfig()
@@ -144,6 +145,7 @@ var addMembersCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr safes add-member -s SafeName -m MemberName --retrieve-account`,
+	Aliases: []string{"add-members"},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
 		client, err := pasapi.GetConfig()
@@ -248,6 +250,7 @@ var removeMembersCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr safes remove-member -s SafeName -m MemberName`,
+	Aliases: []string{"remove-members"},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
 		client, err := pasapi.GetConfig()
@@ -386,8 +389,8 @@ func init() {
 	updateSafeCmd.MarkFlagRequired("target-safe")
 
 	// add-member
-	addMembersCmd.Flags().StringVarP(&Safe, "safe-name", "s", "", "Name of the safe")
-	addMembersCmd.MarkFlagRequired("safe-name")
+	addMembersCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Name of the safe")
+	addMembersCmd.MarkFlagRequired("safe")
 	addMembersCmd.Flags().StringVarP(&MemberName, "member-name", "m", "", "Name of member being added to the desired safe")
 	addMembersCmd.MarkFlagRequired("member-name")
 	addMembersCmd.Flags().StringVarP(&MemberName, "search-in", "i", "Vault", "Search in Domain or Vault")
@@ -411,7 +414,7 @@ func init() {
 	addMembersCmd.Flags().BoolVar(&MoveAccountsAndFolders, "move-accounts-and-folders", false, "Move accounts and folders")
 
 	// remove-member
-	removeMembersCmd.Flags().StringVarP(&Safe, "safe-name", "s", "", "Name of the safe")
+	removeMembersCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Name of the safe")
 	removeMembersCmd.MarkFlagRequired("safe-name")
 	removeMembersCmd.Flags().StringVarP(&MemberName, "member-name", "m", "", "Name of member being removed from the safe")
 	removeMembersCmd.MarkFlagRequired("member-name")
