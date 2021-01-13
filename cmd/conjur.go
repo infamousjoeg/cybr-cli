@@ -63,6 +63,13 @@ func loadPolicy(policyBranch string, policyFilePath string, policyMode conjurapi
 	prettyprint.PrintJSON(response)
 }
 
+func removeFile(path string) {
+	err := os.Remove(path)
+	if err != nil {
+		log.Fatalf("Failed to remove file '%s'. %s", path, err)
+	}
+}
+
 var conjurCmd = &cobra.Command{
 	Use:   "conjur",
 	Short: "Conjur actions",
@@ -152,6 +159,29 @@ var conjurNonInteractiveLogonCmd = &cobra.Command{
 
 		fmt.Println("Successfully logged into conjur")
 
+	},
+}
+
+var conjurLogoffCmd = &cobra.Command{
+	Use:   "logoff",
+	Short: "Logoff to Conjur",
+	Long: `Logoff to conjur and remove the ~/.netrc and ~/.conjurrc files
+	
+	Example Usage:
+	$ cybr conjur logoff`,
+	Run: func(cmd *cobra.Command, args []string) {
+		homeDir, err := conjur.GetHomeDirectory()
+		if err != nil {
+			log.Fatalf("%s\n", err)
+		}
+
+		netrcPath := fmt.Sprintf("%s/.netrc", homeDir)
+		conjurrcPath := fmt.Sprintf("%s/.conjurrc", homeDir)
+
+		removeFile(netrcPath)
+		removeFile(conjurrcPath)
+
+		fmt.Println("Logged off conjur")
 	},
 }
 
@@ -416,5 +446,6 @@ func init() {
 	conjurCmd.AddCommand(conjurInfoCmd)
 	conjurCmd.AddCommand(conjurListResourcesCmd)
 	conjurCmd.AddCommand(conjurRotateAPIKeyCmd)
+	conjurCmd.AddCommand(conjurLogoffCmd)
 	rootCmd.AddCommand(conjurCmd)
 }
