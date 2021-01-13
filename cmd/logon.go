@@ -35,6 +35,7 @@ var logonCmd = &cobra.Command{
 		// Get secret value from STDIN
 		fmt.Print("Enter password: ")
 		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
+		fmt.Println()
 		if err != nil {
 			log.Fatalln("An error occurred trying to read password from " +
 				"Stdin. Exiting...")
