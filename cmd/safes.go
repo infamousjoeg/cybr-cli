@@ -299,7 +299,7 @@ var addSafeCmd = &cobra.Command{
 			log.Fatalf("Failed to add the safe named %s. %s", SafeName, err)
 			return
 		}
-		fmt.Printf("Successfully added safe %s.", SafeName)
+		fmt.Printf("Successfully added safe %s.\n", SafeName)
 	},
 }
 
@@ -326,7 +326,7 @@ var deleteSafeCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("Successfully deleted safe %s.", SafeName)
+		fmt.Printf("Successfully deleted safe %s.\n", SafeName)
 	},
 }
 
