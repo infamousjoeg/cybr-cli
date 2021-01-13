@@ -24,7 +24,7 @@ func (c *Client) Logon(req LogonRequest) error {
 	}
 
 	url := fmt.Sprintf("%s/PasswordVault/api/auth/%s/logon", c.BaseURL, c.AuthType)
-	token, err := httpJson.SendRequestRaw(url, "POST", "", req, c.InsecureTLS)
+	token, err := httpJson.SendRequestRaw(url, "POST", "", req, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return fmt.Errorf("Failed to authenticate to the PAS REST API. %s", err)
 	}
@@ -37,7 +37,7 @@ func (c *Client) Logon(req LogonRequest) error {
 func (c Client) Logoff() error {
 	// Set URL for request
 	url := fmt.Sprintf("%s/PasswordVault/api/auth/logoff", c.BaseURL)
-	_, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS)
+	_, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return fmt.Errorf("Unable to logoff PAS REST API Web Service. %s", err)
 	}

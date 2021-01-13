@@ -62,7 +62,7 @@ type AddAccountRequest struct {
 // ListAccounts CyberArk user has access to
 func (c Client) ListAccounts(query *ListAccountQueryParams) (*ListAccountResponse, error) {
 	url := fmt.Sprintf("%s/PasswordVault/api/Accounts%s", c.BaseURL, httpJson.GetURLQuery(query))
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS)
+	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &ListAccountResponse{}, fmt.Errorf("Failed to list accounts. %s", err)
 	}
@@ -76,7 +76,7 @@ func (c Client) ListAccounts(query *ListAccountQueryParams) (*ListAccountRespons
 // GetAccount details for specific account
 func (c Client) GetAccount(accountID string) (*GetAccountResponse, error) {
 	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s", c.BaseURL, accountID)
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS)
+	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &GetAccountResponse{}, fmt.Errorf("Failed to get account. %s", err)
 	}
@@ -90,7 +90,7 @@ func (c Client) GetAccount(accountID string) (*GetAccountResponse, error) {
 // AddAccount to cyberark
 func (c Client) AddAccount(account AddAccountRequest) (*GetAccountResponse, error) {
 	url := fmt.Sprintf("%s/PasswordVault/api/Accounts", c.BaseURL)
-	response, err := httpJson.Post(url, c.SessionToken, account, c.InsecureTLS)
+	response, err := httpJson.Post(url, c.SessionToken, account, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return &GetAccountResponse{}, fmt.Errorf("Failed to add account. %s. %s", string(returnedError), err)
@@ -105,7 +105,7 @@ func (c Client) AddAccount(account AddAccountRequest) (*GetAccountResponse, erro
 // DeleteAccount from cyberark
 func (c Client) DeleteAccount(accountID string) error {
 	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s", c.BaseURL, accountID)
-	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS)
+	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to delete account '%s'. %s. %s", accountID, string(returnedError), err)

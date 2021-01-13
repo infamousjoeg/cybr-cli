@@ -4,6 +4,8 @@ import (
 	"encoding/gob"
 	"fmt"
 	"os"
+
+	"github.com/infamousjoeg/cybr-cli/pkg/logger"
 )
 
 // Client contains the data necessary for requests to pass successfully
@@ -12,6 +14,7 @@ type Client struct {
 	AuthType     string
 	InsecureTLS  bool
 	SessionToken string
+	Logger       logger.Logger
 }
 
 func getUserHomeDir() (string, error) {
@@ -95,6 +98,13 @@ func GetConfig() (Client, error) {
 	dataFile.Close()
 
 	return client, nil
+}
+
+// GetConfigWithLogger is the same as GetConfig except it also sets the logger
+func GetConfigWithLogger(logger logger.Logger) (Client, error) {
+	client, err := GetConfig()
+	client.Logger = logger
+	return client, err
 }
 
 // RemoveConfig file on the local filesystem
