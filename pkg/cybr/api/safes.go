@@ -81,13 +81,54 @@ func (c Client) ListSafeMembers(safeName string) (*ListSafeMembersResponse, erro
 	return &ListSafeMembersResponse, err
 }
 
+// AddSafeMemberRequest request sent for adding a member to safe with specific permissions
+type AddSafeMemberRequest struct {
+	Member AddSafeMember `json:"member"`
+}
+
+// AddSafeMember used in AddSafeMemberRequest
+type AddSafeMember struct {
+	MemberName               string               `json:"MemberName"`
+	SearchIn                 string               `json:"SearchIn"`
+	MembershipExpirationDate string               `json:"MembershipExpirationDate,omitempty"`
+	Permissions              []PermissionKeyValue `json:"Permissions,omitempty"`
+}
+
+// PermissionKeyValue used in AddSafeMember struct
+type PermissionKeyValue struct {
+	Key   string `json:"Key"`
+	Value bool   `json:"Value"`
+}
+
+// AddSafeMember Add a user or application as a member to a safe with specific permissions
+func (c Client) AddSafeMember(safeName string, addMember AddSafeMemberRequest) error {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s/Members", c.BaseURL, url.QueryEscape(safeName))
+	response, err := httpJson.Post(url, c.SessionToken, addMember, c.InsecureTLS)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Failed to add member '%s' to safe '%s'. %s. %s", addMember.Member.MemberName, safeName, string(returnedError), err)
+	}
+	return nil
+}
+
+// RemoveSafeMember Remove a member from a specific safe
+func (c Client) RemoveSafeMember(safeName string, member string) error {
+	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s/Members/%s", c.BaseURL, url.QueryEscape(safeName), url.QueryEscape(member))
+	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Failed to remove member '%s' from safe '%s'. %s.  %s", member, safeName, string(returnedError), err)
+	}
+	return nil
+}
+
 // AddSafeRequest contains the body of the Add Safe function's request
 type AddSafeRequest struct {
 	SafeName              string `json:"SafeName"`
 	Description           string `json:"Description"`
 	OLACEnabled           bool   `json:"OLACEnabled,omitempty"`
 	ManagingCPM           string `json:"ManagingCPM"`
-	NumberOfDaysRetention int    `json:"NumberOfDaysRetention,omitempty"`
+	NumberOfDaysRetention int    `json:"NumberOfDaysRetention"`
 	AutoPurgeEnabled      bool   `json:"AutoPurgeEnabled,omitempty"`
 	SafeLocation          string `json:"Location,omitempty"`
 }

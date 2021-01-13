@@ -53,6 +53,7 @@ var applicationsCmd = &cobra.Command{
 	List All Applications at Root: $ cybr applications list
 	List All Applications at \Applications: $ cybr applications list -l \\Applications
 	List All Authentication Methods: $ cybr applications methods list -a AppID`,
+	Aliases: []string{"application", "app"},
 }
 
 var listApplicationsCmd = &cobra.Command{
