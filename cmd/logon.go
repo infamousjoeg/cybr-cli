@@ -30,6 +30,7 @@ var logonCmd = &cobra.Command{
 	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com
 	To bypass TLS verification:
 	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com -i`,
+	Aliases: []string{"login"},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get secret value from STDIN
 		fmt.Print("Enter password: ")

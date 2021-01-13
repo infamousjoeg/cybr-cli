@@ -1,5 +1,14 @@
 # cybr-cli <!-- omit in toc -->
-@CyberArk Privileged Access Security (PAS) REST API Client Library
+
+A "Swiss Army Knife" command-line interface (CLI) for easy human and non-human interaction with CyberArk's suite of products.
+
+Current products supported:
+* CyberArk Privileged Access Security (PAS)
+  * Accounts, Safes, Safe Members, Applications
+* CyberArk Enterprise Secrets Manager & Conjur
+  * List Resources, Policy, Secrets, API Key Rotation, Authenticators
+
+**Want to get dangerous quickly?** Check out the example bash script at [dev/add-delete-pas-application.sh]().
 
 [![cybr-cli CI](https://github.com/infamousjoeg/cybr-cli/workflows/cybr-cli%20CI/badge.svg)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3A%22cybr-cli+CI%22) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=infamousjoeg_pas-api-go&metric=alert_status)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3ALint) [![CodeQL](https://github.com/infamousjoeg/cybr-cli/workflows/CodeQL/badge.svg)](https://github.com/infamousjoeg/cybr-cli/actions?query=workflow%3ACodeQL) [![](https://img.shields.io/github/downloads/infamousjoeg/cybr-cli/latest/total?color=blue&label=Download%20Latest%20Release&logo=github)](https://github.com/infamousjoeg/cybr-cli/releases/latest)
 
@@ -22,7 +31,9 @@
       - [add](#add-1)
       - [update](#update)
       - [delete](#delete-1)
-      - [member list](#member-list)
+      - [list-members](#list-members)
+      - [add-member](#add-member)
+      - [remove-member](#remove-member)
     - [applications](#applications)
       - [list](#list-2)
       - [add](#add-2)
@@ -30,6 +41,18 @@
       - [list-authn](#list-authn)
       - [add-authn](#add-authn)
       - [delete-authn](#delete-authn)
+    - [conjur](#conjur)
+      - [logon](#logon-1)
+      - [logon-non-interactive](#logon-non-interactive)
+      - [rotate-api-key](#rotate-api-key)
+      - [list](#list-3)
+      - [append-policy](#append-policy)
+      - [update-policy](#update-policy)
+      - [replace-policy](#replace-policy)
+      - [get-secret](#get-secret)
+      - [set-secret](#set-secret)
+      - [enable-authn](#enable-authn)
+      - [info](#info)
     - [version](#version)
     - [help](#help)
   - [Install from Source](#install-from-source)
@@ -232,17 +255,60 @@ $ cybr safes delete -s SafeName
 
 Delete a safe. If the safe has a retention policy of days that is greater than 0, the safe will be marked for deletion until the amount of days assigned are met.
 
-##### member list
+##### list-members
 
 ```shell
-$ cybr safes member list -s SafeName
+$ cybr safes list-members -s SafeName
 ```
 
 |Short|Long|Required|Default Value|Description|Example|
 |---|---|---|---|---|---|
 |-s|--safe|☑||Safe name to list members from|P-WIN-ADMINS-DOMAIN|
 
-List all safe members on the safe given.
+List all safe members, or a specific safe, that the user logged on can read.
+
+##### add-member
+
+```shell
+$ cybr safes add-member -s SafeName -m MemberName --retrieve-account
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-s|--safe|☑||Safe name to add member to|P-WIN-ADMINS-DOMAIN|
+|-m|--member-name|☑||Name of user or group member being added to safe|"Vault Admins"|
+|-i|--search-in||Vault|Search in Domain or `Vault` for user or group member to add|ldap-domain.com|
+|-e|--member-expiration-date|||When the membership will expire|2022-01-01|
+||--use-accounts||false|Use accounts in safe|true|
+||--retrieve-accounts||false|Retrieve accounts in safe|true|
+||--update-account-content||false|Update account content in safe|true|
+||--update-account-properties||false|Update account properties in safe|true|
+||--init-cpm-account-management-operations||false|Perform automated CPM actions on accounts within the safe|true|
+||--specify-next-account-content||false|Specify next account's content within safe|true|
+||--manage-safe||false|Manage the safe|true|
+||--manage-safe-members||false|Manage members of the safe|true|
+||--backup-safe||false|Backup the safe|true|
+||--view-audit-log||false|View audit log of safe|true|
+||--view-safe-members||false|View the safe members|true|
+||--access-content-without-confirmation||false|Access the Vault without needing approvals|true|
+||--create-folders||false|Create folders within safe|true|
+||--delete-folders||false|Delete folders within safe|true|
+||--move-accounts-and-folders||false|Move accounts and folders to other safes|true|
+
+Adds an existing user as a Safe member. The user who runs this command required `Manage Safe Members` permission on the safe.
+
+##### remove-member
+
+```shell
+$ cybr safes remove-member -s SafeName -m MemberName
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-s|--safe|☑||Safe name to delete member from|P-WIN-ADMINS-DOMAIN|
+|-m|--member-name|☑||Name of user or group member being added to safe|"Vault Admins"|
+
+Removes a specific member from a Safe. The user who runs this command requires `Manage Safe Members` permission on the safe.
 
 #### applications
 
@@ -339,6 +405,152 @@ $ cybr applications delete-authn -a AppID -i 1
 
 Delete an authentication method of an application identity.
 
+#### conjur
+
+```shell
+$ cybr conjur
+```
+Display help for the `cybr conjur` command.
+
+##### logon
+
+```shell
+$ cybr conjur logon -a account -b https://conjur.example.com -l admin
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-l|--login|☑||Conjur login name|admin|
+|-a|--account|☑||Conjur organization account name|cyberark|
+|-b|--base-url|☑||Conjur appliance URL|https://conjur.example.com|
+
+Authenticate to Conjur using API Key or Password.
+
+##### logon-non-interactive
+
+```shell
+$ cybr conjur logon-non-interactive
+```
+
+Authenticate to Conjur using API Key or Password non-interactively. This requires `.netrc` and `.conjurrc` files to be located in the User's home directory. These will be used for authentication purposes.
+
+##### rotate-api-key
+
+```shell
+$ cybr conjur rotate-api-key -l host/some/application
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-l|--login|||The username of the resource to rotate the API key of|host/ansible/tower|
+
+Replaces the API Key of another role you can update with a new, securely random API Key. The new API Key is returned to the STDOUT pipe.
+
+##### list
+
+```shell
+$ cybr conjur list --kind variable --search prod
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-k|--kind|||Filters results to only resources of that kind|hosts|
+|-s|--search|||Filters results to those pertaining to the search query|aws|
+|-l|--limit||10|Maximum number of returned resources. Default is ten (10)|25|
+|-o|--offset||0|Index to start returning results from for pagination|26|
+|-i|--inspect||false|Show full object information|true|
+
+Lists resources within an organization account.
+
+##### append-policy
+
+```shell
+$ cybr conjur append-policy --branch root --file ./path/to/root.yml
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-b|--branch|☑||The policy branch in which policy is being loaded|root|
+|-f|--file|☑||The policy file that will be loaded into the branch|./path/to/root.yml|
+
+Adds data to the existing Conjur policy. Deletions are not allowed. Any policy objects that exist on the server but are omitted from the policy file will not be deleted and any explicit deletions in the policy file will result in an error.
+
+##### update-policy
+
+```shell
+$ cybr conjur update-policy --branch root --file ./path/to/root.yml
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-b|--branch|☑||The policy branch in which policy is being loaded|root|
+|-f|--file|☑||The policy file that will be loaded into the branch|./path/to/root.yml|
+
+Modifies an existing Conjur policy. Data may be explicitly deleted using the `!delete`, `!revoke`, and `!deny` statements. Unlike `replace` mode, no data is ever implicitly deleted.
+
+##### replace-policy
+
+```shell
+$ cybr conjur replace-policy --branch root --file ./path/to/root.yml
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-b|--branch|☑||The policy branch in which policy is being loaded|root|
+|-f|--file|☑||The policy file that will be loaded into the branch|./path/to/root.yml|
+
+Loads or replaces a Conjur policy. Any policy data which already exists on the server but is not explicitly specified in the new policy file **will be deleted**.
+
+##### get-secret
+
+```shell
+$ cybr conjur get-secret -i id/to/variable
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-i|--id|☑||The variable ID containing the secret|/aws/us-east-1/access_key_id|
+|-n|--no-new-line||false|Return the value without a new line|true|
+
+Fetches the value of a secret from the specified Variable.
+
+##### set-secret
+
+```shell
+$ cybr conjur set-secret -i id/to-variable -v "P@$$word"
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-i|--id|☑||The variable ID being updated|/aws/us-east-1/secret_access_key|
+|-n|--no-new-line||false|Return the value without a new line|true|
+
+Sets a secret value for the specified Variable.
+
+##### enable-authn
+
+```shell
+$ cybr conjur enable-authn -s authn-iam/prod
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-s|--service-id|☑||The authenticator service ID|authn-k8s/k8s-cluster-1|
+
+Enables a Conjur authenticator.
+
+##### info
+
+```shell
+$ cybr conjur info
+```
+
+|Short|Long|Required|Default Value|Description|Example|
+|---|---|---|---|---|---|
+|-a|--app-id|☑||Application ID|Ansible|
+
+Get info about the Conjur cluster and health.
+
 #### version
 
 ```shell
@@ -381,7 +593,7 @@ Running indefinitely allows you to stay inside the container with the `cybr` CLI
 ```shell
 $ docker exec -it cybr-cli /bin/bash
 cybr@6e1c196a84a6:/app$ cybr version
-cybr v0.0.4-alpha
+cybr v0.0.5-alpha
 ```
 
 #### Run Container Ephemerally (Recommended)
