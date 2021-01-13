@@ -203,7 +203,6 @@ var conjurGetSecretCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr conjur get-secret -i id/to/variable`,
-	Aliases: []string{"get-secrets"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client, _, err := conjur.GetConjurClient()
 		if err != nil {
@@ -230,7 +229,6 @@ var conjurSetSecretCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr conjur set-secret -i id/to/variable -v "P@$$word"`,
-	Aliases: []string{"set-secrets"},
 	Run: func(cmd *cobra.Command, args []string) {
 		client, _, err := conjur.GetConjurClient()
 		if err != nil {

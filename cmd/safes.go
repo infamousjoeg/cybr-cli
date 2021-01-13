@@ -145,7 +145,6 @@ var addMembersCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr safes add-member -s SafeName -m MemberName --retrieve-account`,
-	Aliases: []string{"add-members"},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
 		client, err := pasapi.GetConfig()
@@ -250,7 +249,6 @@ var removeMembersCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr safes remove-member -s SafeName -m MemberName`,
-	Aliases: []string{"remove-members"},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
 		client, err := pasapi.GetConfig()
