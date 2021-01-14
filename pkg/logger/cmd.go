@@ -14,13 +14,15 @@ func scrubSecrets(message string, secrets []string) string {
 }
 
 // AddSecret add secret to be scrubbed from logging
-func (l CMD) AddSecret(secret string) {
+func (l CMD) AddSecret(secret string) Logger {
 	l.secrets = append(l.secrets, secret)
+	return l
 }
 
 // ClearSecrets clear secrets
-func (l CMD) ClearSecrets() {
+func (l CMD) ClearSecrets() Logger {
 	l.secrets = []string{}
+	return l
 }
 
 // Writef to stdout

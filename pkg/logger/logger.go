@@ -7,8 +7,8 @@ type Logger interface {
 	Enabled() bool
 	LogHeader() bool
 	LogBody() bool
-	AddSecret(string)
-	ClearSecrets()
+	AddSecret(string) Logger
+	ClearSecrets() Logger
 }
 
 // CMD log to the stdout
