@@ -25,7 +25,11 @@ func getUserHomeDir() (string, error) {
 
 // IsValid checks to make sure that the authentication method chosen is valid
 func (c *Client) IsValid() error {
-	if c.AuthType == "cyberark" || c.AuthType == "ldap" {
+	if c.AuthType == "cyberark" ||
+		c.AuthType == "ldap" ||
+		c.AuthType == "radius-push" ||
+		c.AuthType == "radius-append" ||
+		c.AuthType == "radius-challenge" {
 		return nil
 	}
 	return fmt.Errorf("Invalid auth type '%s'", c.AuthType)
