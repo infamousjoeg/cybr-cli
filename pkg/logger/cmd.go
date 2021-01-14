@@ -1,15 +1,43 @@
 package logger
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
+
+func scrubSecrets(message string, secrets []string) string {
+	scrub := "*****"
+	for _, secret := range secrets {
+		message = strings.ReplaceAll(message, secret, scrub)
+	}
+	return message
+}
+
+// AddSecret add secret to be scrubbed from logging
+func (l CMD) AddSecret(secret string) {
+	l.secrets = append(l.secrets, secret)
+}
+
+// ClearSecrets clear secrets
+func (l CMD) ClearSecrets() {
+	l.secrets = []string{}
+}
 
 // Writef to stdout
 func (l CMD) Writef(format string, a ...interface{}) {
-	fmt.Printf(format, a...)
+	if l.Enabled() {
+		message := fmt.Sprintf(format, a...)
+		message = scrubSecrets(message, l.secrets)
+		fmt.Printf("%s", message)
+	}
 }
 
 // Writeln to stdout
-func (l CMD) Writeln(a ...interface{}) {
-	fmt.Println(a...)
+func (l CMD) Writeln(message string) {
+	if l.Enabled() {
+		message = scrubSecrets(message, l.secrets)
+		fmt.Println(message)
+	}
 }
 
 // Enabled to log to stdout

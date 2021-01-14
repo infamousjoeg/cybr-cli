@@ -49,7 +49,7 @@ func logRequest(req *http.Request, logger logger.Logger) {
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(req.Body)
-	logger.Writeln()
+	logger.Writeln("")
 	body := buf.String()
 	logger.Writef("%s\n", body)
 
