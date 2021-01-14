@@ -11,20 +11,7 @@ var (
 )
 
 func TestListAccountSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	query := &pasapi.ListAccountQueryParams{}
 
@@ -39,20 +26,7 @@ func TestListAccountSuccess(t *testing.T) {
 }
 
 func TestListAccountSearchSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	query := &pasapi.ListAccountQueryParams{
 		Search: accountSafeName,
@@ -65,20 +39,7 @@ func TestListAccountSearchSuccess(t *testing.T) {
 }
 
 func TestGetAccountSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	account, err := client.GetAccount("110_3")
 	if err != nil {
@@ -91,20 +52,7 @@ func TestGetAccountSuccess(t *testing.T) {
 }
 
 func TestGetAccountInvalidAccountID(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	_, err = client.GetAccount("not_good")
 	if err == nil {
@@ -113,20 +61,7 @@ func TestGetAccountInvalidAccountID(t *testing.T) {
 }
 
 func TestAddAndDeleteAccountSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	account := pasapi.AddAccountRequest{
 		SafeName:   accountSafeName,
@@ -153,20 +88,7 @@ func TestAddAndDeleteAccountSuccess(t *testing.T) {
 }
 
 func TestAddAccountInvalidSafeName(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	account := pasapi.AddAccountRequest{
 		SafeName:   "invalidSafeName",
@@ -184,20 +106,7 @@ func TestAddAccountInvalidSafeName(t *testing.T) {
 }
 
 func TestDeleteAccountInvalidAccountID(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	err = client.DeleteAccount("invalid_ID")
 	if err == nil {
