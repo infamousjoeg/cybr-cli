@@ -123,3 +123,14 @@ func (c *Client) RemoveConfig() error {
 
 	return nil
 }
+
+// GetLogger retrieve Client logger
+func (c *Client) GetLogger() logger.Logger {
+	if c.Logger != nil {
+		return c.Logger
+	}
+
+	return logger.CMD{
+		LoggerEnabled: false,
+	}
+}

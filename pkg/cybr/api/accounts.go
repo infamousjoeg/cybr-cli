@@ -90,7 +90,7 @@ func (c Client) GetAccount(accountID string) (*GetAccountResponse, error) {
 // AddAccount to cyberark
 func (c Client) AddAccount(account AddAccountRequest) (*GetAccountResponse, error) {
 	url := fmt.Sprintf("%s/PasswordVault/api/Accounts", c.BaseURL)
-	logger := c.Logger.AddSecret(account.Secret)
+	logger := c.GetLogger().AddSecret(account.Secret)
 	response, err := httpJson.Post(url, c.SessionToken, account, c.InsecureTLS, logger)
 	logger = logger.ClearSecrets()
 
