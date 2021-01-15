@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strings"
 	"syscall"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
@@ -53,9 +54,25 @@ var logonCmd = &cobra.Command{
 		}
 
 		err = client.Logon(credentials)
-		if err != nil {
+		if err != nil && !strings.Contains(err.Error(), "ITATS542I") {
 			log.Fatalf("Failed to Logon to the PVWA. %s", err)
-			return
+		}
+
+		// if error contains challenge error code, deal with OTPCode here instead and redo client.Logon()
+		if err != nil {
+			// Get secret value from STDIN
+			fmt.Print("Enter one-time passcode: ")
+			byteOTPCode, err := terminal.ReadPassword(int(syscall.Stdin))
+			credentials.Password = string(byteOTPCode)
+			fmt.Println()
+			if err != nil {
+				log.Fatalln("An error occurred trying to read one-time passcode from " +
+					"Stdin. Exiting...")
+			}
+			err = client.Logon(credentials)
+			if err != nil {
+				log.Fatalf("Failed to respond to challenge. Possible timeout occurred. %s", err)
+			}
 		}
 
 		err = client.SetConfig()
