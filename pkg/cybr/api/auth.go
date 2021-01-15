@@ -2,9 +2,12 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"strings"
+	"syscall"
 
 	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
@@ -31,6 +34,19 @@ func (c *Client) Logon(req LogonRequest) error {
 	url := fmt.Sprintf("%s/PasswordVault/api/auth/%s/logon", c.BaseURL, c.AuthType)
 	token, err = httpJson.SendRequestRaw(url, "POST", "", req, c.InsecureTLS)
 	if err != nil {
+		if strings.Contains(err.Error(), "ITATS542I") {
+			// Get secret value from STDIN
+			fmt.Print("Enter one-time passcode: ")
+			byteOTPCode, err := terminal.ReadPassword(int(syscall.Stdin))
+			req.Password = string(byteOTPCode)
+			fmt.Println()
+			if err != nil {
+				log.Fatalln("An error occurred trying to read one-time passcode from " +
+					"Stdin. Exiting...")
+			}
+			token, err = httpJson.SendRequestRaw(url, "POST", "", req, c.InsecureTLS)
+			return nil
+		}
 		return fmt.Errorf("Failed to authenticate to the PAS REST API. %s", err)
 	}
 
