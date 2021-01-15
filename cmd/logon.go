@@ -71,10 +71,10 @@ var logonCmd = &cobra.Command{
 func init() {
 	logonCmd.Flags().StringVarP(&Username, "username", "u", "", "Username to logon PAS REST API using")
 	logonCmd.MarkFlagRequired("username")
-	logonCmd.Flags().StringVarP(&AuthenticationType, "auth-type", "a", "", "Authentication method to logon using")
+	logonCmd.Flags().StringVarP(&AuthenticationType, "auth-type", "a", "", "Authentication method to logon using [cyberark|ldap|radius-push|radius-append]")
 	logonCmd.MarkFlagRequired("authType")
 	logonCmd.Flags().BoolVarP(&InsecureTLS, "insecure-tls", "i", false, "If detected, TLS will not be verified")
-	logonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Base URL to send Logon request to")
+	logonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Base URL to send Logon request to [https://pvwa.example.com]")
 	logonCmd.MarkFlagRequired("base-url")
 	rootCmd.AddCommand(logonCmd)
 }
