@@ -30,6 +30,9 @@ func (c *Client) IsValid() error {
 		c.AuthType == "radius-push" ||
 		c.AuthType == "radius-append" ||
 		c.AuthType == "radius-challenge" {
+		if c.AuthType == "radius-push" || c.AuthType == "radius-append" || c.AuthType == "radius-challenge" {
+			c.AuthType = "radius"
+		}
 		return nil
 	}
 	return fmt.Errorf("Invalid auth type '%s'", c.AuthType)

@@ -28,15 +28,10 @@ func (c *Client) Logon(req LogonRequest) error {
 	}
 
 	// Handle cyberark, ldap, and radius push & append methods authentication methods
-	if c.AuthType == "cyberark" || c.AuthType == "ldap" {
-		if c.AuthType == "radius-push" || c.AuthType == "radius-append" {
-			c.AuthType = "radius"
-		}
-		url := fmt.Sprintf("%s/PasswordVault/api/auth/%s/logon", c.BaseURL, c.AuthType)
-		token, err = httpJson.SendRequestRaw(url, "POST", "", req, c.InsecureTLS)
-		if err != nil {
-			return fmt.Errorf("Failed to authenticate to the PAS REST API. %s", err)
-		}
+	url := fmt.Sprintf("%s/PasswordVault/api/auth/%s/logon", c.BaseURL, c.AuthType)
+	token, err = httpJson.SendRequestRaw(url, "POST", "", req, c.InsecureTLS)
+	if err != nil {
+		return fmt.Errorf("Failed to authenticate to the PAS REST API. %s", err)
 	}
 
 	c.SessionToken = strings.Trim(string(token), "\"")
