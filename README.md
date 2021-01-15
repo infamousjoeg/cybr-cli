@@ -101,7 +101,7 @@ $ cybr logon -u username -a cyberark-or-ldap -b https://pvwa.example.com
 |-b|--base-url|☑||URL to /PasswordVault|https://pvwa.example.com|
 |-i|--insecure-tls||false|Whether to validate TLS|false|
 
-Logon to the PAS REST API as the username you provide using the authentication method you choose. At this time, only `cyberark`, `ldap`, `radius-push`, `radius-append`, and `radius-challenge` authentication methods are supported. If `radius-challenge` is chosen, you will first be prompted for your `password` followed by your `one-time passcode`.
+Logon to the PAS REST API as the username you provide using the authentication method you choose. At this time, only `cyberark`, `ldap`, `radius` authentication methods are supported. If your RADIUS server is configured for challenge/response, you will first be prompted for your `password` followed by your `one-time passcode`.
 
 Upon successful logon, a file will be created in your user's home directory at `.cybr/config`. It is an encoded file that cannot be read in plain-text. This holds your current session information.
 
