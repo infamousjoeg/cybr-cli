@@ -94,7 +94,7 @@ var listSafesCmd = &cobra.Command{
 	$ cybr safes list`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -121,7 +121,7 @@ var listMembersCmd = &cobra.Command{
 	Aliases: []string{"list-member"},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -147,7 +147,7 @@ var addMembersCmd = &cobra.Command{
 	$ cybr safes add-member -s SafeName -m MemberName --retrieve-account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -251,7 +251,7 @@ var removeMembersCmd = &cobra.Command{
 	$ cybr safes remove-member -s SafeName -m MemberName`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -278,7 +278,7 @@ var addSafeCmd = &cobra.Command{
 	$ cybr safes add -s SafeName -d Description --cpm ManagingCPM --days 0`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -314,7 +314,7 @@ var deleteSafeCmd = &cobra.Command{
 	$ cybr safes delete -s SafeName`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -339,7 +339,7 @@ var updateSafeCmd = &cobra.Command{
 	$ cybr safes update -t TargetSafeName -s NewSafeName -d NewDesc`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return

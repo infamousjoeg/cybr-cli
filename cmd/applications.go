@@ -65,7 +65,7 @@ var listApplicationsCmd = &cobra.Command{
 	$ cybr applications list`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -91,7 +91,7 @@ var listMethodsCmd = &cobra.Command{
 	$ cybr applications list-authn -a AppID`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -115,7 +115,7 @@ var addApplicationCmd = &cobra.Command{
 	Example Usage:
 	$ cybr applications add -a AppID -l "\\"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -155,7 +155,7 @@ var deleteApplicationCmd = &cobra.Command{
 	Example Usage:
 	$ cybr applications delete -a AppID`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -179,7 +179,7 @@ var addApplicationAuthenticationMethodCmd = &cobra.Command{
 	Example Usage:
 	$ cybr applications add-authn -a AppID -t path -v /some/path`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -212,7 +212,7 @@ var deleteApplicationAuthenticationMethodCmd = &cobra.Command{
 	Example Usage:
 	$ cybr applications delete-authn -a AppID -i 1`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return

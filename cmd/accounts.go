@@ -76,7 +76,7 @@ var listAccountsCmd = &cobra.Command{
 	Example Usage:
 	$ cybr accounts list`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -109,7 +109,7 @@ var getAccountsCmd = &cobra.Command{
 	Example Usage:
 	$ cybr accounts get -i 24_1`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -165,7 +165,7 @@ var addAccountsCmd = &cobra.Command{
 	Example Usage:
 	$ cybr accounts add -s SafeName -p platformID -u username -a 10.0.0.1 -t password -s SuperSecret`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
@@ -209,7 +209,7 @@ var deleteAccountsCmd = &cobra.Command{
 	Example Usage:
 	$ cybr accounts delete 24_1`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return

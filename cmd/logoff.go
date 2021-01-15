@@ -17,7 +17,7 @@ var logoffCmd = &cobra.Command{
 	$ cybr logoff`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
-		client, err := pasapi.GetConfig()
+		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
 			log.Fatalf("Failed to read configuration file. %s", err)
 		}

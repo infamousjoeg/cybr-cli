@@ -9,20 +9,7 @@ import (
 )
 
 func TestListSafesSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	safes, err := client.ListSafes()
 	if err != nil {
@@ -35,20 +22,7 @@ func TestListSafesSuccess(t *testing.T) {
 }
 
 func TestListSafeMembersSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	members, err := client.ListSafeMembers("PasswordManager")
 	if err != nil {
@@ -61,20 +35,7 @@ func TestListSafeMembersSuccess(t *testing.T) {
 }
 
 func TestListSafeMembersInvalidSafeName(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	_, err = client.ListSafeMembers("notReal")
 	if !strings.Contains(err.Error(), "404") {
@@ -83,20 +44,8 @@ func TestListSafeMembersInvalidSafeName(t *testing.T) {
 }
 
 func TestAddRemoveSafeSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
+	client, err := defaultPASAPIClient(t)
 
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
 	newSafe := pasapi.AddSafeRequest{
 		SafeName:              "TestCreateDelete",
 		Description:           "Testing creating and deleteing a safe",
@@ -116,20 +65,7 @@ func TestAddRemoveSafeSuccess(t *testing.T) {
 }
 
 func TestRemoveSafeFail(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	safeName := "notRealSafeName"
 	err = client.DeleteSafe(safeName)
@@ -139,20 +75,7 @@ func TestRemoveSafeFail(t *testing.T) {
 }
 
 func TestAddRemoveSafeMemberSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	safeName := "PasswordManager"
 	memberName := "test-add-member"
@@ -182,20 +105,7 @@ func TestAddRemoveSafeMemberSuccess(t *testing.T) {
 }
 
 func TestAddMemberInvalidMemberName(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	safeName := "PasswordManager"
 	memberName := "notReal"
@@ -220,20 +130,7 @@ func TestAddMemberInvalidMemberName(t *testing.T) {
 }
 
 func TestRemoveMemberInvalidMemberName(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	safeName := "PasswordManager"
 	memberName := "notReal"
