@@ -77,6 +77,7 @@ Current products supported:
 ### MacOS
 
 ```shell
+$ brew tap infamousjoeg/tap
 $ brew install cybr-cli
 ```
 
