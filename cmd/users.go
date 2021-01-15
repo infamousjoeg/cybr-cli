@@ -38,7 +38,7 @@ var unsuspendUserCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("Successfully unsuspended user'%s'\n", Username)
+		fmt.Printf("Successfully unsuspended user '%s'\n", Username)
 	},
 }
 
