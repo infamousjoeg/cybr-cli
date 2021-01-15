@@ -23,6 +23,7 @@ func (c *Client) Logon(req LogonRequest) error {
 		return err
 	}
 
+	// Handle cyberark, ldap, and radius push, append & challenge/response authentication methods
 	url := fmt.Sprintf("%s/PasswordVault/api/auth/%s/logon", c.BaseURL, c.AuthType)
 	token, err := httpJson.SendRequestRaw(url, "POST", "", req, c.InsecureTLS, c.Logger)
 	if err != nil {
