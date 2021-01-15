@@ -10,10 +10,6 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-var (
-	token []byte
-)
-
 // LogonRequest contains the body of the Logon function's request
 type LogonRequest struct {
 	Username          string `json:"username"`
@@ -32,7 +28,7 @@ func (c *Client) Logon(req LogonRequest) error {
 
 	// Handle cyberark, ldap, and radius push & append methods authentication methods
 	url := fmt.Sprintf("%s/PasswordVault/api/auth/%s/logon", c.BaseURL, c.AuthType)
-	token, err = httpJson.SendRequestRaw(url, "POST", "", req, c.InsecureTLS)
+	token, err := httpJson.SendRequestRaw(url, "POST", "", req, c.InsecureTLS)
 	if err != nil {
 		if strings.Contains(err.Error(), "ITATS542I") {
 			// Get secret value from STDIN
