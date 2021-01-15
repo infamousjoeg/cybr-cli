@@ -21,7 +21,7 @@ func (c Client) UnsuspendUser(username string) error {
 		Suspended: false,
 	}
 
-	response, err := httpJson.Put(url, c.SessionToken, body, c.InsecureTLS)
+	response, err := httpJson.Put(url, c.SessionToken, body, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to unsuspend user '%s'. %s. %s", username, string(returnedError), err)
