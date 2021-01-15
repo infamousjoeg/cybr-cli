@@ -34,11 +34,11 @@ var unsuspendUserCmd = &cobra.Command{
 
 		err = client.UnsuspendUser(Username)
 		if err != nil {
-			log.Fatalf("Failed to delete account '%s'. %s", AccountID, err)
+			log.Fatalf("Failed to unsuspend user '%s'. %s", Username, err)
 			return
 		}
 
-		fmt.Printf("Successfully deleted account with id '%s'\n", AccountID)
+		fmt.Printf("Successfully unsuspended user'%s'\n", Username)
 	},
 }
 
