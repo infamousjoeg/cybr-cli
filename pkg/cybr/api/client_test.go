@@ -13,6 +13,24 @@ var (
 	password = os.Getenv("PAS_PASSWORD")
 )
 
+func defaultPASAPIClient(t *testing.T) (pasapi.Client, error) {
+	client := pasapi.Client{
+		BaseURL:  hostname,
+		AuthType: "ldap",
+	}
+
+	creds := pasapi.LogonRequest{
+		Username: username,
+		Password: password,
+	}
+
+	err := client.Logon(creds)
+	if err != nil {
+		t.Errorf("Failed to logon. %s", err)
+	}
+	return client, err
+}
+
 func TestIsValidSuccess(t *testing.T) {
 	validAuthTypes := []string{"cyberark", "ldap"}
 

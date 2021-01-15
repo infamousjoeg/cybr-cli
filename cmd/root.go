@@ -4,10 +4,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/infamousjoeg/cybr-cli/pkg/logger"
 	"github.com/spf13/cobra"
 )
 
 var cfgFile string
+
+var (
+	// Verbose logging
+	Verbose bool
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -28,7 +34,16 @@ func Execute() {
 	}
 }
 
+func getLogger() logger.CMD {
+	return logger.CMD{
+		LoggerEnabled:    Verbose,
+		LogHeaderEnabled: true,
+		LogBodyEnabled:   true,
+	}
+}
+
 func init() {
+	rootCmd.PersistentFlags().BoolVar(&Verbose, "verbose", false, "To enable verbose logging")
 	// cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.

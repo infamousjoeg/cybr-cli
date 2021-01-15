@@ -8,20 +8,7 @@ import (
 )
 
 func TestListApplicationSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	apps, err := client.ListApplications("\\")
 	if err != nil {
@@ -34,20 +21,7 @@ func TestListApplicationSuccess(t *testing.T) {
 }
 
 func TestListApplicationInvalidLocation(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	_, err = client.ListApplications("notReal")
 	if !strings.Contains(err.Error(), "400") {
@@ -56,20 +30,7 @@ func TestListApplicationInvalidLocation(t *testing.T) {
 }
 
 func TestListApplicationAuthenticationMethodsSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	_, err = client.ListApplicationAuthenticationMethods("test-list-authn")
 	if err != nil {
@@ -78,20 +39,7 @@ func TestListApplicationAuthenticationMethodsSuccess(t *testing.T) {
 }
 
 func TestListApplicationAuthenticationMethodsInvalidApplicationID(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	_, err = client.ListApplicationAuthenticationMethods("notReal")
 	if !strings.Contains(err.Error(), "404") {
@@ -100,20 +48,7 @@ func TestListApplicationAuthenticationMethodsInvalidApplicationID(t *testing.T) 
 }
 
 func TestAddDeleteApplicationSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	newApplication := pasapi.AddApplicationRequest{
 		Application: pasapi.Application{
@@ -137,20 +72,7 @@ func TestAddDeleteApplicationSuccess(t *testing.T) {
 }
 
 func TestDeleteApplicationInvalidAppID(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	err = client.DeleteApplication("invalid-app-id")
 	if err == nil {
@@ -159,20 +81,7 @@ func TestDeleteApplicationInvalidAppID(t *testing.T) {
 }
 
 func TestAddDeleteApplicationAuthenticationMethodsSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "cyberark",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	newApplication := pasapi.AddApplicationRequest{
 		Application: pasapi.Application{
