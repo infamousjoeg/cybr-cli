@@ -139,19 +139,27 @@ func GetAccountFromConjurRc(conjurrcFileName string) string {
 	return getFieldFromConjurRc(conjurrcFileName, "account")
 }
 
+// GetCertFromConjurRc retrieve conjur certificate from the ~/.conjurrc file, is empty if no cert will be used
+func GetCertFromConjurRc(conjurrcFileName string) string {
+	return strings.Trim(getFieldFromConjurRc(conjurrcFileName, "cert_file"), "\"")
+}
+
 // CreateConjurRc creates a ~/.conjurrc file
-func CreateConjurRc(account string, url string) error {
+func CreateConjurRc(account string, url string, selfSignedCert bool) error {
 	// make sure we can get home directory
 	homeDir, err := GetHomeDirectory()
 	if err != nil {
 		return err
 	}
 
-	// create the ~/conjur-<accountName>.pem
-	certFileName := fmt.Sprintf("%s/conjur-%s.pem", homeDir, account)
-	err = createConjurCert(certFileName, url)
-	if err != nil {
-		return err
+	certFileName := ""
+	if selfSignedCert {
+		// create the ~/conjur-<accountName>.pem
+		certFileName = fmt.Sprintf("%s/conjur-%s.pem", homeDir, account)
+		err = createConjurCert(certFileName, url)
+		if err != nil {
+			return err
+		}
 	}
 
 	// create the ~/.conjurrc file
