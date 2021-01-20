@@ -99,9 +99,14 @@ var conjurLogonCmd = &cobra.Command{
 		}
 
 		netrcPath := fmt.Sprintf("%s/.netrc", homeDir)
-		certPath := fmt.Sprintf("%s/conjur-%s.pem", homeDir, Account)
 
-		err = conjur.CreateConjurRc(Account, BaseURL)
+		// certPath remains empty if not using self-signed-cert
+		certPath := ""
+		if InsecureTLS {
+			certPath = fmt.Sprintf("%s/conjur-%s.pem", homeDir, Account)
+		}
+
+		err = conjur.CreateConjurRc(Account, BaseURL, InsecureTLS)
 		if err != nil {
 			log.Fatalf("Failed to create ~/.conjurrc file. %s\n", err)
 		}
@@ -391,6 +396,7 @@ func init() {
 	conjurLogonCmd.MarkFlagRequired("account")
 	conjurLogonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Conjur appliance URL")
 	conjurLogonCmd.MarkFlagRequired("base-url")
+	conjurLogonCmd.Flags().BoolVar(&InsecureTLS, "self-signed", false, "Retrieve and use self-signed certificate when sending requests to the Conjur API")
 
 	// append-policy
 	conjurAppendPolicyCmd.Flags().StringVarP(&PolicyBranch, "branch", "b", "", "The policy branch in which policy is being loaded")
