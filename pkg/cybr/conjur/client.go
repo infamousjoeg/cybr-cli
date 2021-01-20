@@ -21,7 +21,7 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 	conjurrcPath := fmt.Sprintf("%s/.conjurrc", homeDir)
 	account := GetAccountFromConjurRc(conjurrcPath)
 	baseURL := GetURLFromConjurRc(conjurrcPath)
-	certPath := fmt.Sprintf("%s/conjur-%s.pem", homeDir, account)
+	certPath := GetCertFromConjurRc(conjurrcPath)
 
 	config := conjurapi.Config{
 		Account:      account,
