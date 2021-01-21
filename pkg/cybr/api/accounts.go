@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
 )
@@ -59,6 +60,22 @@ type AddAccountRequest struct {
 	SecretManagement          SecretManagement  `json:"secretManagement,omitempty"`
 }
 
+// GetAccountPasswordRequest get an accounts password from PAS. All fields are optional expect if ticketing system is integrated
+type GetAccountPasswordRequest struct {
+	Reason              string `json:"reason,omitempty"`
+	TicketingSystemName string `json:"TicketingSystemName,omitempty"`
+	TicketID            string `json:"TicketId,omitempty"`
+	Version             int    `json:"Version,omitempty"`
+	ActionType          string `json:"ActionType,omitempty"`
+	IsUse               bool   `json:"isUse,omitempty"`
+	Machine             string `json:"Machine,omitempty"`
+}
+
+// ChangeAccountCredentialRequest only used when account is part of a group
+type ChangeAccountCredentialRequest struct {
+	ChangeEntireGroup bool `json:"ChangeEntireGroup,omitempty"`
+}
+
 // ListAccounts CyberArk user has access to
 func (c Client) ListAccounts(query *ListAccountQueryParams) (*ListAccountResponse, error) {
 	url := fmt.Sprintf("%s/PasswordVault/api/Accounts%s", c.BaseURL, httpJson.GetURLQuery(query))
@@ -112,6 +129,95 @@ func (c Client) DeleteAccount(accountID string) error {
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to delete account '%s'. %s. %s", accountID, string(returnedError), err)
+	}
+
+	return nil
+}
+
+// GetJITAccess from a specific account
+func (c Client) GetJITAccess(accountID string) error {
+	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s/grantAdministrativeAccess", c.BaseURL, accountID)
+	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Failed to get JIT access for account '%s'. %s. %s", accountID, string(returnedError), err)
+	}
+
+	return nil
+}
+
+// RevokeJITAccess from a specific account
+func (c Client) RevokeJITAccess(accountID string) error {
+	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s/RevokeAdministrativeAccess", c.BaseURL, accountID)
+	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Failed to revoke JIT access for account '%s'. %s. %s", accountID, string(returnedError), err)
+	}
+
+	return nil
+}
+
+// GetAccountPassword This method enables users to retrieve the password or SSH key of an existing account that is identified by its Account ID. It enables users to specify a reason and ticket ID, if required
+func (c Client) GetAccountPassword(accountID string, request GetAccountPasswordRequest) (string, error) {
+	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s/Password/Retrieve", c.BaseURL, accountID)
+
+	response, err := httpJson.SendRequestRaw(url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return "", fmt.Errorf("Failed to retrieve the account password '%s'. %s. %s", accountID, string(returnedError), err)
+	}
+
+	return strings.Trim(string(response), "\""), nil
+}
+
+// GetAccountSSHKey This method enables users to retrieve the password or SSH key of an existing account that is identified by its Account ID. It enables users to specify a reason and ticket ID, if required
+func (c Client) GetAccountSSHKey(accountID string, request GetAccountPasswordRequest) (string, error) {
+	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s/Secret/Retrieve", c.BaseURL, accountID)
+
+	response, err := httpJson.SendRequestRaw(url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return "", fmt.Errorf("Failed to retrieve the account SSH Key '%s'. %s. %s", accountID, string(returnedError), err)
+	}
+
+	return strings.Trim(string(response), "\""), nil
+}
+
+// VerifyAccountCredentials marks an account for verification
+func (c Client) VerifyAccountCredentials(accountID string) error {
+	url := fmt.Sprintf("%s/PasswordVault/API/Accounts/%s/Verify", c.BaseURL, accountID)
+	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Failed to verify account '%s'. %s. %s", accountID, string(returnedError), err)
+	}
+
+	return nil
+}
+
+// ChangeAccountCredentials marks an account for immediate change
+func (c Client) ChangeAccountCredentials(accountID string, changeEntireGroup bool) error {
+	url := fmt.Sprintf("%s/PasswordVault/API/Accounts/%s/Change", c.BaseURL, accountID)
+	body := ChangeAccountCredentialRequest{
+		ChangeEntireGroup: changeEntireGroup,
+	}
+	response, err := httpJson.Post(url, c.SessionToken, body, c.InsecureTLS, c.Logger)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Failed to mark change on account '%s'. %s. %s", accountID, string(returnedError), err)
+	}
+
+	return nil
+}
+
+// ReconileAccountCredentials marks an account for reconciliation
+func (c Client) ReconileAccountCredentials(accountID string) error {
+	url := fmt.Sprintf("%s/PasswordVault/API/Accounts/%s/Reconcile", c.BaseURL, accountID)
+	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return fmt.Errorf("Failed to mark reconcile on account '%s'. %s. %s", accountID, string(returnedError), err)
 	}
 
 	return nil
