@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/responses"
 	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
 )
 
@@ -76,22 +74,6 @@ func (c Client) ListUsers(query *ListUsersQueryParams) (ListUsersResponse, error
 	ListUsersResponse := ListUsersResponse{}
 	err = json.Unmarshal(jsonString, &ListUsersResponse)
 	return ListUsersResponse, err
-}
-
-// AddUser to PAS
-func (c Client) AddUser(user requests.AddUser) (responses.AddUser, error) {
-	url := fmt.Sprintf("%s/PasswordVault/api/Users", c.BaseURL)
-
-	response, err := httpJson.Post(url, c.SessionToken, user, c.InsecureTLS, c.Logger)
-	if err != nil {
-		returnedError, _ := json.Marshal(response)
-		return responses.AddUser{}, fmt.Errorf("Failed to add user '%s'. %s. %s", user.Username, string(returnedError), err)
-	}
-
-	jsonString, _ := json.Marshal(response)
-	addUserResponse := responses.AddUser{}
-	err = json.Unmarshal(jsonString, &addUserResponse)
-	return addUserResponse, err
 }
 
 // DeleteUser from PAS

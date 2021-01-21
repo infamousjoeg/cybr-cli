@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 )
 
 func TestUnsuspendUserSuccess(t *testing.T) {
@@ -52,31 +51,10 @@ func TestListUsersInvalidUsername(t *testing.T) {
 	}
 }
 
-func TestAddRemoveUserSuccess(t *testing.T) {
+func TestRemoveUserInvalidUserID(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
-	newUser := requests.AddUser{
-		Username:              "testAddRemove",
-		InitialPassword:       "Cyberark1",
-		UserType:              "EPVUser",
-		AuthenticationMethod:  []string{"AuthTypePass"},
-		Location:              "\\\\",
-		EnableUser:            true,
-		ChangePassOnNextLogon: false,
-		PasswordNeverExpires:  true,
-		Description:           "testAddRemove user",
-		DistinguishedName:     "testAddRemove@cyberark",
-		PersonalDetails: requests.AddUserPersonalDetails{
-			Department: "R&D",
-		},
-	}
-
-	response, err := client.AddUser(newUser)
-	if err != nil {
-		t.Errorf("%s", err)
-	}
-
-	err = client.DeleteUser(response.ID)
-	if err != nil {
-		t.Errorf("Failed to delete user '%d'", response.ID)
+	err = client.DeleteUser(100000)
+	if err == nil {
+		t.Errorf("Error should have been returned becauste UserID is invalid")
 	}
 }
