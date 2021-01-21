@@ -98,12 +98,12 @@ var conjurLogonCmd = &cobra.Command{
 			log.Fatalf("%s\n", err)
 		}
 
-		netrcPath := fmt.Sprintf("%s/.netrc", homeDir)
+		netrcPath := conjur.GetNetRcPath(homeDir)
 
 		// certPath remains empty if not using self-signed-cert
 		certPath := ""
 		if InsecureTLS {
-			certPath = fmt.Sprintf("%s/conjur-%s.pem", homeDir, Account)
+			certPath = conjur.GetConjurPemPath(homeDir, Account)
 		}
 
 		err = conjur.CreateConjurRc(Account, BaseURL, InsecureTLS)
