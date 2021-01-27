@@ -98,12 +98,12 @@ var conjurLogonCmd = &cobra.Command{
 			log.Fatalf("%s\n", err)
 		}
 
-		netrcPath := fmt.Sprintf("%s/.netrc", homeDir)
+		netrcPath := conjur.GetNetRcPath(homeDir)
 
 		// certPath remains empty if not using self-signed-cert
 		certPath := ""
 		if InsecureTLS {
-			certPath = fmt.Sprintf("%s/conjur-%s.pem", homeDir, Account)
+			certPath = conjur.GetConjurPemPath(homeDir, Account)
 		}
 
 		err = conjur.CreateConjurRc(Account, BaseURL, InsecureTLS)
@@ -434,7 +434,7 @@ func init() {
 	// list
 	conjurListResourcesCmd.Flags().StringVarP(&Kind, "kind", "k", "", "Narrows results to only resources of that kind")
 	conjurListResourcesCmd.Flags().StringVarP(&Search, "search", "s", "", "Narrows results to those pertaining to the search query")
-	conjurListResourcesCmd.Flags().IntVarP(&Limit, "limit", "l", 10, "Maximum number of returned resource. Default is 10")
+	conjurListResourcesCmd.Flags().IntVarP(&Limit, "limit", "l", 25, "Maximum number of returned resource. Default is 10")
 	conjurListResourcesCmd.Flags().IntVarP(&Offset, "offset", "o", 0, "Index to start returning results from for pagination")
 	conjurListResourcesCmd.Flags().BoolVarP(&InspectResources, "inspect", "i", false, "Show full object information")
 
