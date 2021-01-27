@@ -58,6 +58,11 @@ func init() {
 	// Joe note: This would be good to allow multiple secret providers
 }
 
+// GetCMD returns the root cmd
+func GetCMD() *cobra.Command {
+	return rootCmd
+}
+
 // initConfig reads in config file and ENV variables if set.
 // func initConfig() {
 // 	if cfgFile != "" {
