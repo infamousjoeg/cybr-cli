@@ -55,6 +55,21 @@ var (
 
 	// Filter Search for accounts filtered by safeName or modificationTime
 	Filter string
+
+	// Reason to access account
+	Reason string
+
+	// TicketingSystemName name of the ticketing system
+	TicketingSystemName string
+
+	// TicketID the ticket ID
+	TicketID string
+
+	// Version of the secret/password being retrieved
+	Version int
+
+	// ChangeEntireGroup change account group
+	ChangeEntireGroup bool
 )
 
 var accountsCmd = &cobra.Command{
@@ -207,7 +222,7 @@ var deleteAccountsCmd = &cobra.Command{
 	Long: `Delete a specific account from PAS REST API.
 	
 	Example Usage:
-	$ cybr accounts delete 24_1`,
+	$ cybr accounts delete -i 24_1`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
@@ -222,6 +237,109 @@ var deleteAccountsCmd = &cobra.Command{
 		}
 
 		fmt.Printf("Successfully deleted account with id '%s'\n", AccountID)
+	},
+}
+
+var getPasswordAccountCmd = &cobra.Command{
+	Use:   "get-password",
+	Short: "Get password of a specific account",
+	Long: `This method enables users to retrieve the password or SSH key of an existing account that is identified by its Account ID. It enables users to specify a reason and ticket ID, if required.
+	
+	Example Usage:
+	$ cybr accounts get-password -i 24_1`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		request := pasapi.GetAccountPasswordRequest{
+			Reason:              Reason,
+			TicketingSystemName: TicketingSystemName,
+			TicketID:            TicketID,
+			Version:             Version,
+		}
+
+		response, err := client.GetAccountPassword(AccountID, request)
+		if err != nil {
+			log.Fatalf("%s", err)
+			return
+		}
+
+		fmt.Println(response)
+	},
+}
+
+var verifyAccountCmd = &cobra.Command{
+	Use:   "verify",
+	Short: "Mark an account for verification",
+	Long: `This method marks an account for credential verification
+	
+	Example Usage:
+	$ cybr accounts verify -i 24_1`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		err = client.VerifyAccountCredentials(AccountID)
+		if err != nil {
+			log.Fatalf("%s", err)
+			return
+		}
+
+		fmt.Printf("Successfully marked account '%s' for verification\n", AccountID)
+	},
+}
+
+var changeAccountCmd = &cobra.Command{
+	Use:   "change",
+	Short: "Mark an account for change",
+	Long: `This method marks an account for credential change
+	
+	Example Usage:
+	$ cybr accounts change -i 24_1`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		err = client.ChangeAccountCredentials(AccountID, ChangeEntireGroup)
+		if err != nil {
+			log.Fatalf("%s", err)
+			return
+		}
+
+		fmt.Printf("Successfully marked account '%s' for change\n", AccountID)
+	},
+}
+
+var reconcileAccountCmd = &cobra.Command{
+	Use:   "reconcile",
+	Short: "Mark an account for reconciliation",
+	Long: `This method marks an account for credential reconciliation
+	
+	Example Usage:
+	$ cybr accounts reconcile -i 24_1`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		err = client.ReconileAccountCredentials(AccountID)
+		if err != nil {
+			log.Fatalf("%s", err)
+			return
+		}
+
+		fmt.Printf("Successfully marked account '%s' for reconciliation\n", AccountID)
 	},
 }
 
@@ -256,11 +374,36 @@ func init() {
 	deleteAccountsCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to delete")
 	deleteAccountsCmd.MarkFlagRequired("account-id")
 
+	// Get password for account
+	getPasswordAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to retrieve password value of")
+	getPasswordAccountCmd.MarkFlagRequired("account-id")
+	getPasswordAccountCmd.Flags().IntVarP(&Version, "version", "v", 0, "Version of the account password")
+	getPasswordAccountCmd.Flags().StringVarP(&Reason, "reason", "r", "", "Reason for retriving account password")
+	getPasswordAccountCmd.Flags().StringVarP(&TicketingSystemName, "ticketing-system", "s", "", "Ticketing system name")
+	getPasswordAccountCmd.Flags().StringVarP(&TicketID, "ticket-id", "t", "", "The ticket ID related to the ticketing system")
+
+	// verify account
+	verifyAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to verify")
+	verifyAccountCmd.MarkFlagRequired("account-id")
+
+	// change account
+	changeAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to change")
+	changeAccountCmd.MarkFlagRequired("account-id")
+	changeAccountCmd.Flags().BoolVarP(&ChangeEntireGroup, "change-entire-group", "c", false, "If account is part of account group, change the entire group")
+
+	// reconcile
+	reconcileAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to reconcile")
+	reconcileAccountCmd.MarkFlagRequired("account-id")
+
 	// Add cmd to account cmd
 	accountsCmd.AddCommand(listAccountsCmd)
 	accountsCmd.AddCommand(getAccountsCmd)
 	accountsCmd.AddCommand(addAccountsCmd)
 	accountsCmd.AddCommand(deleteAccountsCmd)
+	accountsCmd.AddCommand(getPasswordAccountCmd)
+	accountsCmd.AddCommand(verifyAccountCmd)
+	accountsCmd.AddCommand(changeAccountCmd)
+	accountsCmd.AddCommand(reconcileAccountCmd)
 
 	// Add accounts cmd to root
 	rootCmd.AddCommand(accountsCmd)
