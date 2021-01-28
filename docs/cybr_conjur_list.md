@@ -19,7 +19,7 @@ cybr conjur list [flags]
   -h, --help            help for list
   -i, --inspect         Show full object information
   -k, --kind string     Narrows results to only resources of that kind
-  -l, --limit int       Maximum number of returned resource. Default is 10 (default 25)
+  -l, --limit int       Maximum number of returned resource (default 25)
   -o, --offset int      Index to start returning results from for pagination
   -s, --search string   Narrows results to those pertaining to the search query
 ```
