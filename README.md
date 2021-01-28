@@ -196,26 +196,6 @@ $ docker run --rm \
 
 All commands are documentated [in the docs/ directory](docs/cybr.md).
 
-## Packages
-
-### cybr/api Package
-
-`github.com/infamousjoeg/cybr-cli/pkg/cybr/api`
-
-Read the documentation at: [docs/pkg/cybr_api.html]()
-
-### cybr/conjur Package
-
-`github.com/infamousjoeg/cybr-cli/pkg/cybr/conjur`
-
-Read the documentation at: [docs/pkg/cybr_conjur.html]()
-
-### cybr/helpers Package
-
-`github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers`
-
-Read the documentation at: [docs/pkg/cybr_helpers.html]()
-
 ## Example Source Code
 
 ### Logon to the PAS REST API Web Service
