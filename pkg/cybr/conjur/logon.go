@@ -9,14 +9,20 @@ import (
 	"net/url"
 )
 
-// Login to conjur and return an api key in []byte format
-func Login(applianceURL string, account string, username string, password []byte, certPath string) ([]byte, error) {
+func getLoginClient(certPath string) (*http.Client, error) {
+	// return default client because self-signed certificate will not be used
+	client := &http.Client{}
+	if certPath == "" {
+		return &http.Client{}, nil
+	}
+
+	// self-signed certificate needs to be added to the cert pool
+	pool := x509.NewCertPool()
 	content, err := ioutil.ReadFile(certPath)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to read cert file. %s. %s", certPath, err)
 	}
 
-	pool := x509.NewCertPool()
 	ok := pool.AppendCertsFromPEM(content)
 	if !ok {
 		return nil, fmt.Errorf("Failed to append Conjur SSL cert")
@@ -26,8 +32,16 @@ func Login(applianceURL string, account string, username string, password []byte
 		TLSClientConfig: &tls.Config{RootCAs: pool},
 	}
 
-	client := &http.Client{
-		Transport: transport,
+	client.Transport = transport
+
+	return client, nil
+}
+
+// Login to conjur and return an api key in []byte format
+func Login(applianceURL string, account string, username string, password []byte, certPath string) ([]byte, error) {
+	client, err := getLoginClient(certPath)
+	if err != nil {
+		return nil, err
 	}
 
 	url := fmt.Sprintf("%s/authn/%s/login", applianceURL, url.QueryEscape(account))

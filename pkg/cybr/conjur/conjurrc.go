@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"path/filepath"
 	"strings"
 )
 
@@ -18,6 +19,16 @@ plugins: []
 appliance_url: {{ APPLIANCE_URL }}
 cert_file: "{{ CERT_FILE }}"
 `
+
+// GetConjurRcPath returns path to the ~/.conjurrc file os-agnostic
+func GetConjurRcPath(homeDir string) string {
+	return filepath.FromSlash(fmt.Sprintf("%s/.conjurrc", homeDir))
+}
+
+// GetConjurPemPath returns path to the ~/conjur-<account>.pem file os-agnostic
+func GetConjurPemPath(homeDir string, account string) string {
+	return filepath.FromSlash(fmt.Sprintf("%s/conjur-%s.pem", homeDir, account))
+}
 
 func getPem(url string) (string, error) {
 	conf := &tls.Config{
@@ -139,23 +150,30 @@ func GetAccountFromConjurRc(conjurrcFileName string) string {
 	return getFieldFromConjurRc(conjurrcFileName, "account")
 }
 
+// GetCertFromConjurRc retrieve conjur certificate from the ~/.conjurrc file, is empty if no cert will be used
+func GetCertFromConjurRc(conjurrcFileName string) string {
+	return strings.Trim(getFieldFromConjurRc(conjurrcFileName, "cert_file"), "\"")
+}
+
 // CreateConjurRc creates a ~/.conjurrc file
-func CreateConjurRc(account string, url string) error {
+func CreateConjurRc(account string, url string, selfSignedCert bool) error {
 	// make sure we can get home directory
 	homeDir, err := GetHomeDirectory()
 	if err != nil {
 		return err
 	}
 
-	// create the ~/conjur-<accountName>.pem
-	certFileName := fmt.Sprintf("%s/conjur-%s.pem", homeDir, account)
-	err = createConjurCert(certFileName, url)
-	if err != nil {
-		return err
+	certFileName := ""
+	if selfSignedCert {
+		certFileName = GetConjurPemPath(homeDir, account)
+		err = createConjurCert(certFileName, url)
+		if err != nil {
+			return err
+		}
 	}
 
 	// create the ~/.conjurrc file
-	conjurrcFileName := fmt.Sprintf("%s/.conjurrc", homeDir)
+	conjurrcFileName := GetConjurRcPath(homeDir)
 	err = createConjurRcFile(account, url, certFileName, conjurrcFileName)
 
 	return err

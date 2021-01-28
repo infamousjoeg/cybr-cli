@@ -4,6 +4,8 @@ import (
 	"encoding/gob"
 	"fmt"
 	"os"
+
+	"github.com/infamousjoeg/cybr-cli/pkg/logger"
 )
 
 // Client contains the data necessary for requests to pass successfully
@@ -12,6 +14,7 @@ type Client struct {
 	AuthType     string
 	InsecureTLS  bool
 	SessionToken string
+	Logger       logger.Logger
 }
 
 func getUserHomeDir() (string, error) {
@@ -25,7 +28,7 @@ func getUserHomeDir() (string, error) {
 
 // IsValid checks to make sure that the authentication method chosen is valid
 func (c *Client) IsValid() error {
-	if c.AuthType == "cyberark" || c.AuthType == "ldap" {
+	if c.AuthType == "cyberark" || c.AuthType == "ldap" || c.AuthType == "radius" {
 		return nil
 	}
 	return fmt.Errorf("Invalid auth type '%s'", c.AuthType)
@@ -97,6 +100,13 @@ func GetConfig() (Client, error) {
 	return client, nil
 }
 
+// GetConfigWithLogger is the same as GetConfig except it also sets the logger
+func GetConfigWithLogger(logger logger.Logger) (Client, error) {
+	client, err := GetConfig()
+	client.Logger = logger
+	return client, err
+}
+
 // RemoveConfig file on the local filesystem
 func (c *Client) RemoveConfig() error {
 	// Get user home directory
@@ -112,4 +122,15 @@ func (c *Client) RemoveConfig() error {
 	}
 
 	return nil
+}
+
+// GetLogger retrieve Client logger
+func (c *Client) GetLogger() logger.Logger {
+	if c.Logger != nil {
+		return c.Logger
+	}
+
+	return logger.CMD{
+		LoggerEnabled: false,
+	}
 }

@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
+	"strings"
 	"syscall"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
@@ -19,6 +21,8 @@ var (
 	InsecureTLS bool
 	// BaseURL to send PAS REST API logon request to
 	BaseURL string
+	// NonInteractive logon
+	NonInteractive bool
 )
 
 var logonCmd = &cobra.Command{
@@ -32,12 +36,22 @@ var logonCmd = &cobra.Command{
 	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com -i`,
 	Aliases: []string{"login"},
 	Run: func(cmd *cobra.Command, args []string) {
-		// Get secret value from STDIN
-		fmt.Print("Enter password: ")
-		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
-		if err != nil {
-			log.Fatalln("An error occurred trying to read password from " +
-				"Stdin. Exiting...")
+		password := os.Getenv("PAS_PASSWORD")
+
+		if !NonInteractive {
+			// Get secret value from STDIN
+			fmt.Print("Enter password: ")
+			byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
+			fmt.Println()
+			if err != nil {
+				log.Fatalln("An error occurred trying to read password from " +
+					"Stdin. Exiting...")
+			}
+			password = string(byteSecretVal)
+		}
+
+		if password == "" {
+			log.Fatalf("Provided password is empty")
 		}
 
 		client := pasapi.Client{
@@ -48,13 +62,29 @@ var logonCmd = &cobra.Command{
 
 		credentials := pasapi.LogonRequest{
 			Username: Username,
-			Password: string(byteSecretVal),
+			Password: password,
 		}
 
-		err = client.Logon(credentials)
-		if err != nil {
+		err := client.Logon(credentials)
+		if err != nil && !strings.Contains(err.Error(), "ITATS542I") {
 			log.Fatalf("Failed to Logon to the PVWA. %s", err)
-			return
+		}
+
+		// if error contains challenge error code, deal with OTPCode here instead and redo client.Logon()
+		if err != nil {
+			// Get secret value from STDIN
+			fmt.Print("Enter one-time passcode: ")
+			byteOTPCode, err := terminal.ReadPassword(int(syscall.Stdin))
+			credentials.Password = string(byteOTPCode)
+			fmt.Println()
+			if err != nil {
+				log.Fatalln("An error occurred trying to read one-time passcode from " +
+					"Stdin. Exiting...")
+			}
+			err = client.Logon(credentials)
+			if err != nil {
+				log.Fatalf("Failed to respond to challenge. Possible timeout occurred. %s", err)
+			}
 		}
 
 		err = client.SetConfig()
@@ -70,10 +100,12 @@ var logonCmd = &cobra.Command{
 func init() {
 	logonCmd.Flags().StringVarP(&Username, "username", "u", "", "Username to logon PAS REST API using")
 	logonCmd.MarkFlagRequired("username")
-	logonCmd.Flags().StringVarP(&AuthenticationType, "auth-type", "a", "", "Authentication method to logon using")
+	logonCmd.Flags().StringVarP(&AuthenticationType, "auth-type", "a", "", "Authentication method to logon using [cyberark|ldap|radius]")
 	logonCmd.MarkFlagRequired("authType")
 	logonCmd.Flags().BoolVarP(&InsecureTLS, "insecure-tls", "i", false, "If detected, TLS will not be verified")
-	logonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Base URL to send Logon request to")
+	logonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Base URL to send Logon request to [https://pvwa.example.com]")
 	logonCmd.MarkFlagRequired("base-url")
+	logonCmd.Flags().BoolVar(&NonInteractive, "non-interactive", false, "If detected, will retrieve the password from the PAS_PASSWORD environment variable")
+
 	rootCmd.AddCommand(logonCmd)
 }

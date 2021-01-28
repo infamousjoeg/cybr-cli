@@ -33,7 +33,7 @@ type ListApplication struct {
 // ListApplications returns all Application Identities setup in PAS
 func (c Client) ListApplications(location string) (*ListApplicationsResponse, error) {
 	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications?Location=%s", c.BaseURL, location)
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS)
+	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &ListApplicationsResponse{}, fmt.Errorf("Error listing applications in location '%s'. %s", location, err)
 	}
@@ -62,7 +62,7 @@ type ListAuthentication struct {
 // ListApplicationAuthenticationMethods returns all auth methods for a specific Application Identity
 func (c Client) ListApplicationAuthenticationMethods(appID string) (*ListApplicationAuthenticationMethodsResponse, error) {
 	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications", c.BaseURL, appID)
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS)
+	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &ListApplicationAuthenticationMethodsResponse{}, fmt.Errorf("Error listing application's '%s' authentication methods. %s", appID, err)
 	}
@@ -95,7 +95,7 @@ type Application struct {
 // AddApplication add an applications to PAS
 func (c Client) AddApplication(application AddApplicationRequest) error {
 	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications", c.BaseURL)
-	response, err := httpJson.Post(url, c.SessionToken, application, c.InsecureTLS)
+	response, err := httpJson.Post(url, c.SessionToken, application, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Error adding application '%s' authentication methods. %s. %s", application.Application.AppID, string(returnedError), err)
@@ -106,7 +106,7 @@ func (c Client) AddApplication(application AddApplicationRequest) error {
 // DeleteApplication delete an applications to PAS
 func (c Client) DeleteApplication(appID string) error {
 	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s", c.BaseURL, url.QueryEscape(appID))
-	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS)
+	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Error deleting application '%s' authentication methods. %s. %s", appID, string(returnedError), err)
@@ -130,7 +130,7 @@ type ApplicationAuthenticationMethod struct {
 // AddApplicationAuthenticationMethod add authentication method to an application
 func (c Client) AddApplicationAuthenticationMethod(appID string, authenticationMethod AddApplicationAuthenticationRequest) error {
 	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications/", c.BaseURL, url.QueryEscape(appID))
-	response, err := httpJson.Post(url, c.SessionToken, authenticationMethod, c.InsecureTLS)
+	response, err := httpJson.Post(url, c.SessionToken, authenticationMethod, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Error adding application authentication method to '%s'. %s. %s", appID, string(returnedError), err)
@@ -141,7 +141,7 @@ func (c Client) AddApplicationAuthenticationMethod(appID string, authenticationM
 // DeleteApplicationAuthenticationMethod delete an applications authentication method
 func (c Client) DeleteApplicationAuthenticationMethod(appID string, authnMethodID string) error {
 	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Applications/%s/Authentications/%s", c.BaseURL, url.QueryEscape(appID), url.QueryEscape(authnMethodID))
-	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS)
+	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Error deleting application '%s' authentication methods. %s. %s", appID, string(returnedError), err)

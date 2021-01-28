@@ -7,24 +7,14 @@ import (
 )
 
 var (
-	accountSafeName = "CLI_ACCOUNTS_TEST"
+	accountSafeName  = "CLI_ACCOUNTS_TEST"
+	accountID        = "110_3"
+	accountSSHKeyID  = "110_15"
+	invalidAccountID = "202_5"
 )
 
 func TestListAccountSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	query := &pasapi.ListAccountQueryParams{}
 
@@ -39,20 +29,7 @@ func TestListAccountSuccess(t *testing.T) {
 }
 
 func TestListAccountSearchSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	query := &pasapi.ListAccountQueryParams{
 		Search: accountSafeName,
@@ -65,20 +42,7 @@ func TestListAccountSearchSuccess(t *testing.T) {
 }
 
 func TestGetAccountSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	account, err := client.GetAccount("110_3")
 	if err != nil {
@@ -91,20 +55,7 @@ func TestGetAccountSuccess(t *testing.T) {
 }
 
 func TestGetAccountInvalidAccountID(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	_, err = client.GetAccount("not_good")
 	if err == nil {
@@ -113,20 +64,7 @@ func TestGetAccountInvalidAccountID(t *testing.T) {
 }
 
 func TestAddAndDeleteAccountSuccess(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	account := pasapi.AddAccountRequest{
 		SafeName:   accountSafeName,
@@ -153,20 +91,7 @@ func TestAddAndDeleteAccountSuccess(t *testing.T) {
 }
 
 func TestAddAccountInvalidSafeName(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	account := pasapi.AddAccountRequest{
 		SafeName:   "invalidSafeName",
@@ -184,23 +109,105 @@ func TestAddAccountInvalidSafeName(t *testing.T) {
 }
 
 func TestDeleteAccountInvalidAccountID(t *testing.T) {
-	client := pasapi.Client{
-		BaseURL:  hostname,
-		AuthType: "ldap",
-	}
-
-	creds := pasapi.LogonRequest{
-		Username: username,
-		Password: password,
-	}
-
-	err := client.Logon(creds)
-	if err != nil {
-		t.Errorf("Failed to logon. %s", err)
-	}
+	client, err := defaultPASAPIClient(t)
 
 	err = client.DeleteAccount("invalid_ID")
 	if err == nil {
 		t.Errorf("Delete account but it does not exists. This should not happen")
+	}
+}
+
+func TestGetAccountPasswordSuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	result, err := client.GetAccountPassword(accountID, pasapi.GetAccountPasswordRequest{})
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+
+	if result != "Cyberark1" {
+		t.Errorf(result)
+		t.Errorf("Password retrieved is invalid")
+	}
+}
+
+func TestGetAccountPasswordInvalidAccountID(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	_, err = client.GetAccountPassword(invalidAccountID, pasapi.GetAccountPasswordRequest{})
+	if err == nil {
+		t.Errorf("Got password but should have failed")
+	}
+}
+
+func TestGetAccountSSHKeySuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	_, err = client.GetAccountSSHKey(accountSSHKeyID, pasapi.GetAccountPasswordRequest{})
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+}
+
+func TestGetAccountSSHKeyInvalidAccountID(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	_, err = client.GetAccountSSHKey(invalidAccountID, pasapi.GetAccountPasswordRequest{})
+	if err == nil {
+		t.Errorf("Got password but should have failed")
+	}
+}
+
+func TestVerifyAccountCredentialsSuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.VerifyAccountCredentials(accountID)
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+}
+
+func TestVerifyAccountCredentialsInvalidAccount(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.VerifyAccountCredentials(invalidAccountID)
+	if err == nil {
+		t.Errorf("Set account for verify but it should not exist")
+	}
+}
+
+func TestChangeAccountCredentialsSuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.ChangeAccountCredentials(accountID, false)
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+}
+
+func TestChangeAccountCredentialsInvalidAccount(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.ChangeAccountCredentials(invalidAccountID, false)
+	if err == nil {
+		t.Errorf("Set account for change but it should not exist")
+	}
+}
+
+func TestReconileAccountCredentialsSuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.ReconileAccountCredentials(accountID)
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+}
+
+func TestReconcileAccountCredentialsInvalidAccount(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.ReconileAccountCredentials(invalidAccountID)
+	if err == nil {
+		t.Errorf("Set account for reconcile but it should not exist")
 	}
 }

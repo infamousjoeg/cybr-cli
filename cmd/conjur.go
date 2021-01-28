@@ -63,6 +63,13 @@ func loadPolicy(policyBranch string, policyFilePath string, policyMode conjurapi
 	prettyprint.PrintJSON(response)
 }
 
+func removeFile(path string) {
+	err := os.Remove(path)
+	if err != nil {
+		log.Fatalf("Failed to remove file '%s'. %s", path, err)
+	}
+}
+
 var conjurCmd = &cobra.Command{
 	Use:   "conjur",
 	Short: "Conjur actions",
@@ -91,10 +98,15 @@ var conjurLogonCmd = &cobra.Command{
 			log.Fatalf("%s\n", err)
 		}
 
-		netrcPath := fmt.Sprintf("%s/.netrc", homeDir)
-		certPath := fmt.Sprintf("%s/conjur-%s.pem", homeDir, Account)
+		netrcPath := conjur.GetNetRcPath(homeDir)
 
-		err = conjur.CreateConjurRc(Account, BaseURL)
+		// certPath remains empty if not using self-signed-cert
+		certPath := ""
+		if InsecureTLS {
+			certPath = conjur.GetConjurPemPath(homeDir, Account)
+		}
+
+		err = conjur.CreateConjurRc(Account, BaseURL, InsecureTLS)
 		if err != nil {
 			log.Fatalf("Failed to create ~/.conjurrc file. %s\n", err)
 		}
@@ -152,6 +164,29 @@ var conjurNonInteractiveLogonCmd = &cobra.Command{
 
 		fmt.Println("Successfully logged into conjur")
 
+	},
+}
+
+var conjurLogoffCmd = &cobra.Command{
+	Use:   "logoff",
+	Short: "Logoff to Conjur",
+	Long: `Logoff to conjur and remove the ~/.netrc and ~/.conjurrc files
+	
+	Example Usage:
+	$ cybr conjur logoff`,
+	Run: func(cmd *cobra.Command, args []string) {
+		homeDir, err := conjur.GetHomeDirectory()
+		if err != nil {
+			log.Fatalf("%s\n", err)
+		}
+
+		netrcPath := fmt.Sprintf("%s/.netrc", homeDir)
+		conjurrcPath := fmt.Sprintf("%s/.conjurrc", homeDir)
+
+		removeFile(netrcPath)
+		removeFile(conjurrcPath)
+
+		fmt.Println("Logged off conjur")
 	},
 }
 
@@ -361,6 +396,7 @@ func init() {
 	conjurLogonCmd.MarkFlagRequired("account")
 	conjurLogonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Conjur appliance URL")
 	conjurLogonCmd.MarkFlagRequired("base-url")
+	conjurLogonCmd.Flags().BoolVar(&InsecureTLS, "self-signed", false, "Retrieve and use self-signed certificate when sending requests to the Conjur API")
 
 	// append-policy
 	conjurAppendPolicyCmd.Flags().StringVarP(&PolicyBranch, "branch", "b", "", "The policy branch in which policy is being loaded")
@@ -398,7 +434,7 @@ func init() {
 	// list
 	conjurListResourcesCmd.Flags().StringVarP(&Kind, "kind", "k", "", "Narrows results to only resources of that kind")
 	conjurListResourcesCmd.Flags().StringVarP(&Search, "search", "s", "", "Narrows results to those pertaining to the search query")
-	conjurListResourcesCmd.Flags().IntVarP(&Limit, "limit", "l", 10, "Maximum number of returned resource. Default is 10")
+	conjurListResourcesCmd.Flags().IntVarP(&Limit, "limit", "l", 25, "Maximum number of returned resource")
 	conjurListResourcesCmd.Flags().IntVarP(&Offset, "offset", "o", 0, "Index to start returning results from for pagination")
 	conjurListResourcesCmd.Flags().BoolVarP(&InspectResources, "inspect", "i", false, "Show full object information")
 
@@ -416,5 +452,6 @@ func init() {
 	conjurCmd.AddCommand(conjurInfoCmd)
 	conjurCmd.AddCommand(conjurListResourcesCmd)
 	conjurCmd.AddCommand(conjurRotateAPIKeyCmd)
+	conjurCmd.AddCommand(conjurLogoffCmd)
 	rootCmd.AddCommand(conjurCmd)
 }

@@ -5,10 +5,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
 
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 )
+
+// GetNetRcPath returns path to the ~/.netrc file os-agnostic
+func GetNetRcPath(homeDir string) string {
+	return filepath.FromSlash(fmt.Sprintf("%s/.netrc", homeDir))
+}
 
 // GetConjurClient create conjur client and login pair for ~/.conjurrc and ~/.netrc
 func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
@@ -17,11 +23,12 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 		return nil, nil, fmt.Errorf("%s", err)
 	}
 
-	netrcPath := fmt.Sprintf("%s/.netrc", homeDir)
-	conjurrcPath := fmt.Sprintf("%s/.conjurrc", homeDir)
+	netrcPath := GetNetRcPath(homeDir)
+	conjurrcPath := GetConjurRcPath(homeDir)
+
 	account := GetAccountFromConjurRc(conjurrcPath)
 	baseURL := GetURLFromConjurRc(conjurrcPath)
-	certPath := fmt.Sprintf("%s/conjur-%s.pem", homeDir, account)
+	certPath := GetCertFromConjurRc(conjurrcPath)
 
 	config := conjurapi.Config{
 		Account:      account,
