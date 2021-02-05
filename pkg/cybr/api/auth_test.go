@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 )
 
 func TestCyberarkLogonSuccess(t *testing.T) {
@@ -13,7 +14,7 @@ func TestCyberarkLogonSuccess(t *testing.T) {
 		AuthType: "cyberark",
 	}
 
-	creds := pasapi.LogonRequest{
+	creds := requests.Logon{
 		Username: username,
 		Password: password,
 	}
@@ -30,7 +31,7 @@ func TestCyberarkLogonInvalidCreds(t *testing.T) {
 		AuthType: "cyberark",
 	}
 
-	creds := pasapi.LogonRequest{
+	creds := requests.Logon{
 		Username: "notReal",
 		Password: password,
 	}
@@ -47,7 +48,7 @@ func TestCyberarkLogonInvalidHostName(t *testing.T) {
 		AuthType: "cyberark",
 	}
 
-	creds := pasapi.LogonRequest{
+	creds := requests.Logon{
 		Username: "notReal",
 		Password: password,
 	}
@@ -64,7 +65,7 @@ func TestLogonInvalidAuthType(t *testing.T) {
 		AuthType: "notGood",
 	}
 
-	creds := pasapi.LogonRequest{
+	creds := requests.Logon{
 		Username: username,
 		Password: password,
 	}
@@ -85,7 +86,7 @@ func TestCyberarkLogoffSuccess(t *testing.T) {
 		AuthType: "cyberark",
 	}
 
-	creds := pasapi.LogonRequest{
+	creds := requests.Logon{
 		Username: username,
 		Password: password,
 	}
