@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -60,7 +61,7 @@ var logonCmd = &cobra.Command{
 			InsecureTLS: InsecureTLS,
 		}
 
-		credentials := pasapi.LogonRequest{
+		credentials := requests.Logon{
 			Username: Username,
 			Password: password,
 		}

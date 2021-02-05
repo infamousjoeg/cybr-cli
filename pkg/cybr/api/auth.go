@@ -4,20 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
 )
-
-// LogonRequest contains the body of the Logon function's request
-type LogonRequest struct {
-	Username          string `json:"username"`
-	Password          string `json:"password"`
-	ConcurrentSession bool   `json:"concurrentSession,omitempty"`
-}
 
 // Logon to PAS REST API Web Service
 // Because we're using concurrentSession capability, this is only supported
 // on PAS REST API v11.3 and above
-func (c *Client) Logon(req LogonRequest) error {
+func (c *Client) Logon(req requests.Logon) error {
 	err := c.IsValid()
 	if err != nil {
 		return err

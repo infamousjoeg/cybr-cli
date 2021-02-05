@@ -5,6 +5,7 @@ import (
 	"log"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/queries"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/spf13/cobra"
 )
@@ -62,7 +63,7 @@ var listUsersCmd = &cobra.Command{
 			return
 		}
 
-		query := &pasapi.ListUsersQueryParams{
+		query := &queries.ListUsers{
 			Search: Search,
 			Filter: Filter,
 		}

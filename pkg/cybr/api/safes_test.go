@@ -4,8 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
-	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 )
 
 func TestListSafesSuccess(t *testing.T) {
@@ -46,7 +45,7 @@ func TestListSafeMembersInvalidSafeName(t *testing.T) {
 func TestAddRemoveSafeSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	newSafe := pasapi.AddSafeRequest{
+	newSafe := requests.AddSafe{
 		SafeName:              "TestCreateDelete",
 		Description:           "Testing creating and deleteing a safe",
 		OLACEnabled:           false,
@@ -80,16 +79,16 @@ func TestAddRemoveSafeMemberSuccess(t *testing.T) {
 	safeName := "PasswordManager"
 	memberName := "test-add-member"
 
-	retrieveAccounts := pasapi.PermissionKeyValue{
+	retrieveAccounts := requests.PermissionKeyValue{
 		Key:   "RetrieveAccounts",
 		Value: true,
 	}
 
-	addMember := api.AddSafeMemberRequest{
-		Member: pasapi.AddSafeMember{
+	addMember := requests.AddSafeMember{
+		Member: requests.AddSafeMemberInternal{
 			MemberName:  memberName,
 			SearchIn:    "Vault",
-			Permissions: []pasapi.PermissionKeyValue{retrieveAccounts},
+			Permissions: []requests.PermissionKeyValue{retrieveAccounts},
 		},
 	}
 
@@ -110,16 +109,16 @@ func TestAddMemberInvalidMemberName(t *testing.T) {
 	safeName := "PasswordManager"
 	memberName := "notReal"
 
-	retrieveAccounts := pasapi.PermissionKeyValue{
+	retrieveAccounts := requests.PermissionKeyValue{
 		Key:   "RetrieveAccounts",
 		Value: true,
 	}
 
-	addMember := api.AddSafeMemberRequest{
-		Member: pasapi.AddSafeMember{
+	addMember := requests.AddSafeMember{
+		Member: requests.AddSafeMemberInternal{
 			MemberName:  memberName,
 			SearchIn:    "Vault",
-			Permissions: []pasapi.PermissionKeyValue{retrieveAccounts},
+			Permissions: []requests.PermissionKeyValue{retrieveAccounts},
 		},
 	}
 
