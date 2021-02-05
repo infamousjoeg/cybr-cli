@@ -3,7 +3,8 @@ package api_test
 import (
 	"testing"
 
-	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/queries"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 )
 
 var (
@@ -16,7 +17,7 @@ var (
 func TestListAccountSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	query := &pasapi.ListAccountQueryParams{}
+	query := &queries.ListAccounts{}
 
 	accounts, err := client.ListAccounts(query)
 	if err != nil {
@@ -31,7 +32,7 @@ func TestListAccountSuccess(t *testing.T) {
 func TestListAccountSearchSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	query := &pasapi.ListAccountQueryParams{
+	query := &queries.ListAccounts{
 		Search: accountSafeName,
 	}
 
@@ -66,7 +67,7 @@ func TestGetAccountInvalidAccountID(t *testing.T) {
 func TestAddAndDeleteAccountSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	account := pasapi.AddAccountRequest{
+	account := requests.AddAccount{
 		SafeName:   accountSafeName,
 		Address:    "10.0.0.1",
 		UserName:   "add-account-test",
@@ -93,7 +94,7 @@ func TestAddAndDeleteAccountSuccess(t *testing.T) {
 func TestAddAccountInvalidSafeName(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	account := pasapi.AddAccountRequest{
+	account := requests.AddAccount{
 		SafeName:   "invalidSafeName",
 		Address:    "10.0.0.1",
 		UserName:   "add-account-test",
@@ -120,7 +121,7 @@ func TestDeleteAccountInvalidAccountID(t *testing.T) {
 func TestGetAccountPasswordSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	result, err := client.GetAccountPassword(accountID, pasapi.GetAccountPasswordRequest{})
+	result, err := client.GetAccountPassword(accountID, requests.GetAccountPassword{})
 	if err != nil {
 		t.Errorf("Failed to get account password. %s", err)
 	}
@@ -134,7 +135,7 @@ func TestGetAccountPasswordSuccess(t *testing.T) {
 func TestGetAccountPasswordInvalidAccountID(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	_, err = client.GetAccountPassword(invalidAccountID, pasapi.GetAccountPasswordRequest{})
+	_, err = client.GetAccountPassword(invalidAccountID, requests.GetAccountPassword{})
 	if err == nil {
 		t.Errorf("Got password but should have failed")
 	}
@@ -143,7 +144,7 @@ func TestGetAccountPasswordInvalidAccountID(t *testing.T) {
 func TestGetAccountSSHKeySuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	_, err = client.GetAccountSSHKey(accountSSHKeyID, pasapi.GetAccountPasswordRequest{})
+	_, err = client.GetAccountSSHKey(accountSSHKeyID, requests.GetAccountPassword{})
 	if err != nil {
 		t.Errorf("Failed to get account password. %s", err)
 	}
@@ -152,7 +153,7 @@ func TestGetAccountSSHKeySuccess(t *testing.T) {
 func TestGetAccountSSHKeyInvalidAccountID(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	_, err = client.GetAccountSSHKey(invalidAccountID, pasapi.GetAccountPasswordRequest{})
+	_, err = client.GetAccountSSHKey(invalidAccountID, requests.GetAccountPassword{})
 	if err == nil {
 		t.Errorf("Got password but should have failed")
 	}

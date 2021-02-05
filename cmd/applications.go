@@ -5,6 +5,7 @@ import (
 	"log"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/spf13/cobra"
 )
@@ -121,8 +122,8 @@ var addApplicationCmd = &cobra.Command{
 			return
 		}
 
-		newApplication := pasapi.AddApplicationRequest{
-			Application: pasapi.Application{
+		newApplication := requests.AddApplication{
+			Application: requests.Application{
 				AppID:               AppID,
 				Location:            Location,
 				Description:         Desc,
@@ -185,8 +186,8 @@ var addApplicationAuthenticationMethodCmd = &cobra.Command{
 			return
 		}
 
-		newAppAuthnMethod := pasapi.AddApplicationAuthenticationRequest{
-			Authentication: pasapi.ApplicationAuthenticationMethod{
+		newAppAuthnMethod := requests.AddApplicationAuthentication{
+			Authentication: requests.ApplicationAuthenticationMethod{
 				AuthType:             AuthType,
 				AuthValue:            AuthValue,
 				IsFolder:             IsFolder,

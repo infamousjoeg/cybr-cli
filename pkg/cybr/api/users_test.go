@@ -3,7 +3,7 @@ package api_test
 import (
 	"testing"
 
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/queries"
 )
 
 func TestUnsuspendUserSuccess(t *testing.T) {
@@ -27,7 +27,7 @@ func TestUnsuspendUserInvalidUsername(t *testing.T) {
 
 func TestListUsersSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
-	query := &api.ListUsersQueryParams{}
+	query := &queries.ListUsers{}
 
 	_, err = client.ListUsers(query)
 	if err != nil {
@@ -37,7 +37,7 @@ func TestListUsersSuccess(t *testing.T) {
 
 func TestListUsersInvalidUsername(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
-	query := &api.ListUsersQueryParams{
+	query := &queries.ListUsers{
 		Search: "invalidUsername",
 	}
 

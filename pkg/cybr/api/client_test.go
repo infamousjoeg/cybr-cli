@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 )
 
 var (
@@ -19,7 +20,7 @@ func defaultPASAPIClient(t *testing.T) (pasapi.Client, error) {
 		AuthType: "ldap",
 	}
 
-	creds := pasapi.LogonRequest{
+	creds := requests.Logon{
 		Username: username,
 		Password: password,
 	}

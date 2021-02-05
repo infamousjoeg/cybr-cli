@@ -6,6 +6,9 @@ import (
 	"strings"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/queries"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/shared"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/spf13/cobra"
 )
@@ -97,7 +100,7 @@ var listAccountsCmd = &cobra.Command{
 			return
 		}
 
-		query := &pasapi.ListAccountQueryParams{
+		query := &queries.ListAccounts{
 			Search:     Search,
 			SearchType: SearchType,
 			Sort:       Sort,
@@ -191,7 +194,7 @@ var addAccountsCmd = &cobra.Command{
 			log.Fatalf("Failed to parse platform properties. %s", err)
 		}
 
-		newAccount := pasapi.AddAccountRequest{
+		newAccount := requests.AddAccount{
 			Name:       Name,
 			Address:    Address,
 			UserName:   Username,
@@ -199,7 +202,7 @@ var addAccountsCmd = &cobra.Command{
 			SafeName:   Safe,
 			SecretType: SecretType,
 			Secret:     Secret,
-			SecretManagement: pasapi.SecretManagement{
+			SecretManagement: shared.SecretManagement{
 				AutomaticManagementEnabled: AutomaticManagementEnabled,
 				ManualManagementReason:     ManualManagementReason,
 			},
@@ -254,7 +257,7 @@ var getPasswordAccountCmd = &cobra.Command{
 			return
 		}
 
-		request := pasapi.GetAccountPasswordRequest{
+		request := requests.GetAccountPassword{
 			Reason:              Reason,
 			TicketingSystemName: TicketingSystemName,
 			TicketID:            TicketID,
