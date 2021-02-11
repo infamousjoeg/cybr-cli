@@ -34,6 +34,11 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v2
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          stable: 'true'
+          go-version: '^1.15.8'
       - name: Test All
         run: go test -v ./...
 
