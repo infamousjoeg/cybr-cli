@@ -5,11 +5,77 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 )
+
+var (
+	envAccountKey      = "CONJUR_ACCOUNT"
+	envApplianceURLKey = "CONJUR_APPLIANCE_URL"
+	envLoginKey        = "CONJUR_AUTHN_LOGIN"
+	envAPIKeyKey       = "CONJUR_AUTHN_API_KEY"
+	envCertFileKey     = "CONJUR_CERT_FILE"
+
+	envAccount      = os.Getenv(envAccountKey)
+	envApplianceURL = os.Getenv(envApplianceURLKey)
+	envLogin        = os.Getenv(envLoginKey)
+	envAPIKey       = os.Getenv(envAPIKeyKey)
+	envCertFile     = os.Getenv(envCertFileKey)
+)
+
+func validateEnviromentConfig(value string, keyName string, errMsg string) string {
+	if value == "" {
+		errMsg += keyName + ", "
+	}
+	return errMsg
+}
+
+// This method will return an empty conjurapi.Config and error if no conjur environment
+// variables are set. If one environment variable is set this will assume that the user
+// is attempting to use environment variables and an empty conjurapi.Config is returned with an
+// error message of the missing environment variables.
+func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, error) {
+	// Do not get client from environment variables because none provided
+	if envAccount == "" && envApplianceURL == "" && envLogin == "" && envAPIKey == "" {
+		return &conjurapi.Client{}, &authn.LoginPair{}, nil
+	}
+
+	errMsg := ""
+	errMsg = validateEnviromentConfig(envAccount, envAccountKey, errMsg)
+	errMsg = validateEnviromentConfig(envApplianceURL, envApplianceURLKey, errMsg)
+	errMsg = validateEnviromentConfig(envLogin, envLoginKey, errMsg)
+	errMsg = validateEnviromentConfig(envAPIKey, envAPIKeyKey, errMsg)
+
+	// Partial environment variables were provided so return an error
+	// with a list of the environment variables that were not provided
+	if errMsg != "" {
+		return &conjurapi.Client{},
+			&authn.LoginPair{},
+			fmt.Errorf("Environment variable(s) not provided: %s", strings.TrimRight(errMsg, ", "))
+	}
+
+	apiKey, err := Login(envApplianceURL, envAccount, envLogin, []byte(envAPIKey), envCertFile)
+	if err != nil {
+		return &conjurapi.Client{}, &authn.LoginPair{}, err
+	}
+
+	config := conjurapi.Config{
+		Account:      envAccount,
+		ApplianceURL: envApplianceURL,
+		SSLCertPath:  envCertFile,
+	}
+	loginPair := authn.LoginPair{
+		Login:  envLogin,
+		APIKey: string(apiKey),
+	}
+
+	client, err := conjurapi.NewClientFromKey(config, loginPair)
+	return client, &loginPair, err
+}
 
 // GetNetRcPath returns path to the ~/.netrc file os-agnostic
 func GetNetRcPath(homeDir string) string {
@@ -18,6 +84,18 @@ func GetNetRcPath(homeDir string) string {
 
 // GetConjurClient create conjur client and login pair for ~/.conjurrc and ~/.netrc
 func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
+	client, loginPair, err := getClientFromEnvironmentVariable()
+
+	// Partial environment variables were provided, assume user is attempting to use environment variables
+	if err != nil {
+		return &conjurapi.Client{}, &authn.LoginPair{}, err
+	}
+
+	// Return client created from environment variables
+	if *client != (conjurapi.Client{}) {
+		return client, loginPair, nil
+	}
+
 	homeDir, err := GetHomeDirectory()
 	if err != nil {
 		return nil, nil, fmt.Errorf("%s", err)
@@ -37,12 +115,12 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 		NetRCPath:    netrcPath,
 	}
 
-	loginPair, err := conjurapi.LoginPairFromNetRC(config)
+	loginPair, err = conjurapi.LoginPairFromNetRC(config)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Failed to retrieve credentials from ~/.netrc. %s", err)
 	}
 
-	client, err := conjurapi.NewClientFromKey(config, *loginPair)
+	client, err = conjurapi.NewClientFromKey(config, *loginPair)
 	return client, loginPair, err
 }
 

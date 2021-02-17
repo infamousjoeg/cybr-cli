@@ -2,9 +2,12 @@ name: cybr-cli CI
 
 on:
   pull_request:
-    branches: [master]
+    branches:
+      - main
+      - v*
   push:
-    branches-ignore: [master]
+    branches-ignore:
+      - main
 
 jobs:
   lint:
@@ -19,11 +22,32 @@ jobs:
         with:
           golint-path: './...'
 
+  test:
+    name: Test
+    runs-on: self-hosted
+    needs:
+      - lint
+    env:
+      PAS_HOSTNAME: ${{ secrets.PAS_HOSTNAME }}
+      PAS_USERNAME: ${{ secrets.PAS_USERNAME }}
+      PAS_PASSWORD: ${{ secrets.PAS_PASSWORD }}
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          stable: 'true'
+          go-version: '^1.15.8'
+      - name: Test All
+        run: go test -v ./...
+
   build:
     name: Build Binaries
     runs-on: ubuntu-latest
     needs:
       - lint
+      - test
     defaults:
       run:
         shell: bash
