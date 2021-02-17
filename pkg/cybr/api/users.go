@@ -55,3 +55,19 @@ func (c Client) DeleteUser(userID int) error {
 
 	return nil
 }
+
+// AddUser to PAS
+func (c Client) AddUser(user requests.AddUser) (responses.AddUser, error) {
+	url := fmt.Sprintf("%s/PasswordVault/api/Users", c.BaseURL)
+
+	response, err := httpJson.Post(url, c.SessionToken, user, c.InsecureTLS, c.Logger)
+	if err != nil {
+		returnedError, _ := json.Marshal(response)
+		return responses.AddUser{}, fmt.Errorf("Failed to add user '%s'. %s. %s", user.Username, string(returnedError), err)
+	}
+
+	jsonString, _ := json.Marshal(response)
+	addUserResponse := responses.AddUser{}
+	err = json.Unmarshal(jsonString, &addUserResponse)
+	return addUserResponse, err
+}
