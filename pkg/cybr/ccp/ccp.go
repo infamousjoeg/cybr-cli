@@ -77,14 +77,6 @@ func sendHTTPRequest(url string, insecureSkipVerify bool, useClientCert bool, ce
 		tlsConfig.BuildNameToCertificate()
 	}
 
-	// caCert, err := ioutil.ReadFile("/Users/acopeland/tmp/cert-ccp/ca.crt")
-	// if err != nil {
-	// 	return map[string]string{}, err
-	// }
-	// caCertPool := x509.NewCertPool()
-	// caCertPool.AppendCertsFromPEM(caCert)
-	// tlsConfig.RootCAs = caCertPool
-
 	tr := &http.Transport{
 		TLSClientConfig: tlsConfig,
 	}
