@@ -392,7 +392,7 @@ func init() {
 	addMembersCmd.MarkFlagRequired("safe")
 	addMembersCmd.Flags().StringVarP(&MemberName, "member-name", "m", "", "Name of member being added to the desired safe")
 	addMembersCmd.MarkFlagRequired("member-name")
-	addMembersCmd.Flags().StringVarP(&MemberName, "search-in", "i", "Vault", "Search in Domain or Vault")
+	addMembersCmd.Flags().StringVarP(&SearchIn, "search-in", "i", "Vault", "Search in Domain or Vault")
 	addMembersCmd.Flags().StringVarP(&MembershipExpirationDate, "member-expiration-date", "e", "", "When the membership will expire")
 	addMembersCmd.Flags().BoolVar(&UseAccounts, "use-accounts", false, "Use accounts in safe")
 	addMembersCmd.Flags().BoolVar(&RetrieveAccounts, "retrieve-accounts", false, "Retrieve accounts in safe")
