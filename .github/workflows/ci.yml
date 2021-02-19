@@ -31,6 +31,8 @@ jobs:
       PAS_HOSTNAME: ${{ secrets.PAS_HOSTNAME }}
       PAS_USERNAME: ${{ secrets.PAS_USERNAME }}
       PAS_PASSWORD: ${{ secrets.PAS_PASSWORD }}
+      CCP_CLIENT_CERT: ${{ secrets.CCP_CLIENT_CERT }}
+      CCP_CLIENT_PRIVATE_KEY: ${{ secrets.CCP_CLIENT_PRIVATE_KEY }}
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v2
