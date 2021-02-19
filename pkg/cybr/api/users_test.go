@@ -30,12 +30,10 @@ func TestListUsersSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 	query := &queries.ListUsers{}
 
-	users, err := client.ListUsers(query)
+	_, err = client.ListUsers(query)
 	if err != nil {
 		t.Errorf("Failed to list users. %s", err)
 	}
-
-	t.Errorf("%v", users)
 }
 
 func TestListUsersInvalidUsername(t *testing.T) {
