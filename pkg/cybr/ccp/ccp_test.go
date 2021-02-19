@@ -1,6 +1,7 @@
 package ccp_test
 
 import (
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -16,7 +17,29 @@ var (
 	clientKey  = os.Getenv("CCP_CLIENT_PRIVATE_KEY")
 )
 
+func writeCertsToFile(clientCertContent string, clientKeyContent string) (string, string, error) {
+	certFilePath := os.TempDir() + "/client.crt"
+	keyFilePath := os.TempDir() + "/client.key"
+
+	err := ioutil.WriteFile(certFilePath, []byte(clientCertContent), 0644)
+	if err != nil {
+		return "", "", err
+	}
+	err = ioutil.WriteFile(keyFilePath, []byte(clientKeyContent), 0644)
+	if err != nil {
+		return "", "", err
+	}
+
+	return certFilePath, keyFilePath, nil
+
+}
+
 func TestCCPClientCertSuccess(t *testing.T) {
+	clientCertPath, clientKeyPath, err := writeCertsToFile(clientCert, clientKey)
+	if err != nil {
+		t.Fatalf("Failed to write the client cert and key. %s", err)
+	}
+
 	query := &ccp.RetrieveAccountQuery{
 		AppID:  appID,
 		Safe:   safe,
@@ -26,12 +49,16 @@ func TestCCPClientCertSuccess(t *testing.T) {
 		URL:             hostname,
 		IgnoreSSLVerify: false,
 		Query:           query,
-		ClientCert:      clientCert,
-		ClientKey:       clientKey,
+		ClientCert:      clientCertPath,
+		ClientKey:       clientKeyPath,
 	}
 
 	response, err := ccp.RetrieveAccount(request)
 	if err != nil {
 		t.Errorf("Failed to retrieve account from cyberark using CCP. %s. %v", err, response)
 	}
+
+	// Clean up the files
+	os.Remove(clientCertPath)
+	os.Remove(clientKeyPath)
 }
