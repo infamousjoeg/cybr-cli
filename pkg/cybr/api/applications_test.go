@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 )
 
 func TestListApplicationSuccess(t *testing.T) {
@@ -50,8 +50,8 @@ func TestListApplicationAuthenticationMethodsInvalidApplicationID(t *testing.T) 
 func TestAddDeleteApplicationSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	newApplication := pasapi.AddApplicationRequest{
-		Application: pasapi.Application{
+	newApplication := requests.AddApplication{
+		Application: requests.Application{
 			AppID:               "test-api-app1",
 			Description:         "Some type of description",
 			Location:            "\\",
@@ -83,8 +83,8 @@ func TestDeleteApplicationInvalidAppID(t *testing.T) {
 func TestAddDeleteApplicationAuthenticationMethodsSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	newApplication := pasapi.AddApplicationRequest{
-		Application: pasapi.Application{
+	newApplication := requests.AddApplication{
+		Application: requests.Application{
 			AppID:               "test-api-method-app1",
 			Description:         "Some type of description",
 			Location:            "\\",
@@ -98,8 +98,8 @@ func TestAddDeleteApplicationAuthenticationMethodsSuccess(t *testing.T) {
 		t.Errorf("Failed to add application. %s", err)
 	}
 
-	newAuthnMethod := pasapi.AddApplicationAuthenticationRequest{
-		Authentication: pasapi.ApplicationAuthenticationMethod{
+	newAuthnMethod := requests.AddApplicationAuthentication{
+		Authentication: requests.ApplicationAuthenticationMethod{
 			AuthType:             "path",
 			AuthValue:            "/some/path",
 			IsFolder:             false,

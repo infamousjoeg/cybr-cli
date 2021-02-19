@@ -5,6 +5,7 @@ import (
 	"log"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/spf13/cobra"
 )
@@ -153,77 +154,77 @@ var addMembersCmd = &cobra.Command{
 			return
 		}
 
-		newMember := pasapi.AddSafeMemberRequest{
-			Member: pasapi.AddSafeMember{
+		newMember := requests.AddSafeMember{
+			Member: requests.AddSafeMemberInternal{
 				MemberName:               MemberName,
 				SearchIn:                 SearchIn,
 				MembershipExpirationDate: MembershipExpirationDate,
-				Permissions: []pasapi.PermissionKeyValue{
-					pasapi.PermissionKeyValue{
+				Permissions: []requests.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "UseAccounts",
 						Value: UseAccounts,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "RetrieveAccounts",
 						Value: RetrieveAccounts,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "ListAccounts",
 						Value: ListAccounts,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "AddAccounts",
 						Value: AddAccounts,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "UpdateAccountContent",
 						Value: UpdateAccountContent,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "UpdateAccountProperties",
 						Value: UpdateAccountProperties,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "InitiateCPMAccountManagementOperations",
 						Value: InitiateCPMAccountManagementOperations,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "SpecifyNextAccountContent",
 						Value: SpecifyNextAccountContent,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "ManageSafe",
 						Value: ManageSafe,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "ManageSafeMembers",
 						Value: ManageSafeMembers,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "BackupSafe",
 						Value: BackupSafe,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "ViewAuditLog",
 						Value: ViewAuditLog,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "ViewSafeMembers",
 						Value: ViewSafeMembers,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "AccessWithoutConfirmation",
 						Value: AccessWithoutConfirmation,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "CreateFolders",
 						Value: CreateFolders,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "DeleteFolders",
 						Value: DeleteFolders,
 					},
-					pasapi.PermissionKeyValue{
+					requests.PermissionKeyValue{
 						Key:   "MoveAccountsAndFolders",
 						Value: MoveAccountsAndFolders,
 					},
@@ -284,7 +285,7 @@ var addSafeCmd = &cobra.Command{
 			return
 		}
 		// Build body of the request
-		body := pasapi.AddSafeRequest{
+		body := requests.AddSafe{
 			SafeName:              SafeName,
 			Description:           Description,
 			OLACEnabled:           OLACEnabled,
@@ -345,7 +346,7 @@ var updateSafeCmd = &cobra.Command{
 			return
 		}
 		// Build body of the request
-		body := pasapi.UpdateSafeRequest{
+		body := requests.UpdateSafe{
 			SafeName:    SafeName,
 			Description: Description,
 			OLACEnabled: OLACEnabled,
@@ -391,7 +392,7 @@ func init() {
 	addMembersCmd.MarkFlagRequired("safe")
 	addMembersCmd.Flags().StringVarP(&MemberName, "member-name", "m", "", "Name of member being added to the desired safe")
 	addMembersCmd.MarkFlagRequired("member-name")
-	addMembersCmd.Flags().StringVarP(&MemberName, "search-in", "i", "Vault", "Search in Domain or Vault")
+	addMembersCmd.Flags().StringVarP(&SearchIn, "search-in", "i", "Vault", "Search in Domain or Vault")
 	addMembersCmd.Flags().StringVarP(&MembershipExpirationDate, "member-expiration-date", "e", "", "When the membership will expire")
 	addMembersCmd.Flags().BoolVar(&UseAccounts, "use-accounts", false, "Use accounts in safe")
 	addMembersCmd.Flags().BoolVar(&RetrieveAccounts, "retrieve-accounts", false, "Retrieve accounts in safe")
