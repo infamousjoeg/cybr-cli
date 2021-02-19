@@ -34,6 +34,4 @@ func TestCCPClientCertSuccess(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to retrieve account from cyberark using CCP. %s. %v", err, response)
 	}
-
-	t.Errorf("%v", response)
 }
