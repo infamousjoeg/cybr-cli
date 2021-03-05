@@ -41,6 +41,10 @@ var logonCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		password := os.Getenv("PAS_PASSWORD")
 
+		if !NonInteractive && Password != "" {
+			log.Fatalf("An error occured because --non-interactive must be provided when using --password flag")
+		}
+
 		if !NonInteractive {
 			// Get secret value from STDIN
 			fmt.Print("Enter password: ")
@@ -51,10 +55,6 @@ var logonCmd = &cobra.Command{
 					"Stdin. Exiting...")
 			}
 			password = string(byteSecretVal)
-		}
-
-		if !NonInteractive && Password != "" {
-			log.Fatalf("An error occured because --non-interactive must be provided when using --password flag")
 		}
 
 		if Password != "" {
