@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/cyberark/conjur-api-go/conjurapi"
@@ -75,11 +74,6 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 
 	client, err := conjurapi.NewClientFromKey(config, loginPair)
 	return client, &loginPair, err
-}
-
-// GetNetRcPath returns path to the ~/.netrc file os-agnostic
-func GetNetRcPath(homeDir string) string {
-	return filepath.FromSlash(fmt.Sprintf("%s/.netrc", homeDir))
 }
 
 // GetConjurClient create conjur client and login pair for ~/.conjurrc and ~/.netrc

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -12,6 +13,11 @@ var netrcTemplate string = `machine {{ APPLIANCE_URL }}/authn
   login {{ USERNAME }}
   password {{ PASSWORD }}
 `
+
+// GetNetRcPath returns path to the ~/.conjurrc file os-agnostic
+func GetNetRcPath(homeDir string) string {
+	return filepath.FromSlash(fmt.Sprintf("%s/.netrc", homeDir))
+}
 
 // CreateNetRc create a conjur netrc file
 func CreateNetRc(username string, password string) error {
@@ -21,14 +27,14 @@ func CreateNetRc(username string, password string) error {
 		return err
 	}
 
-	conjurrcFileName := fmt.Sprintf("%s/.conjurrc", homeDir)
+	conjurrcFileName := GetConjurRcPath(homeDir)
 	url := GetURLFromConjurRc(conjurrcFileName)
 	if url == "" {
 		return fmt.Errorf("Failed to get appliance url from '%s'. Run 'cam init' to set this file", conjurrcFileName)
 	}
 
 	// create the ~/.netrc file
-	netrcFileName := fmt.Sprintf("%s/.netrc", homeDir)
+	netrcFileName := GetNetRcPath(homeDir)
 	fmt.Print("Replace ~/.netrc file [y]: ")
 	// prompt user
 	reader := bufio.NewReader(os.Stdin)
