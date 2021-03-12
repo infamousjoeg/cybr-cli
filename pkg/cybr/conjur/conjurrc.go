@@ -48,12 +48,14 @@ func getPem(url string) (string, error) {
 	}
 	defer conn.Close()
 
-	if len(conn.ConnectionState().PeerCertificates) != 2 {
+	if len(conn.ConnectionState().PeerCertificates) == 1 {
 		return "", fmt.Errorf("Invalid conjur url '%s'. Make sure hostname and port are correct", url)
 	}
-	pemCert := string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: conn.ConnectionState().PeerCertificates[0].Raw}))
-	secondPemCert := string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: conn.ConnectionState().PeerCertificates[1].Raw}))
-	pemCert = pemCert + secondPemCert
+
+	pemCert := ""
+	for _, cert := range conn.ConnectionState().PeerCertificates {
+		pemCert += string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw}))
+	}
 
 	return pemCert, err
 }
