@@ -24,6 +24,8 @@ var (
 	BaseURL string
 	// NonInteractive logon
 	NonInteractive bool
+	// ConcurrentSession allow concurrent sessions
+	ConcurrentSession bool
 )
 
 var logonCmd = &cobra.Command{
@@ -62,8 +64,9 @@ var logonCmd = &cobra.Command{
 		}
 
 		credentials := requests.Logon{
-			Username: Username,
-			Password: password,
+			Username:          Username,
+			Password:          password,
+			ConcurrentSession: ConcurrentSession,
 		}
 
 		err := client.Logon(credentials)
@@ -107,6 +110,7 @@ func init() {
 	logonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Base URL to send Logon request to [https://pvwa.example.com]")
 	logonCmd.MarkFlagRequired("base-url")
 	logonCmd.Flags().BoolVar(&NonInteractive, "non-interactive", false, "If detected, will retrieve the password from the PAS_PASSWORD environment variable")
+	logonCmd.Flags().BoolVar(&ConcurrentSession, "concurrent", false, "If detected, will create a concurrent session to the PAS API")
 
 	rootCmd.AddCommand(logonCmd)
 }
