@@ -69,7 +69,7 @@ func createConjurCert(certFileName string, url string) error {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(fmt.Sprintf("Replace certificate file '%s' [y]: ", certFileName))
 	text, _ := reader.ReadString('\n')
-	answer := strings.Replace(text, "\n", "", -1)
+	answer := strings.TrimSpace(text)
 	// overwrite file
 	if answer == "" || answer == "y" {
 		err = ioutil.WriteFile(certFileName, []byte(pemCert), 0600)
@@ -85,7 +85,7 @@ func createConjurRcFile(account string, url string, certFileName string, conjurr
 	fmt.Print("Replace ~/.conjurrc file [y]: ")
 	reader := bufio.NewReader(os.Stdin)
 	text, err := reader.ReadString('\n')
-	answer := strings.Replace(text, "\n", "", -1)
+	answer := strings.TrimSpace(text)
 
 	// overwrite ~/.conjurrc file
 	if answer == "" || answer == "y" {

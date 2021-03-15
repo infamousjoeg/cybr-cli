@@ -39,7 +39,7 @@ func CreateNetRc(username string, password string) error {
 	// prompt user
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
-	answer := strings.Replace(text, "\n", "", -1)
+	answer := strings.TrimSpace(text)
 	if answer == "" || answer == "y" {
 		// create the ~/.netrc file
 		netrcContent := strings.Replace(netrcTemplate, "{{ USERNAME }}", username, 1)
