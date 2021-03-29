@@ -15,6 +15,7 @@ Current products supported:
 - [Install](#install)
   - [MacOS](#macos)
   - [Windows or Linux](#windows-or-linux)
+  - [AWS CloudShell](#aws-cloudshell)
   - [Install from Source](#install-from-source)
 - [Usage](#usage)
 - [Example Source Code](#example-source-code)
@@ -36,6 +37,18 @@ $ brew install cybr-cli
 ### Windows or Linux
 
 Download from the [Releases](https://github.com/infamousjoeg/cybr-cli/releases) page.
+
+
+### AWS CloudShell
+
+```shell
+mkdir -p ~/.local/bin && \
+curl --silent "https://api.github.com/repos/infamousjoeg/cybr-cli/releases/latest" |
+    grep '"tag_name":' |
+    sed -E 's/.*"([^"]+)".*/\1/' |
+    xargs -I {}  curl -o ~/.local/bin/cybr -sOL "https://github.com/infamousjoeg/cybr-cli/releases/download/"{}'/linux_cybr' && \
+chmod +x ~/.local/bin/cybr
+```
 
 ### Install from Source
 
