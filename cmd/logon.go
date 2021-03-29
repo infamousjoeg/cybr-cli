@@ -26,6 +26,8 @@ var (
 	NonInteractive bool
 	// Password to logon to the PAS REST API
 	Password string
+	// ConcurrentSession allow concurrent sessions
+	ConcurrentSession bool
 )
 
 var logonCmd = &cobra.Command{
@@ -72,8 +74,9 @@ var logonCmd = &cobra.Command{
 		}
 
 		credentials := requests.Logon{
-			Username: Username,
-			Password: password,
+			Username:          Username,
+			Password:          password,
+			ConcurrentSession: ConcurrentSession,
 		}
 
 		err := client.Logon(credentials)
@@ -118,6 +121,7 @@ func init() {
 	logonCmd.MarkFlagRequired("base-url")
 	logonCmd.Flags().BoolVar(&NonInteractive, "non-interactive", false, "If detected, will retrieve the password from the PAS_PASSWORD environment variable")
 	logonCmd.Flags().StringVarP(&Password, "password", "p", "", "Password to logon to PAS REST API, only supported when using --non-interactive flag")
+	logonCmd.Flags().BoolVar(&ConcurrentSession, "concurrent", false, "If detected, will create a concurrent session to the PAS API")
 
 	rootCmd.AddCommand(logonCmd)
 }
