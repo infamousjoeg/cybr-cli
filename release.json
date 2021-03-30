@@ -1,4 +1,4 @@
 {
-    "version": "0.1.1-beta",
-    "go_version": "1.15.8"
+    "version": "0.1.2-beta",
+    "go_version": "1.16"
 }
