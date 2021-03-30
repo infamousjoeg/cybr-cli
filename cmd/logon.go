@@ -24,6 +24,10 @@ var (
 	BaseURL string
 	// NonInteractive logon
 	NonInteractive bool
+	// Password to logon to the PAS REST API
+	Password string
+	// ConcurrentSession allow concurrent sessions
+	ConcurrentSession bool
 )
 
 var logonCmd = &cobra.Command{
@@ -39,6 +43,10 @@ var logonCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		password := os.Getenv("PAS_PASSWORD")
 
+		if !NonInteractive && Password != "" {
+			log.Fatalf("An error occured because --non-interactive must be provided when using --password flag")
+		}
+
 		if !NonInteractive {
 			// Get secret value from STDIN
 			fmt.Print("Enter password: ")
@@ -49,6 +57,10 @@ var logonCmd = &cobra.Command{
 					"Stdin. Exiting...")
 			}
 			password = string(byteSecretVal)
+		}
+
+		if Password != "" {
+			password = Password
 		}
 
 		if password == "" {
@@ -62,8 +74,9 @@ var logonCmd = &cobra.Command{
 		}
 
 		credentials := requests.Logon{
-			Username: Username,
-			Password: password,
+			Username:          Username,
+			Password:          password,
+			ConcurrentSession: ConcurrentSession,
 		}
 
 		err := client.Logon(credentials)
@@ -99,7 +112,7 @@ var logonCmd = &cobra.Command{
 }
 
 func init() {
-	logonCmd.Flags().StringVarP(&Username, "username", "u", "", "Username to logon PAS REST API using")
+	logonCmd.Flags().StringVarP(&Username, "username", "u", "", "Username to logon to PAS REST API")
 	logonCmd.MarkFlagRequired("username")
 	logonCmd.Flags().StringVarP(&AuthenticationType, "auth-type", "a", "", "Authentication method to logon using [cyberark|ldap|radius]")
 	logonCmd.MarkFlagRequired("authType")
@@ -107,6 +120,8 @@ func init() {
 	logonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Base URL to send Logon request to [https://pvwa.example.com]")
 	logonCmd.MarkFlagRequired("base-url")
 	logonCmd.Flags().BoolVar(&NonInteractive, "non-interactive", false, "If detected, will retrieve the password from the PAS_PASSWORD environment variable")
+	logonCmd.Flags().StringVarP(&Password, "password", "p", "", "Password to logon to PAS REST API, only supported when using --non-interactive flag")
+	logonCmd.Flags().BoolVar(&ConcurrentSession, "concurrent", false, "If detected, will create a concurrent session to the PAS API")
 
 	rootCmd.AddCommand(logonCmd)
 }

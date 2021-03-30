@@ -12,7 +12,7 @@ type GetAccount struct {
 	PlatformID                string                  `json:"platformId"`
 	SafeName                  string                  `json:"safeName"`
 	SecretType                string                  `json:"secretType"`
-	PlatformAccountProperties map[string]interface{}  `json:"platformAccountProperties"`
+	PlatformAccountProperties map[string]string       `json:"platformAccountProperties"`
 	SecretManagement          shared.SecretManagement `json:"secretManagement"`
 	CreatedTime               int                     `json:"createdTime"`
 }

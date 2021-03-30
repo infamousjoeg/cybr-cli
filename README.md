@@ -65,6 +65,25 @@ $ cybr help
 
 All commands are documentated [in the docs/ directory](docs/cybr.md).
 
+## Autocomplete
+The `cybr` CLI has a `completion` command that can be used to enable autocomplete for the CLI.
+The completion command is dependant on your shell type. Currently the only shells that are supported are: bash, zsh, fish and powershell.
+
+Below is an example on how to enable `cybr` cli auto-completion from a zsh shell.
+```bash
+# enable shell completetion. Only needs to be performed once.
+echo "autoload -U compinit; compinit" >> ~/.zshrc
+
+# create and write the auto-completion script.
+# ${fpath[1]} '1' may be different depending on your environment.
+cybr completion zsh > "${fpath[1]}/_cybr"
+```
+
+If you are using a different shell execute the `completion` command with the `--help` flag and follow instructions for the desired shell type.
+```bash
+cybr completion --help
+```
+
 ## Example Source Code
 
 ### Logon to the PAS REST API Web Service
@@ -94,6 +113,7 @@ func main() {
 		log.Fatalf("Authentication failed. %s", errLogon)
 	}
 	fmt.Printf("Session Token:\r\n%s\r\n\r\n", token)
+}
 ```
 
 ## Testing

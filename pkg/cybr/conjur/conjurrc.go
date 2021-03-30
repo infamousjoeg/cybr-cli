@@ -48,12 +48,14 @@ func getPem(url string) (string, error) {
 	}
 	defer conn.Close()
 
-	if len(conn.ConnectionState().PeerCertificates) != 2 {
+	if len(conn.ConnectionState().PeerCertificates) == 1 {
 		return "", fmt.Errorf("Invalid conjur url '%s'. Make sure hostname and port are correct", url)
 	}
-	pemCert := string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: conn.ConnectionState().PeerCertificates[0].Raw}))
-	secondPemCert := string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: conn.ConnectionState().PeerCertificates[1].Raw}))
-	pemCert = pemCert + secondPemCert
+
+	pemCert := ""
+	for _, cert := range conn.ConnectionState().PeerCertificates {
+		pemCert += string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw}))
+	}
 
 	return pemCert, err
 }
@@ -69,7 +71,7 @@ func createConjurCert(certFileName string, url string) error {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(fmt.Sprintf("Replace certificate file '%s' [y]: ", certFileName))
 	text, _ := reader.ReadString('\n')
-	answer := strings.Replace(text, "\n", "", -1)
+	answer := strings.TrimSpace(text)
 	// overwrite file
 	if answer == "" || answer == "y" {
 		err = ioutil.WriteFile(certFileName, []byte(pemCert), 0600)
@@ -85,7 +87,7 @@ func createConjurRcFile(account string, url string, certFileName string, conjurr
 	fmt.Print("Replace ~/.conjurrc file [y]: ")
 	reader := bufio.NewReader(os.Stdin)
 	text, err := reader.ReadString('\n')
-	answer := strings.Replace(text, "\n", "", -1)
+	answer := strings.TrimSpace(text)
 
 	// overwrite ~/.conjurrc file
 	if answer == "" || answer == "y" {

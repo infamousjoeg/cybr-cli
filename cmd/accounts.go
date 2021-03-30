@@ -313,6 +313,57 @@ var reconcileAccountCmd = &cobra.Command{
 	},
 }
 
+var moveAccountCmd = &cobra.Command{
+	Use:   "move",
+	Short: "Move an account to a different safe",
+	Long: `Move an account to a different safe
+
+	Example Usage:
+	$ cybr accounts move -i 24_1 -s newSafeName`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		account, err := client.GetAccount(AccountID)
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+
+		secret, err := client.GetAccountPassword(AccountID, requests.GetAccountPassword{})
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+
+		newAccount := requests.AddAccount{
+			Name:                      account.Name,
+			Address:                   account.Address,
+			UserName:                  account.UserName,
+			PlatformID:                account.PlatformID,
+			SafeName:                  Safe,
+			SecretType:                account.SecretType,
+			Secret:                    secret,
+			PlatformAccountProperties: account.PlatformAccountProperties,
+			SecretManagement:          account.SecretManagement,
+		}
+
+		createdAccount, err := client.AddAccount(newAccount)
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+
+		err = client.DeleteAccount(AccountID)
+		if err != nil {
+			log.Fatalf("%s", err)
+			return
+		}
+
+		prettyprint.PrintJSON(createdAccount)
+	},
+}
+
 func init() {
 	// Listing an account
 	listAccountsCmd.Flags().StringVarP(&Search, "search", "s", "", "List of keywords to search for in accounts, separated by a space")
@@ -365,6 +416,12 @@ func init() {
 	reconcileAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to reconcile")
 	reconcileAccountCmd.MarkFlagRequired("account-id")
 
+	// move
+	moveAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to move")
+	moveAccountCmd.MarkFlagRequired("account-id")
+	moveAccountCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Safe name in which the account will be moved into")
+	moveAccountCmd.MarkFlagRequired("safe")
+
 	// Add cmd to account cmd
 	accountsCmd.AddCommand(listAccountsCmd)
 	accountsCmd.AddCommand(getAccountsCmd)
@@ -374,6 +431,7 @@ func init() {
 	accountsCmd.AddCommand(verifyAccountCmd)
 	accountsCmd.AddCommand(changeAccountCmd)
 	accountsCmd.AddCommand(reconcileAccountCmd)
+	accountsCmd.AddCommand(moveAccountCmd)
 
 	// Add accounts cmd to root
 	rootCmd.AddCommand(accountsCmd)
