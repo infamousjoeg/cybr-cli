@@ -15,34 +15,36 @@ import (
 )
 
 var (
-	// Organization tenant name
+	// CemOrganization Organization tenant name
 	CemOrganization string
 
-	// NonInteractive logon
+	// CemNonInteractive NonInteractive logon
 	CemNonInteractive bool
 
-	// PlatformName
+	// CemPlatform Platform Name
 	CemPlatform string
-	// Account ID
-	CemAccountId string
-	// Entity ID
-	CemEntityId string
+	// CemAccountID Account ID
+	CemAccountID string
+	// CemEntityID Entity ID
+	CemEntityID string
 
-	// Full Admin
+	// CemNonFullAdmin non-full Admin only
 	CemNonFullAdmin bool
-	// Shadow Admin
+	// CemNonShadowAdmin non-sadow Admin only
 	CemNonShadowAdmin bool
-	// Full Admin
+	// CemFullAdmin Full Admin only
 	CemFullAdmin bool
-	// Shadow Admin
+	// CemShadowAdmin Shadow Admin
 	CemShadowAdmin bool
 
-	// Next Token
+	// CemNextToken Next Token
 	CemNextToken string
 
-	// Internal Variables
+	// CemSessionTokenPath path to session token file
 	CemSessionTokenPath string = "/.cybr/cem.config"
-	CemEnvApiKey        string = "CEM_APIKEY"
+
+	// CemEnvAPIKey environment variable of CEM API Key for non-interfactive logon
+	CemEnvAPIKey string = "CEM_APIKEY"
 )
 
 var cemCmd = &cobra.Command{
@@ -64,10 +66,10 @@ var cemLoginCmd = &cobra.Command{
 	$ cybr cem login -a $ORGANIZATION
 	
 	For non-interactive logon:
-	$ export ` + CemEnvApiKey + `=<Your CEM access key>
+	$ export ` + CemEnvAPIKey + `=<Your CEM access key>
 	$ cybr cem login -a $ORGANIZATION --non-interactive`,
 	Run: func(cmd *cobra.Command, args []string) {
-		apikey := os.Getenv(CemEnvApiKey)
+		apikey := os.Getenv(CemEnvAPIKey)
 
 		if !CemNonInteractive {
 			// Get secret value from STDIN
@@ -99,16 +101,17 @@ var cemLoginCmd = &cobra.Command{
 	},
 }
 
+// getUserHomeDir Get the Home directory of the current user
 func getUserHomeDir() (string, error) {
 	// Get user home directory
 	userHome, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("Could not read user home directory for OS. %s", err)
+		return "", fmt.Errorf("could not read user home directory for OS. %s", err)
 	}
 	return userHome, nil
 }
 
-// SetConfig file on the local filesystem for use
+// SaveToken saving token as file on the local filesystem
 func SaveToken(token string) error {
 	// Get user home directory
 	userHome, err := getUserHomeDir()
@@ -121,7 +124,7 @@ func SaveToken(token string) error {
 		// Create .cybr folder in user home directory
 		err = os.Mkdir(userHome+"/.cybr", 0766)
 		if err != nil {
-			return fmt.Errorf("Could not create folder %s/.cybr on local file system. %s", userHome, err)
+			return fmt.Errorf("could not create folder %s/.cybr on local file system. %s", userHome, err)
 		}
 	}
 
@@ -129,13 +132,13 @@ func SaveToken(token string) error {
 	if _, err = os.Stat(userHome + CemSessionTokenPath); !os.IsNotExist(err) {
 		err = os.Remove(userHome + CemSessionTokenPath)
 		if err != nil {
-			return fmt.Errorf("Could not remove existing %s%s file. %s", userHome, CemSessionTokenPath, err)
+			return fmt.Errorf("could not remove existing %s%s file. %s", userHome, CemSessionTokenPath, err)
 		}
 	}
 	// Create config file in user home directory
 	dataFile, err := os.Create(userHome + CemSessionTokenPath)
 	if err != nil {
-		return fmt.Errorf("Could not create configuration file at %s%s. %s", userHome, CemSessionTokenPath, err)
+		return fmt.Errorf("could not create configuration file at %s%s. %s", userHome, CemSessionTokenPath, err)
 	}
 
 	// serialize the data
@@ -159,14 +162,14 @@ func GetToken() (string, error) {
 	// open data file
 	dataFile, err := os.Open(userHome + CemSessionTokenPath)
 	if err != nil {
-		return "", fmt.Errorf("Failed to retrieve token file at %s. %s", CemSessionTokenPath, err)
+		return "", fmt.Errorf("failed to retrieve token file at %s. %s", CemSessionTokenPath, err)
 	}
 
 	dataDecoder := gob.NewDecoder(dataFile)
 	result := ""
 	err = dataDecoder.Decode(&result)
 	if err != nil {
-		return result, fmt.Errorf("Failed to decode token file at .cybr/config. %s", err)
+		return result, fmt.Errorf("failed to decode token file at .cybr/config. %s", err)
 	}
 
 	dataFile.Close()
@@ -218,8 +221,8 @@ var cemGetRemediationsCmd = &cobra.Command{
 
 		cemQuery := &cem.EntityQuery{
 			Platform:  CemPlatform,
-			AccountId: CemAccountId,
-			EntityId:  CemEntityId,
+			AccountId: CemAccountID,
+			EntityId:  CemEntityID,
 		}
 
 		cemResult, err := cem.GetEntityRecommendations(token, cemQuery)
@@ -253,8 +256,8 @@ var cemGetRecommendationsCmd = &cobra.Command{
 
 		cemQuery := &cem.EntityQuery{
 			Platform:  CemPlatform,
-			AccountId: CemAccountId,
-			EntityId:  CemEntityId,
+			AccountId: CemAccountID,
+			EntityId:  CemEntityID,
 		}
 
 		cemResult, err := cem.GetEntityRecommendations(token, cemQuery)
@@ -288,8 +291,8 @@ var cemGetEntityDetailCmd = &cobra.Command{
 
 		cemQuery := &cem.EntityQuery{
 			Platform:  CemPlatform,
-			AccountId: CemAccountId,
-			EntityId:  CemEntityId,
+			AccountId: CemAccountID,
+			EntityId:  CemEntityID,
 		}
 
 		cemResult, err := cem.GetEntityDetail(token, cemQuery)
@@ -347,7 +350,7 @@ var cemGetEntitiesCmd = &cobra.Command{
 
 		cemQuery := &cem.GetEntitiesQuery{
 			Platform:    CemPlatform,
-			AccountId:   CemAccountId,
+			AccountId:   CemAccountID,
 			FullAdmin:   inputFullAdmin,
 			ShadowAdmin: inputShadowAdmin,
 			NextToken:   CemNextToken,
@@ -377,7 +380,7 @@ func init() {
 
 	// Get Entities
 	cemGetEntitiesCmd.Flags().StringVarP(&CemPlatform, "platform", "p", "", "Platform Name")
-	cemGetEntitiesCmd.Flags().StringVarP(&CemAccountId, "account-id", "a", "", "Account ID")
+	cemGetEntitiesCmd.Flags().StringVarP(&CemAccountID, "account-id", "a", "", "Account ID")
 	cemGetEntitiesCmd.Flags().BoolVar(&CemNonFullAdmin, "non-full-admin", false, "Get non-full admin entities only. Cannot be used with --full-admin")
 	cemGetEntitiesCmd.Flags().BoolVar(&CemNonShadowAdmin, "non-shadow-admin", false, "Get non-shadow admin entities only.  Cannot be used with --shadow-admin")
 	cemGetEntitiesCmd.Flags().BoolVar(&CemFullAdmin, "full-admin", false, "Get full admin entities only.  Cannot be used with --non-full-admin")
@@ -387,25 +390,25 @@ func init() {
 	// Get Entity Detail
 	cemGetEntityDetailCmd.Flags().StringVarP(&CemPlatform, "platform", "p", "", "Platform Name")
 	cemGetEntityDetailCmd.MarkFlagRequired("platform")
-	cemGetEntityDetailCmd.Flags().StringVarP(&CemAccountId, "account-id", "a", "", "Account ID")
+	cemGetEntityDetailCmd.Flags().StringVarP(&CemAccountID, "account-id", "a", "", "Account ID")
 	cemGetEntityDetailCmd.MarkFlagRequired("account-id")
-	cemGetEntityDetailCmd.Flags().StringVarP(&CemEntityId, "entity-id", "e", "", "Entity ID")
+	cemGetEntityDetailCmd.Flags().StringVarP(&CemEntityID, "entity-id", "e", "", "Entity ID")
 	cemGetEntityDetailCmd.MarkFlagRequired("entity-id")
 
 	// Get Entity Recommendations
 	cemGetRecommendationsCmd.Flags().StringVarP(&CemPlatform, "platform", "p", "", "Platform Name")
 	cemGetRecommendationsCmd.MarkFlagRequired("platform")
-	cemGetRecommendationsCmd.Flags().StringVarP(&CemAccountId, "account-id", "a", "", "Account ID")
+	cemGetRecommendationsCmd.Flags().StringVarP(&CemAccountID, "account-id", "a", "", "Account ID")
 	cemGetRecommendationsCmd.MarkFlagRequired("account-id")
-	cemGetRecommendationsCmd.Flags().StringVarP(&CemEntityId, "entity-id", "e", "", "Entity ID")
+	cemGetRecommendationsCmd.Flags().StringVarP(&CemEntityID, "entity-id", "e", "", "Entity ID")
 	cemGetRecommendationsCmd.MarkFlagRequired("entity-id")
 
 	// Get Entity Remediations
 	cemGetRemediationsCmd.Flags().StringVarP(&CemPlatform, "platform", "p", "", "Platform Name")
 	cemGetRemediationsCmd.MarkFlagRequired("platform")
-	cemGetRemediationsCmd.Flags().StringVarP(&CemAccountId, "account-id", "a", "", "Account ID")
+	cemGetRemediationsCmd.Flags().StringVarP(&CemAccountID, "account-id", "a", "", "Account ID")
 	cemGetRemediationsCmd.MarkFlagRequired("account-id")
-	cemGetRemediationsCmd.Flags().StringVarP(&CemEntityId, "entity-id", "e", "", "Entity ID")
+	cemGetRemediationsCmd.Flags().StringVarP(&CemEntityID, "entity-id", "e", "", "Entity ID")
 	cemGetRemediationsCmd.MarkFlagRequired("entity-id")
 
 	// Add the sub-commands to "cem" command
