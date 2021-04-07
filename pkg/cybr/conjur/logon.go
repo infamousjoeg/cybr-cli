@@ -44,7 +44,7 @@ func Login(applianceURL string, account string, username string, password []byte
 		return nil, err
 	}
 
-	url := fmt.Sprintf("%s/authn/%s/login", applianceURL, url.QueryEscape(account))
+	url := fmt.Sprintf("%s/%s/login", applianceURL, url.QueryEscape(account))
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create login request. %s", err)

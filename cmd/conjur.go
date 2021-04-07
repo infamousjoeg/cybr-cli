@@ -114,7 +114,7 @@ var conjurLogonCmd = &cobra.Command{
 			log.Fatalf("Failed to create ~/.conjurrc file. %s\n", err)
 		}
 
-		authnURL := conjur.GetAuthURL(BaseURL, "", "")
+		authnURL := conjur.GetAuthURL(BaseURL, "authn", "")
 		if AuthnLDAP != "" {
 			authnURL = conjur.GetAuthURL(BaseURL, "authn-ldap", AuthnLDAP)
 		}

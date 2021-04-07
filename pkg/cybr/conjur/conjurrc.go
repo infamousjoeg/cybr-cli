@@ -34,8 +34,11 @@ func GetConjurPemPath(homeDir string, account string) string {
 // GetAuthURL returns a proper LDAP Authentication authn_url for the ~/.conjurrc file
 func GetAuthURL(baseURL string, authType string, serviceID string) string {
 	authURL := baseURL
-	if authType != "" && serviceID != "" {
-		authURL = authURL + "/" + authType + "/" + serviceID
+	if authType != "" {
+		authURL = authURL + "/" + authType
+	}
+	if serviceID != "" {
+		authURL = authURL + "/" + serviceID
 	}
 	return authURL
 }
