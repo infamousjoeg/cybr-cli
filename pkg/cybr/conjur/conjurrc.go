@@ -32,10 +32,10 @@ func GetConjurPemPath(homeDir string, account string) string {
 }
 
 // GetAuthURL returns a proper LDAP Authentication authn_url for the ~/.conjurrc file
-func GetAuthURL(baseURL string, authType string, serviceId string) string {
+func GetAuthURL(baseURL string, authType string, serviceID string) string {
 	authURL := baseURL
-	if authType != "" && serviceId != "" {
-		authURL = authURL + "/" + authType + "/" + serviceId
+	if authType != "" && serviceID != "" {
+		authURL = authURL + "/" + authType + "/" + serviceID
 	}
 	return authURL
 }
@@ -109,10 +109,10 @@ func createConjurRcFile(account string, url string, certFileName string, authnLD
 		conjurrcContent := strings.Replace(conjurrcTemplate, "{{ ACCOUNT }}", account, 1)
 		conjurrcContent = strings.Replace(conjurrcContent, "{{ APPLIANCE_URL }}", url, 1)
 		conjurrcContent = strings.Replace(conjurrcContent, "{{ CERT_FILE }}", certFileName, 1)
-		ldapUrl := GetAuthURL(url, "authn-ldap", authnLDAP)
-		conjurrcContent = strings.Replace(conjurrcContent, "{{ AUTHN_LDAP_URL }}", ldapUrl, 1)
+		ldapURL := GetAuthURL(url, "authn-ldap", authnLDAP)
+		conjurrcContent = strings.Replace(conjurrcContent, "{{ AUTHN_LDAP_URL }}", ldapURL, 1)
 		if authnLDAP == "" {
-			removeLine := "authn_url: " + ldapUrl
+			removeLine := "authn_url: " + ldapURL
 			conjurrcContent = strings.Replace(conjurrcContent, removeLine, "", 1)
 		}
 
