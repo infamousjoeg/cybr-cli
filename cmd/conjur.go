@@ -20,6 +20,9 @@ var (
 	// Account conjur account
 	Account string
 
+	// LDAP Authenticator Service ID
+	AuthnLDAP string
+
 	// PolicyBranch branch policy is being loaded into
 	PolicyBranch string
 
@@ -106,7 +109,7 @@ var conjurLogonCmd = &cobra.Command{
 			certPath = conjur.GetConjurPemPath(homeDir, Account)
 		}
 
-		err = conjur.CreateConjurRc(Account, BaseURL, InsecureTLS)
+		err = conjur.CreateConjurRc(Account, BaseURL, InsecureTLS, AuthnLDAP)
 		if err != nil {
 			log.Fatalf("Failed to create ~/.conjurrc file. %s\n", err)
 		}
@@ -396,6 +399,7 @@ func init() {
 	conjurLogonCmd.MarkFlagRequired("account")
 	conjurLogonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Conjur appliance URL")
 	conjurLogonCmd.MarkFlagRequired("base-url")
+	conjurLogonCmd.Flags().StringVarP(&AuthnLDAP, "authn-ldap", "", "", "Uses provided Service ID to configure LDAP Authentication")
 	conjurLogonCmd.Flags().BoolVar(&InsecureTLS, "self-signed", false, "Retrieve and use self-signed certificate when sending requests to the Conjur API")
 
 	// append-policy

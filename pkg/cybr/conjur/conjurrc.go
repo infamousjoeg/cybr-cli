@@ -18,6 +18,7 @@ account: {{ ACCOUNT }}
 plugins: []
 appliance_url: {{ APPLIANCE_URL }}
 cert_file: "{{ CERT_FILE }}"
+authn_url: {{ AUTHN_LDAP_URL }}
 `
 
 // GetConjurRcPath returns path to the ~/.conjurrc file os-agnostic
@@ -83,7 +84,7 @@ func createConjurCert(certFileName string, url string) error {
 	return err
 }
 
-func createConjurRcFile(account string, url string, certFileName string, conjurrcFileName string) error {
+func createConjurRcFile(account string, url string, certFileName string, authnLDAP string, conjurrcFileName string) error {
 	fmt.Print("Replace ~/.conjurrc file [y]: ")
 	reader := bufio.NewReader(os.Stdin)
 	text, err := reader.ReadString('\n')
@@ -99,6 +100,12 @@ func createConjurRcFile(account string, url string, certFileName string, conjurr
 		conjurrcContent := strings.Replace(conjurrcTemplate, "{{ ACCOUNT }}", account, 1)
 		conjurrcContent = strings.Replace(conjurrcContent, "{{ APPLIANCE_URL }}", url, 1)
 		conjurrcContent = strings.Replace(conjurrcContent, "{{ CERT_FILE }}", certFileName, 1)
+		ldapUrl := url + "/authn-ldap/" + authnLDAP
+		conjurrcContent = strings.Replace(conjurrcContent, "{{ AUTHN_LDAP_URL }}", ldapUrl, 1)
+		if authnLDAP == "" {
+			removeLine := "authn_url: " + ldapUrl
+			conjurrcContent = strings.Replace(conjurrcContent, removeLine, "", 1)
+		}
 
 		err = ioutil.WriteFile(conjurrcFileName, []byte(conjurrcContent), 0600)
 		if err != nil {
@@ -158,7 +165,7 @@ func GetCertFromConjurRc(conjurrcFileName string) string {
 }
 
 // CreateConjurRc creates a ~/.conjurrc file
-func CreateConjurRc(account string, url string, selfSignedCert bool) error {
+func CreateConjurRc(account string, url string, selfSignedCert bool, authnLDAP string) error {
 	// make sure we can get home directory
 	homeDir, err := GetHomeDirectory()
 	if err != nil {
@@ -176,7 +183,7 @@ func CreateConjurRc(account string, url string, selfSignedCert bool) error {
 
 	// create the ~/.conjurrc file
 	conjurrcFileName := GetConjurRcPath(homeDir)
-	err = createConjurRcFile(account, url, certFileName, conjurrcFileName)
+	err = createConjurRcFile(account, url, certFileName, authnLDAP, conjurrcFileName)
 
 	return err
 }
