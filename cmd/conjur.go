@@ -20,7 +20,7 @@ var (
 	// Account conjur account
 	Account string
 
-	// LDAP Authenticator Service ID
+	// AuthnLDAP Authenticator Service ID
 	AuthnLDAP string
 
 	// PolicyBranch branch policy is being loaded into
