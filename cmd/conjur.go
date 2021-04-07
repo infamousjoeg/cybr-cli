@@ -114,7 +114,12 @@ var conjurLogonCmd = &cobra.Command{
 			log.Fatalf("Failed to create ~/.conjurrc file. %s\n", err)
 		}
 
-		apiKey, err := conjur.Login(BaseURL, Account, Username, byteSecretVal, certPath)
+		authnURL := conjur.GetAuthURL(BaseURL, "", "")
+		if AuthnLDAP != "" {
+			authnURL = conjur.GetAuthURL(BaseURL, "authn-ldap", AuthnLDAP)
+		}
+
+		apiKey, err := conjur.Login(authnURL, Account, Username, byteSecretVal, certPath)
 		if err != nil {
 			log.Fatalf("Failed to login and retrieve api key. %s", err)
 		}
