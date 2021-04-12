@@ -1,15 +1,14 @@
 package cmd
 
 import (
-	"bytes"
 	"encoding/gob"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"syscall"
 
-	"github.com/quincycheng/cem-api-go/cem"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
+	"github.com/quincycheng/cem-api-go/pkg/cem"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -196,13 +195,7 @@ var cemGetAccountsCmd = &cobra.Command{
 			return
 		}
 
-		var prettyJSON bytes.Buffer
-		error := json.Indent(&prettyJSON, []byte(cemResult), "", "  ")
-		if error != nil {
-			log.Fatal("JSON parse error: ", error)
-		}
-		fmt.Println(prettyJSON.String())
-
+		prettyprint.PrintJSON(cemResult)
 	},
 }
 
@@ -221,8 +214,8 @@ var cemGetRemediationsCmd = &cobra.Command{
 
 		cemQuery := &cem.EntityQuery{
 			Platform:  CemPlatform,
-			AccountId: CemAccountID,
-			EntityId:  CemEntityID,
+			AccountID: CemAccountID,
+			EntityID:  CemEntityID,
 		}
 
 		cemResult, err := cem.GetEntityRecommendations(token, cemQuery)
@@ -231,12 +224,7 @@ var cemGetRemediationsCmd = &cobra.Command{
 			return
 		}
 
-		var prettyJSON bytes.Buffer
-		error := json.Indent(&prettyJSON, []byte(cemResult), "", "  ")
-		if error != nil {
-			log.Fatal("JSON parse error: ", error)
-		}
-		fmt.Println(prettyJSON.String())
+		prettyprint.PrintJSON(cemResult)
 
 	},
 }
@@ -256,8 +244,8 @@ var cemGetRecommendationsCmd = &cobra.Command{
 
 		cemQuery := &cem.EntityQuery{
 			Platform:  CemPlatform,
-			AccountId: CemAccountID,
-			EntityId:  CemEntityID,
+			AccountID: CemAccountID,
+			EntityID:  CemEntityID,
 		}
 
 		cemResult, err := cem.GetEntityRecommendations(token, cemQuery)
@@ -266,12 +254,7 @@ var cemGetRecommendationsCmd = &cobra.Command{
 			return
 		}
 
-		var prettyJSON bytes.Buffer
-		error := json.Indent(&prettyJSON, []byte(cemResult), "", "  ")
-		if error != nil {
-			log.Fatal("JSON parse error: ", error)
-		}
-		fmt.Println(prettyJSON.String())
+		prettyprint.PrintJSON(cemResult)
 
 	},
 }
@@ -291,8 +274,8 @@ var cemGetEntityDetailCmd = &cobra.Command{
 
 		cemQuery := &cem.EntityQuery{
 			Platform:  CemPlatform,
-			AccountId: CemAccountID,
-			EntityId:  CemEntityID,
+			AccountID: CemAccountID,
+			EntityID:  CemEntityID,
 		}
 
 		cemResult, err := cem.GetEntityDetail(token, cemQuery)
@@ -301,13 +284,7 @@ var cemGetEntityDetailCmd = &cobra.Command{
 			return
 		}
 
-		var prettyJSON bytes.Buffer
-		error := json.Indent(&prettyJSON, []byte(cemResult), "", "  ")
-		if error != nil {
-			log.Fatal("JSON parse error: ", error)
-		}
-		fmt.Println(prettyJSON.String())
-
+		prettyprint.PrintJSON(cemResult)
 	},
 }
 
@@ -362,12 +339,7 @@ var cemGetEntitiesCmd = &cobra.Command{
 			return
 		}
 
-		var prettyJSON bytes.Buffer
-		error := json.Indent(&prettyJSON, []byte(cemResult), "", "  ")
-		if error != nil {
-			log.Fatal("JSON parse error: ", error)
-		}
-		fmt.Println(prettyJSON.String())
+		prettyprint.PrintJSON(cemResult)
 	},
 }
 
