@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"encoding/gob"
 	"fmt"
 	"log"
 	"os"
 	"syscall"
 
+	local_cem "github.com/infamousjoeg/cybr-cli/pkg/cybr/cem/"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/quincycheng/cem-api-go/pkg/cem"
 	"github.com/spf13/cobra"
@@ -91,89 +91,13 @@ var cemLoginCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = SaveToken(token)
+		err = local_cem.SaveToken(token, CemSessionTokenPath)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		fmt.Printf("Successfully logged onto CEM (organization: %s)\n", CemOrganization)
 	},
-}
-
-// getUserHomeDir Get the Home directory of the current user
-func getUserHomeDir() (string, error) {
-	// Get user home directory
-	userHome, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("could not read user home directory for OS. %s", err)
-	}
-	return userHome, nil
-}
-
-// SaveToken saving token as file on the local filesystem
-func SaveToken(token string) error {
-	// Get user home directory
-	userHome, err := getUserHomeDir()
-	if err != nil {
-		return fmt.Errorf("ACL error. %s", err)
-	}
-
-	// Check if .cybr directory already exists, create if not
-	if _, err = os.Stat(userHome + "/.cybr"); os.IsNotExist(err) {
-		// Create .cybr folder in user home directory
-		err = os.Mkdir(userHome+"/.cybr", 0766)
-		if err != nil {
-			return fmt.Errorf("could not create folder %s/.cybr on local file system. %s", userHome, err)
-		}
-	}
-
-	// Check for config file and remove if existing
-	if _, err = os.Stat(userHome + CemSessionTokenPath); !os.IsNotExist(err) {
-		err = os.Remove(userHome + CemSessionTokenPath)
-		if err != nil {
-			return fmt.Errorf("could not remove existing %s%s file. %s", userHome, CemSessionTokenPath, err)
-		}
-	}
-	// Create config file in user home directory
-	dataFile, err := os.Create(userHome + CemSessionTokenPath)
-	if err != nil {
-		return fmt.Errorf("could not create configuration file at %s%s. %s", userHome, CemSessionTokenPath, err)
-	}
-
-	// serialize the data
-	dataEncoder := gob.NewEncoder(dataFile)
-	dataEncoder.Encode(token)
-
-	dataFile.Close()
-
-	return nil
-}
-
-// GetToken file from local filesystem and read
-func GetToken() (string, error) {
-
-	// Get user home directory
-	userHome, err := getUserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("ACL error. %s", err)
-	}
-
-	// open data file
-	dataFile, err := os.Open(userHome + CemSessionTokenPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to retrieve token file at %s. %s", CemSessionTokenPath, err)
-	}
-
-	dataDecoder := gob.NewDecoder(dataFile)
-	result := ""
-	err = dataDecoder.Decode(&result)
-	if err != nil {
-		return result, fmt.Errorf("failed to decode token file at .cybr/config. %s", err)
-	}
-
-	dataFile.Close()
-
-	return result, nil
 }
 
 var cemGetAccountsCmd = &cobra.Command{
@@ -184,7 +108,7 @@ var cemGetAccountsCmd = &cobra.Command{
 	Example Usage:
 	$ cybr cem get-accounts`,
 	Run: func(cmd *cobra.Command, args []string) {
-		token, err := GetToken()
+		token, err := local_cem.GetToken(CemSessionTokenPath)
 		if err != nil {
 			log.Fatalf("Failed to retrieve token file at %s. %s\n", CemSessionTokenPath, err)
 		}
@@ -207,7 +131,7 @@ var cemGetRemediationsCmd = &cobra.Command{
 	Example Usage:
 	$ cybr cem get-remediations -p PLATFORM -a ACCOUNT_ID -e ENTITY_ID`,
 	Run: func(cmd *cobra.Command, args []string) {
-		token, err := GetToken()
+		token, err := local_cem.GetToken(CemSessionTokenPath)
 		if err != nil {
 			log.Fatalf("Failed to retrieve token file at %s. %s\n", CemSessionTokenPath, err)
 		}
@@ -237,7 +161,7 @@ var cemGetRecommendationsCmd = &cobra.Command{
 	Example Usage:
 	$ cybr cem get-recommendations -p PLATFORM -a ACCOUNT_ID -e ENTITY_ID`,
 	Run: func(cmd *cobra.Command, args []string) {
-		token, err := GetToken()
+		token, err := local_cem.GetToken(CemSessionTokenPath)
 		if err != nil {
 			log.Fatalf("Failed to retrieve token file at %s. %s\n", CemSessionTokenPath, err)
 		}
@@ -267,7 +191,7 @@ var cemGetEntityDetailCmd = &cobra.Command{
 	Example Usage:
 	$ cybr cem get-entity-detail -p PLATFORM -a ACCOUNT_ID -e ENTITY_ID`,
 	Run: func(cmd *cobra.Command, args []string) {
-		token, err := GetToken()
+		token, err := local_cem.GetToken(CemSessionTokenPath)
 		if err != nil {
 			log.Fatalf("Failed to retrieve token file at %s. %s\n", CemSessionTokenPath, err)
 		}
@@ -296,7 +220,7 @@ var cemGetEntitiesCmd = &cobra.Command{
 	Example Usage:
 	$ cybr cem get-entities -p PLATFORM -a ACCOUNT_ID`,
 	Run: func(cmd *cobra.Command, args []string) {
-		token, err := GetToken()
+		token, err := local_cem.GetToken(CemSessionTokenPath)
 		if err != nil {
 			log.Fatalf("Failed to retrieve token file at %s. %s\n", CemSessionTokenPath, err)
 		}
@@ -346,7 +270,7 @@ var cemGetEntitiesCmd = &cobra.Command{
 func init() {
 
 	// Login
-	cemLoginCmd.Flags().StringVarP(&CemOrganization, "organization", "o", "", "Username to logon PAS REST API using")
+	cemLoginCmd.Flags().StringVarP(&CemOrganization, "organization", "o", "", "Organization identity for CEM")
 	cemLoginCmd.MarkFlagRequired("organization")
 	cemLoginCmd.Flags().BoolVar(&CemNonInteractive, "non-interactive", false, "If detected, will retrieve the API key from the CEM_APIKEY environment variable")
 
