@@ -38,13 +38,13 @@ func getLoginClient(certPath string) (*http.Client, error) {
 }
 
 // Login to conjur and return an api key in []byte format
-func Login(applianceURL string, account string, username string, password []byte, certPath string) ([]byte, error) {
+func Login(authnURL string, account string, username string, password []byte, certPath string) ([]byte, error) {
 	client, err := getLoginClient(certPath)
 	if err != nil {
 		return nil, err
 	}
 
-	url := fmt.Sprintf("%s/%s/login", applianceURL, url.QueryEscape(account))
+	url := fmt.Sprintf("%s/%s/login", authnURL, url.QueryEscape(account))
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to create login request. %s", err)
