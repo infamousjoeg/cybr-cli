@@ -6,7 +6,7 @@ import (
 	"os"
 	"syscall"
 
-	local_cem "github.com/infamousjoeg/cybr-cli/pkg/cybr/cem/"
+	local_cem "github.com/infamousjoeg/cybr-cli/pkg/cybr/cem"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/quincycheng/cem-api-go/pkg/cem"
 	"github.com/spf13/cobra"
