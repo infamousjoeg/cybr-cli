@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/util"
 	"github.com/infamousjoeg/cybr-cli/pkg/logger"
 )
 
@@ -15,15 +16,6 @@ type Client struct {
 	InsecureTLS  bool
 	SessionToken string
 	Logger       logger.Logger
-}
-
-func getUserHomeDir() (string, error) {
-	// Get user home directory
-	userHome, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("Could not read user home directory for OS. %s", err)
-	}
-	return userHome, nil
 }
 
 // IsValid checks to make sure that the authentication method chosen is valid
@@ -37,7 +29,7 @@ func (c *Client) IsValid() error {
 // SetConfig file on the local filesystem for use
 func (c *Client) SetConfig() error {
 	// Get user home directory
-	userHome, err := getUserHomeDir()
+	userHome, err := util.GetUserHomeDir()
 	if err != nil {
 		return fmt.Errorf("ACL error. %s", err)
 	}
@@ -78,7 +70,7 @@ func GetConfig() (Client, error) {
 	var client Client
 
 	// Get user home directory
-	userHome, err := getUserHomeDir()
+	userHome, err := util.GetUserHomeDir()
 	if err != nil {
 		return Client{}, fmt.Errorf("ACL error. %s", err)
 	}
@@ -110,7 +102,7 @@ func GetConfigWithLogger(logger logger.Logger) (Client, error) {
 // RemoveConfig file on the local filesystem
 func (c *Client) RemoveConfig() error {
 	// Get user home directory
-	userHome, err := getUserHomeDir()
+	userHome, err := util.GetUserHomeDir()
 	if err != nil {
 		return fmt.Errorf("ACL error. %s", err)
 	}
