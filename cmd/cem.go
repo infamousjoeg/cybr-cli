@@ -57,8 +57,8 @@ var cemCmd = &cobra.Command{
 }
 
 var cemLoginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "Login to CEM REST API",
+	Use:   "logon",
+	Short: "Logon to CEM REST API",
 	Long: `Authenticate to Cloud Entitlements Manager REST API.
 	
 	Example Usage:
@@ -67,6 +67,7 @@ var cemLoginCmd = &cobra.Command{
 	For non-interactive logon:
 	$ export ` + CemEnvAPIKey + `=<Your CEM access key>
 	$ cybr cem login -a $ORGANIZATION --non-interactive`,
+	Aliases: []string{"login"},
 	Run: func(cmd *cobra.Command, args []string) {
 		apikey := os.Getenv(CemEnvAPIKey)
 
@@ -101,12 +102,13 @@ var cemLoginCmd = &cobra.Command{
 }
 
 var cemGetAccountsCmd = &cobra.Command{
-	Use:   "get-accounts",
+	Use:   "accounts",
 	Short: "Get Accounts",
 	Long: `Retrieve workspaces grouped by platforms
 
 	Example Usage:
 	$ cybr cem get-accounts`,
+	Aliases: []string{"get-accounts", "account"},
 	Run: func(cmd *cobra.Command, args []string) {
 		token, err := local_cem.GetToken(CemSessionTokenPath)
 		if err != nil {
@@ -124,12 +126,13 @@ var cemGetAccountsCmd = &cobra.Command{
 }
 
 var cemGetRemediationsCmd = &cobra.Command{
-	Use:   "get-remediations",
+	Use:   "remediations",
 	Short: "Get Entity Remediations",
 	Long: `Retrieve Remediations for an entity
 
 	Example Usage:
 	$ cybr cem get-remediations -p PLATFORM -a ACCOUNT_ID -e ENTITY_ID`,
+	Aliases: []string{"get-remediations", "remediation"},
 	Run: func(cmd *cobra.Command, args []string) {
 		token, err := local_cem.GetToken(CemSessionTokenPath)
 		if err != nil {
@@ -154,12 +157,13 @@ var cemGetRemediationsCmd = &cobra.Command{
 }
 
 var cemGetRecommendationsCmd = &cobra.Command{
-	Use:   "get-recommendations",
+	Use:   "recommendations",
 	Short: "Get Entity Recommendations",
 	Long: `Retrieve recommendations for an entity
 
 	Example Usage:
 	$ cybr cem get-recommendations -p PLATFORM -a ACCOUNT_ID -e ENTITY_ID`,
+	Aliases: []string{"get-recommendations", "recommendation"},
 	Run: func(cmd *cobra.Command, args []string) {
 		token, err := local_cem.GetToken(CemSessionTokenPath)
 		if err != nil {
@@ -184,12 +188,13 @@ var cemGetRecommendationsCmd = &cobra.Command{
 }
 
 var cemGetEntityDetailCmd = &cobra.Command{
-	Use:   "get-entity-detail",
+	Use:   "entity-details",
 	Short: "Get Entity Details",
 	Long: `Retrieve the details of a specific entity within a platform and workspace
 
 	Example Usage:
 	$ cybr cem get-entity-detail -p PLATFORM -a ACCOUNT_ID -e ENTITY_ID`,
+	Aliases: []string{"get-entity-details", "entity-detail"},
 	Run: func(cmd *cobra.Command, args []string) {
 		token, err := local_cem.GetToken(CemSessionTokenPath)
 		if err != nil {
@@ -213,12 +218,13 @@ var cemGetEntityDetailCmd = &cobra.Command{
 }
 
 var cemGetEntitiesCmd = &cobra.Command{
-	Use:   "get-entities",
+	Use:   "entities",
 	Short: "Get Entities",
 	Long: `Search for entities on any platform and retrieve entity details.
 	
 	Example Usage:
 	$ cybr cem get-entities -p PLATFORM -a ACCOUNT_ID`,
+	Aliases: []string{"get-entities", "entity"},
 	Run: func(cmd *cobra.Command, args []string) {
 		token, err := local_cem.GetToken(CemSessionTokenPath)
 		if err != nil {
