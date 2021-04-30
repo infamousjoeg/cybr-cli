@@ -18,6 +18,8 @@ type Client struct {
 	Logger       logger.Logger
 }
 
+
+
 // IsValid checks to make sure that the authentication method chosen is valid
 func (c *Client) IsValid() error {
 	if c.AuthType == "cyberark" || c.AuthType == "ldap" || c.AuthType == "radius" {
