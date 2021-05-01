@@ -17,6 +17,21 @@ import (
 	"github.com/infamousjoeg/cybr-cli/pkg/logger"
 )
 
+type contextKey string
+
+var (
+	contextKeyCookies = contextKey("cookies")
+)
+
+func (c contextKey) String() string {
+	return "httpjson_cookies" + string(c)
+}
+
+func Cookies(ctx context.Context) ([]*http.Cookie, bool) {
+	cookies, ok := ctx.Value(contextKeyCookies).(([]*http.Cookie))
+	return cookies, ok
+}
+
 func bodyToBytes(body interface{}) ([]byte, error) {
 	if body == nil {
 		return []byte(""), nil
@@ -68,11 +83,13 @@ func getResponse(ctx context.Context, urls string, method string, token string, 
 	jar, _ := cookiejar.New(nil)
 	u, _ := url.Parse(urls)
 
-	if cookies := ctx.Value("cookies"); cookies != nil {
-		jar.SetCookies(u, cookies.([]*http.Cookie))
-	} else {
+	cookies, ok := Cookies(ctx)
+	if !ok {
 		jar.SetCookies(u, nil)
+	} else {
+		jar.SetCookies(u, cookies)
 	}
+
 	httpClient := http.Client{
 		Jar:     jar,
 		Timeout: time.Second * 30, // Maximum of 30 secs
@@ -151,7 +168,7 @@ func SendRequestRaw(ctx context.Context, url string, method string, token string
 	if errRead != nil {
 		return ctx, nil, fmt.Errorf("Failed to read body. %s", errRead)
 	}
-	newCtx := context.WithValue(ctx, "cookies", res.Cookies())
+	newCtx := context.WithValue(ctx, contextKeyCookies, res.Cookies())
 	return newCtx, content, err
 }
 
