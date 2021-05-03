@@ -163,13 +163,16 @@ func SendRequest(ctx context.Context, url string, method string, token string, b
 // SendRequestRaw is an http request and get response as byte[]
 func SendRequestRaw(ctx context.Context, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (context.Context, []byte, error) {
 	res, err := getResponse(ctx, url, method, token, body, insecureTLS, logger)
-	//Read the response body.
-	content, errRead := ioutil.ReadAll(res.Body)
-	if errRead != nil {
-		return ctx, nil, fmt.Errorf("Failed to read body. %s", errRead)
+	//Read the response body if not nil
+	if err != nil && res.Body != nil {
+		content, errRead := ioutil.ReadAll(res.Body)
+		if errRead != nil {
+			return ctx, nil, fmt.Errorf("Failed to read body. %s", errRead)
+		}
+		newCtx := context.WithValue(ctx, contextKeyCookies, res.Cookies())
+		return newCtx, content, err
 	}
-	newCtx := context.WithValue(ctx, contextKeyCookies, res.Cookies())
-	return newCtx, content, err
+	return ctx, nil, err
 }
 
 // Get a get request and get response as serialized json map[string]interface{}
