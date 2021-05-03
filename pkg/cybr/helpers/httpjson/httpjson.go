@@ -27,6 +27,7 @@ func (c contextKey) String() string {
 	return "httpjson_cookies" + string(c)
 }
 
+//Cookies get http cookies from context
 func Cookies(ctx context.Context) ([]*http.Cookie, bool) {
 	cookies, ok := ctx.Value(contextKeyCookies).(([]*http.Cookie))
 	return cookies, ok
