@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"syscall"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
@@ -34,7 +34,7 @@ var logonCmd = &cobra.Command{
 	Use:   "logon",
 	Short: "Logon to PAS REST API",
 	Long: `Authenticate to PAS REST API using the provided authentication type.
-	
+
 	Example Usage:
 	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com
 	To bypass TLS verification:
@@ -79,15 +79,16 @@ var logonCmd = &cobra.Command{
 			ConcurrentSession: ConcurrentSession,
 		}
 
-		err := client.Logon(credentials)
-		if err != nil && !strings.Contains(err.Error(), "ITATS542I") {
-			log.Fatalf("Failed to Logon to the PVWA. %s", err)
+		ctx := context.Background()
+		ctx, errorResponse, err := client.Logon(ctx, credentials)
+		if err != nil && errorResponse.ErrorCode != "ITATS542I" {
+			log.Fatalf("Failed to Logon to the PVWA. %s", errorResponse.ErrorMessage)
 		}
 
 		// if error contains challenge error code, deal with OTPCode here instead and redo client.Logon()
 		if err != nil {
 			// Get secret value from STDIN
-			fmt.Print("Enter one-time passcode: ")
+			fmt.Printf("%s: \n", errorResponse.ErrorMessage)
 			byteOTPCode, err := terminal.ReadPassword(int(syscall.Stdin))
 			credentials.Password = string(byteOTPCode)
 			fmt.Println()
@@ -95,7 +96,7 @@ var logonCmd = &cobra.Command{
 				log.Fatalln("An error occurred trying to read one-time passcode from " +
 					"Stdin. Exiting...")
 			}
-			err = client.Logon(credentials)
+			_, _, err = client.Logon(ctx, credentials)
 			if err != nil {
 				log.Fatalf("Failed to respond to challenge. Possible timeout occurred. %s", err)
 			}

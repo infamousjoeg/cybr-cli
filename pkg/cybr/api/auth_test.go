@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -19,7 +20,7 @@ func TestCyberarkLogonSuccess(t *testing.T) {
 		Password: password,
 	}
 
-	err := client.Logon(creds)
+	_, _, err := client.Logon(context.TODO(), creds)
 	if err != nil {
 		t.Errorf("Failed to logon. %s", err)
 	}
@@ -36,7 +37,7 @@ func TestCyberarkLogonInvalidCreds(t *testing.T) {
 		Password: password,
 	}
 
-	err := client.Logon(creds)
+	_, _, err := client.Logon(context.TODO(), creds)
 	if err == nil {
 		t.Errorf("Successfully logged in but shouldn't have. %s", err)
 	}
@@ -53,7 +54,7 @@ func TestCyberarkLogonInvalidHostName(t *testing.T) {
 		Password: password,
 	}
 
-	err := client.Logon(creds)
+	_, _, err := client.Logon(context.TODO(), creds)
 	if err == nil {
 		t.Errorf("Successfully logged in but shouldn't have. %s", err)
 	}
@@ -70,7 +71,7 @@ func TestLogonInvalidAuthType(t *testing.T) {
 		Password: password,
 	}
 
-	err := client.Logon(creds)
+	_, _, err := client.Logon(context.TODO(), creds)
 	if err == nil {
 		t.Errorf("Successfully logged in but shouldn't have. %s", err)
 	}
@@ -91,7 +92,7 @@ func TestCyberarkLogoffSuccess(t *testing.T) {
 		Password: password,
 	}
 
-	err := client.Logon(creds)
+	_, _, err := client.Logon(context.TODO(), creds)
 	if err != nil {
 		t.Errorf("Failed to logon. %s", err)
 	}
