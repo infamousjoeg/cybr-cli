@@ -28,7 +28,7 @@ jobs:
     needs:
       - lint
     env:
-      PAS_HOSTNAME: ${{ secrets.PAS_HOSTNAME }}
+      PAS_HOSTNAME: "https://cyberark.joegarcia.dev"
       PAS_USERNAME: ${{ secrets.PAS_USERNAME }}
       PAS_PASSWORD: ${{ secrets.PAS_PASSWORD }}
       CCP_CLIENT_CERT: ${{ secrets.CCP_CLIENT_CERT }}
