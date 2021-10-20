@@ -27,13 +27,17 @@ pipeline {
         stage('Go Test') {
             steps {
                 withCredentials([
-                    conjurSecretCredential(credentialsId: 'controller-pas-hostname', variable: 'PAS_HOSTNAME'),
-                    conjurSecretCredential(credentialsId: 'controller-pas-username', variable: 'PAS_USERNAME'),
-                    conjurSecretCredential(credentialsId: 'controller-pas-password', variable: 'PAS_PASSWORD'),
-                    conjurSecretCredential(credentialsId: 'controller-ccp-client-cert', variable: 'CCP_CLIENT_CERT'),
-                    conjurSecretCredential(credentialsId: 'controller-ccp-client-priv-key', variable: 'CCP_CLIENT_PRIVATE_KEY')
+                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Website-GenericWebApp-httpscyberark.joegarcia.dev-pas_address-password', variable: 'PAS_HOSTNAME'),
+                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-Win-SvcAccts-Operating System-WinDomain-10.0.4.48-Svc_CybrCLI-username', variable: 'PAS_USERNAME'),
+                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-Win-SvcAccts-Operating System-WinDomain-10.0.4.48-Svc_CybrCLI-password', variable: 'PAS_PASSWORD'),
+                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Website-GenericWebApp-httpscyberark.joegarcia.dev-ccp_client_certificate-password', variable: 'CCP_CLIENT_CERT'),
+                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Website-GenericWebApp-httpscyberark.joegarcia.dev-ccp_client_key-password', variable: 'CCP_CLIENT_PRIVATE_KEY')
                 ]) {
-                    sh 'go test -v ./pkg/cybr/api'
+                    sh '''
+                        $CCP_CLIENT_CERT=$(echo $CCP_CLIENT_CERT | base64 --decode)
+                        $CCP_CLIENT_PRIVATE_KEY=$(echo $CCP_CLIENT_PRIVATE_KEY | base64 --decode)
+                        go test -v ./pkg/cybr/api
+                    '''
                 }
             }
             
@@ -56,8 +60,8 @@ pipeline {
         stage('Release to AWS S3') {
             steps {
                 withCredentials([
-                    conjurSecretCredential(credentialsId: 'controller-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    conjurSecretCredential(credentialsId: 'controller-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Cloud Service-AWSAccessKeys-jenkins_cybr-cli-username', variable: 'AWS_ACCESS_KEY_ID'),
+                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Cloud Service-AWSAccessKeys-jenkins_cybr-cli-password', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
                     sh 'aws --version'
                     sh 'aws s3 cp ./bin/${BUILD_TIMESTAMP}_linux_cybr s3://cybr-cli-releases'
