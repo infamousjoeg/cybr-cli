@@ -3,7 +3,7 @@ package cybr
 import "fmt"
 
 // Version field is a SemVer that should indicate the baked-in version of conceal
-var Version = "0.1.5"
+var Version = "0.1.6"
 
 // Tag field denotes the specific build type for the broker. It may be replaced by compile-time variables if needed to
 // provide the git commit information in the final binary.
