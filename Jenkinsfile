@@ -13,11 +13,6 @@ pipeline {
     }
 
     stages {
-        stage('Go Lint') {
-            steps {
-                sh 'golint ./...'
-            }
-        }
         stage('Go Vet') {
             steps {
                 sh 'go version'
