@@ -54,13 +54,22 @@ pipeline {
                 echo "Finished making - files output to ./bin/"
             }
         }
+        stage('Install AWS CLI') {
+            steps {
+                sh '''
+                    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                    unzip awscliv2.zip
+                    sudo ./aws/install
+                    aws --version
+                '''
+            }
+        }
         stage('Release to AWS S3') {
             steps {
                 withCredentials([
                     conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Cloud Service-AWSAccessKeys-jenkins_cybr-cli-username', variable: 'AWS_ACCESS_KEY_ID'),
                     conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Cloud Service-AWSAccessKeys-jenkins_cybr-cli-password', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
-                    sh 'aws --version'
                     sh 'aws s3 cp ./bin/${BUILD_TIMESTAMP}_linux_cybr s3://cybr-cli-releases'
                     sh 'aws s3 cp ./bin/${BUILD_TIMESTAMP}_darwin_cybr s3://cybr-cli-releases'
                     sh 'aws s3 cp ./bin/${BUILD_TIMESTAMP}_cybr s3://cybr-cli-releases'
