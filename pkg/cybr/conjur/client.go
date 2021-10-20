@@ -59,45 +59,15 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 
 	authnURL := GetAuthURL(envApplianceURL, "authn", "")
 
-	homeDir, err := GetHomeDirectory()
-	if err != nil {
-		return &conjurapi.Client{},
-			&authn.LoginPair{},
-			fmt.Errorf("could not find home directory: %s", err)
-	}
-
-	netrcPath := GetNetRcPath(homeDir)
-
-	// certPath remains empty if not using self-signed-cert
-	certPath := ""
-	if envCertFile != "" {
-		certPath = GetConjurPemPath(homeDir, envAccount)
-	}
-
-	err = CreateConjurRc(envAccount, envApplianceURL, false, "")
-	if err != nil {
-		return &conjurapi.Client{},
-			&authn.LoginPair{},
-			fmt.Errorf("failed to create ~/.conjurrc file. %s", err)
-	}
-
 	apiKey, err := Login(authnURL, envAccount, envLogin, []byte(envAPIKey), envCertFile)
 	if err != nil {
 		return &conjurapi.Client{}, &authn.LoginPair{}, err
 	}
 
-	err = CreateNetRc(envLogin, string(apiKey))
-	if err != nil {
-		return &conjurapi.Client{},
-			&authn.LoginPair{},
-			fmt.Errorf("failed to create ~/.netrc file. %s", err)
-	}
-
 	config := conjurapi.Config{
 		Account:      envAccount,
 		ApplianceURL: envApplianceURL,
-		NetRCPath:    netrcPath,
-		SSLCertPath:  certPath,
+		SSLCertPath:  envCertFile,
 	}
 	loginPair := authn.LoginPair{
 		Login:  envLogin,
