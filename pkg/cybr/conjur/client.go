@@ -54,7 +54,7 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 	if errMsg != "" {
 		return &conjurapi.Client{},
 			&authn.LoginPair{},
-			fmt.Errorf("Environment variable(s) not provided: %s", strings.TrimRight(errMsg, ", "))
+			fmt.Errorf("environment variable(s) not provided: %s", strings.TrimRight(errMsg, ", "))
 	}
 
 	authnURL := GetAuthURL(envApplianceURL, "authn", "")
@@ -63,7 +63,7 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 	if err != nil {
 		return &conjurapi.Client{},
 			&authn.LoginPair{},
-			fmt.Errorf("Could not find home directory: %s", err)
+			fmt.Errorf("could not find home directory: %s", err)
 	}
 
 	netrcPath := GetNetRcPath(homeDir)
@@ -78,7 +78,7 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 	if err != nil {
 		return &conjurapi.Client{},
 			&authn.LoginPair{},
-			fmt.Errorf("Failed to create ~/.conjurrc file. %s\n", err)
+			fmt.Errorf("failed to create ~/.conjurrc file. %s", err)
 	}
 
 	apiKey, err := Login(authnURL, envAccount, envLogin, []byte(envAPIKey), envCertFile)
@@ -90,7 +90,7 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 	if err != nil {
 		return &conjurapi.Client{},
 			&authn.LoginPair{},
-			fmt.Errorf("Failed to create ~/.netrc file. %s\n", err)
+			fmt.Errorf("failed to create ~/.netrc file. %s", err)
 	}
 
 	config := conjurapi.Config{
@@ -143,7 +143,7 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 
 	loginPair, err = conjurapi.LoginPairFromNetRC(config)
 	if err != nil {
-		return nil, nil, fmt.Errorf("Failed to retrieve credentials from ~/.netrc. %s", err)
+		return nil, nil, fmt.Errorf("failed to retrieve credentials from ~/.netrc. %s", err)
 	}
 
 	client, err = conjurapi.NewClientFromKey(config, *loginPair)
@@ -154,12 +154,12 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 func sendConjurAuthenticatedHTTPRequest(client *conjurapi.Client, loginPair *authn.LoginPair, url string, method string, body io.Reader) (*http.Response, error) {
 	sessionToken, err := client.Authenticate(*loginPair)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to authenticate to conjur. %s", err)
+		return nil, fmt.Errorf("failed to authenticate to conjur. %s", err)
 	}
 
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create request '%s'. %s", url, err)
+		return nil, fmt.Errorf("failed to create request '%s'. %s", url, err)
 	}
 
 	req.Header.Add("Authorization", fmt.Sprintf("Token token=\"%s\"", base64.StdEncoding.EncodeToString(sessionToken)))
@@ -167,11 +167,11 @@ func sendConjurAuthenticatedHTTPRequest(client *conjurapi.Client, loginPair *aut
 	httpClient := client.GetHttpClient()
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to send HTTP request. %s", err)
+		return nil, fmt.Errorf("failed to send HTTP request. %s", err)
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 204 {
-		return resp, fmt.Errorf("Received invalid status code '%d'", resp.StatusCode)
+		return resp, fmt.Errorf("received invalid status code '%d'", resp.StatusCode)
 	}
 
 	return resp, nil
