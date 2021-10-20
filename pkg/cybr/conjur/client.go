@@ -26,7 +26,7 @@ var (
 	envCertFile     = os.Getenv(envCertFileKey)
 )
 
-func validateEnviromentConfig(value string, keyName string, errMsg string) string {
+func validateEnvironmentConfig(value string, keyName string, errMsg string) string {
 	if value == "" {
 		errMsg += keyName + ", "
 	}
@@ -44,10 +44,10 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 	}
 
 	errMsg := ""
-	errMsg = validateEnviromentConfig(envAccount, envAccountKey, errMsg)
-	errMsg = validateEnviromentConfig(envApplianceURL, envApplianceURLKey, errMsg)
-	errMsg = validateEnviromentConfig(envLogin, envLoginKey, errMsg)
-	errMsg = validateEnviromentConfig(envAPIKey, envAPIKeyKey, errMsg)
+	errMsg = validateEnvironmentConfig(envAccount, envAccountKey, errMsg)
+	errMsg = validateEnvironmentConfig(envApplianceURL, envApplianceURLKey, errMsg)
+	errMsg = validateEnvironmentConfig(envLogin, envLoginKey, errMsg)
+	errMsg = validateEnvironmentConfig(envAPIKey, envAPIKeyKey, errMsg)
 
 	// Partial environment variables were provided so return an error
 	// with a list of the environment variables that were not provided
@@ -55,6 +55,13 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 		return &conjurapi.Client{},
 			&authn.LoginPair{},
 			fmt.Errorf("Environment variable(s) not provided: %s", strings.TrimRight(errMsg, ", "))
+	}
+
+	// Check the appliance URL provided for /authn and if not found,
+	// append for proper authentication
+	s := strings.Split(envApplianceURL, "/")
+	if s[len(s)-1] != "authn" {
+		envApplianceURL = envApplianceURL + "/authn"
 	}
 
 	apiKey, err := Login(envApplianceURL, envAccount, envLogin, []byte(envAPIKey), envCertFile)
@@ -139,7 +146,7 @@ func sendConjurAuthenticatedHTTPRequest(client *conjurapi.Client, loginPair *aut
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 204 {
-		return resp, fmt.Errorf("Recieved invalid status code '%d'", resp.StatusCode)
+		return resp, fmt.Errorf("Received invalid status code '%d'", resp.StatusCode)
 	}
 
 	return resp, nil
