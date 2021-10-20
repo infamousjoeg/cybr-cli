@@ -29,8 +29,8 @@ pipeline {
                     conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Website-GenericWebApp-httpscyberark.joegarcia.dev-ccp_client_key-password', variable: 'CCP_CLIENT_PRIVATE_KEY')
                 ]) {
                     sh '''
-                        $CCP_CLIENT_CERT=$(echo $CCP_CLIENT_CERT | base64 --decode)
-                        $CCP_CLIENT_PRIVATE_KEY=$(echo $CCP_CLIENT_PRIVATE_KEY | base64 --decode)
+                        CCP_CLIENT_CERT=$(echo $CCP_CLIENT_CERT | base64 --decode)
+                        CCP_CLIENT_PRIVATE_KEY=$(echo $CCP_CLIENT_PRIVATE_KEY | base64 --decode)
                         go test -v ./pkg/cybr/api
                     '''
                 }
