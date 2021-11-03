@@ -49,7 +49,7 @@ func getPem(url string) (string, error) {
 	}
 
 	// trim https://
-	url = strings.TrimLeft(url, "https://")
+	url = strings.TrimPrefix(url, "https://")
 	// If no port is provide default to port 443
 	if !strings.Contains(url, ":") {
 		url = url + ":443"
