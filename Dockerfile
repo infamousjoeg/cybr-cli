@@ -1,4 +1,4 @@
-FROM golang:1.17.0-bullseye
+FROM golang:1.17.4-bullseye
 
 ENV GO111MODULE=on
 
