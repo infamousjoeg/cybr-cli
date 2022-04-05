@@ -55,7 +55,7 @@ func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
 		return permissions, nil
 	}
 
-	if role == "SafeAdmin" {
+	if role == "BreakGlass" {
 		permissions = []requests.PermissionKeyValue{
 			{
 				Key:   "UseAccounts",
@@ -137,20 +137,12 @@ func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
 				Key:   "MoveAccountsAndFolders",
 				Value: true,
 			},
-			{
-				Key:   "RequestsAuthorizationLevel1",
-				Value: false,
-			},
-			{
-				Key:   "RequestsAuthorizationLevel2",
-				Value: false,
-			},
 		}
 
 		return permissions, nil
 	}
 
-	if role == "Provisioner" {
+	if role == "AccountProvisioner" {
 		permissions = []requests.PermissionKeyValue{
 			{
 				Key:   "ListAccounts",
@@ -158,6 +150,10 @@ func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
 			},
 			{
 				Key:   "AddAccounts",
+				Value: true,
+			},
+			{
+				Key:   "UpdateAccountContent",
 				Value: true,
 			},
 			{
@@ -169,7 +165,27 @@ func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
 				Value: true,
 			},
 			{
+				Key:   "RenameAccounts",
+				Value: true,
+			},
+			{
 				Key:   "DeleteAccounts",
+				Value: true,
+			},
+			{
+				Key:   "ViewAuditLog",
+				Value: true,
+			},
+			{
+				Key:   "ViewSafeMembers",
+				Value: true,
+			},
+			{
+				Key:   "CreateFolders",
+				Value: true,
+			},
+			{
+				Key:   "DeleteFolders",
 				Value: true,
 			},
 		}
@@ -298,6 +314,184 @@ func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
 			},
 			{
 				Key:   "AccessWithoutConfirmation",
+				Value: true,
+			},
+		}
+
+		return permissions, nil
+	}
+
+	if role == "EndUser" {
+		permissions = []requests.PermissionKeyValue{
+			{
+				Key:   "UseAccounts",
+				Value: true,
+			},
+			{
+				Key:   "RetrieveAccounts",
+				Value: true,
+			},
+			{
+				Key:   "ListAccounts",
+				Value: true,
+			},
+			{
+				Key:   "ViewAuditLog",
+				Value: true,
+			},
+			{
+				Key:   "ViewSafeMembers",
+				Value: true,
+			},
+		}
+
+		return permissions, nil
+	}
+
+	if role == "VaultAdmin" {
+		permissions = []requests.PermissionKeyValue{
+			{
+				Key:   "ListAccounts",
+				Value: true,
+			},
+			{
+				Key:   "ViewAuditLog",
+				Value: true,
+			},
+			{
+				Key:   "ViewSafeMembers",
+				Value: true,
+			},
+		}
+
+		return permissions, nil
+	}
+
+	if role == "ApproverLevel1" {
+		permissions = []requests.PermissionKeyValue{
+			{
+				Key:   "ListAccounts",
+				Value: true,
+			},
+			{
+				Key:   "ViewAuditLog",
+				Value: true,
+			},
+			{
+				Key:   "ViewSafeMembers",
+				Value: true,
+			},
+			{
+				Key:   "RequestsAuthorizationLevel1",
+				Value: true,
+			},
+		}
+
+		return permissions, nil
+	}
+
+	if role == "ApproverLevel2" {
+		permissions = []requests.PermissionKeyValue{
+			{
+				Key:   "ListAccounts",
+				Value: true,
+			},
+			{
+				Key:   "ViewAuditLog",
+				Value: true,
+			},
+			{
+				Key:   "ViewSafeMembers",
+				Value: true,
+			},
+			{
+				Key:   "RequestsAuthorizationLevel2",
+				Value: true,
+			},
+		}
+
+		return permissions, nil
+	}
+
+	if role == "APIAutomation" {
+		permissions = []requests.PermissionKeyValue{
+			{
+				Key:   "ListAccounts",
+				Value: true,
+			},
+			{
+				Key:   "AddAccounts",
+				Value: true,
+			},
+			{
+				Key:   "UpdateAccountContent",
+				Value: true,
+			},
+			{
+				Key:   "UpdateAccountProperties",
+				Value: true,
+			},
+			{
+				Key:   "InitiateCPMAccountManagementOperations",
+				Value: true,
+			},
+			{
+				Key:   "RenameAccounts",
+				Value: true,
+			},
+			{
+				Key:   "DeleteAccounts",
+				Value: true,
+			},
+			{
+				Key:   "UnlockAccounts",
+				Value: true,
+			},
+			{
+				Key:   "ManageSafe",
+				Value: true,
+			},
+			{
+				Key:   "ManageSafeMembers",
+				Value: true,
+			},
+			{
+				Key:   "ViewAuditLog",
+				Value: true,
+			},
+			{
+				Key:   "ViewSafeMembers",
+				Value: true,
+			},
+			{
+				Key:   "CreateFolders",
+				Value: true,
+			},
+			{
+				Key:   "DeleteFolders",
+				Value: true,
+			},
+			{
+				Key:   "MoveAccountsAndFolders",
+				Value: true,
+			},
+		}
+
+		return permissions, nil
+	}
+
+	if role == "Auditor" {
+		permissions = []requests.PermissionKeyValue{
+			{
+				Key:   "ListAccounts",
+				Value: true,
+			},
+			{
+				Key:   "ViewAuditLog",
+				Value: true,
+			},
+			{
+				Key:   "ViewSafeMembers",
 				Value: true,
 			},
 		}
