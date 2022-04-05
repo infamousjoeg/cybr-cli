@@ -48,6 +48,12 @@ var (
 	InitiateCPMAccountManagementOperations bool
 	// SpecifyNextAccountContent specify next account content in safe
 	SpecifyNextAccountContent bool
+	// RenameAccounts rename accounts inside of safe
+	RenameAccounts bool
+	// DeleteAccounts delete accounts inside of safe
+	DeleteAccounts bool
+	// UnlockAccounts unlock accounts inside of safe
+	UnlockAccounts bool
 	// ManageSafe manage this safe
 	ManageSafe bool
 	// ManageSafeMembers manage members of this safe
@@ -66,12 +72,20 @@ var (
 	DeleteFolders bool
 	// MoveAccountsAndFolders move accounts and folders
 	MoveAccountsAndFolders bool
+	// RequestsAuthorizationLevel1 sets as approver of level 1 requests for access
+	RequestsAuthorizationLevel1 bool
+	// RequestsAuthorizationLevel2 sets as approver of level 2 requests for access
+	RequestsAuthorizationLevel2 bool
 	// MemberName name of the member being added to a safe
 	MemberName string
 	//SearchIn search in Vault or Domain
 	SearchIn string
 	// MembershipExpirationDate when membership will expire
 	MembershipExpirationDate string
+	// Role of safe member to determine pre-defined safe permissions
+	Role string
+	// RolePermissions contain the pre-defined safe permissions of defined role
+	RolePermissions []requests.PermissionKeyValue
 )
 
 var safesCmd = &cobra.Command{
@@ -145,7 +159,8 @@ var addMembersCmd = &cobra.Command{
 	The user who runs this web service requires Manage Safe Members permissions in the Vault.
 	
 	Example Usage:
-	$ cybr safes add-member -s SafeName -m MemberName --retrieve-account`,
+	$ cybr safes add-member -s SafeName -m MemberName --list-account --use-account --retrieve-account
+	$ cybr safes add-member -s SafeName -m MemberName --role ApplicationIdentity`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
 		client, err := pasapi.GetConfigWithLogger(getLogger())
@@ -154,81 +169,115 @@ var addMembersCmd = &cobra.Command{
 			return
 		}
 
+		// If no role is specified, default to user-provided safe permissions
+		if Role == "" {
+			RolePermissions = []requests.PermissionKeyValue{
+				{
+					Key:   "UseAccounts",
+					Value: UseAccounts,
+				},
+				{
+					Key:   "RetrieveAccounts",
+					Value: RetrieveAccounts,
+				},
+				{
+					Key:   "ListAccounts",
+					Value: ListAccounts,
+				},
+				{
+					Key:   "AddAccounts",
+					Value: AddAccounts,
+				},
+				{
+					Key:   "UpdateAccountContent",
+					Value: UpdateAccountContent,
+				},
+				{
+					Key:   "UpdateAccountProperties",
+					Value: UpdateAccountProperties,
+				},
+				{
+					Key:   "InitiateCPMAccountManagementOperations",
+					Value: InitiateCPMAccountManagementOperations,
+				},
+				{
+					Key:   "SpecifyNextAccountContent",
+					Value: SpecifyNextAccountContent,
+				},
+				{
+					Key:   "RenameAccounts",
+					Value: RenameAccounts,
+				},
+				{
+					Key:   "DeleteAccounts",
+					Value: DeleteAccounts,
+				},
+				{
+					Key:   "UnlockAccounts",
+					Value: UnlockAccounts,
+				},
+				{
+					Key:   "ManageSafe",
+					Value: ManageSafe,
+				},
+				{
+					Key:   "ManageSafeMembers",
+					Value: ManageSafeMembers,
+				},
+				{
+					Key:   "BackupSafe",
+					Value: BackupSafe,
+				},
+				{
+					Key:   "ViewAuditLog",
+					Value: ViewAuditLog,
+				},
+				{
+					Key:   "ViewSafeMembers",
+					Value: ViewSafeMembers,
+				},
+				{
+					Key:   "AccessWithoutConfirmation",
+					Value: AccessWithoutConfirmation,
+				},
+				{
+					Key:   "CreateFolders",
+					Value: CreateFolders,
+				},
+				{
+					Key:   "DeleteFolders",
+					Value: DeleteFolders,
+				},
+				{
+					Key:   "MoveAccountsAndFolders",
+					Value: MoveAccountsAndFolders,
+				},
+				{
+					Key:   "RequestsAuthorizationLevel1",
+					Value: RequestsAuthorizationLevel1,
+				},
+				{
+					Key:   "RequestsAuthorizationLevel2",
+					Value: RequestsAuthorizationLevel2,
+				},
+			}
+		}
+
+		// If role is provided, use the pre-defined role safe permissions
+		if Role != "" {
+			RolePermissions, err = pasapi.GetRolePermissions(Role)
+			if err != nil {
+				log.Fatalf("Failed to load safe permissions for role defined. %s", err)
+				return
+			}
+		}
+
 		newMember := requests.AddSafeMember{
 			Member: requests.AddSafeMemberInternal{
 				MemberName:               MemberName,
 				SearchIn:                 SearchIn,
 				MembershipExpirationDate: MembershipExpirationDate,
-				Permissions: []requests.PermissionKeyValue{
-					requests.PermissionKeyValue{
-						Key:   "UseAccounts",
-						Value: UseAccounts,
-					},
-					requests.PermissionKeyValue{
-						Key:   "RetrieveAccounts",
-						Value: RetrieveAccounts,
-					},
-					requests.PermissionKeyValue{
-						Key:   "ListAccounts",
-						Value: ListAccounts,
-					},
-					requests.PermissionKeyValue{
-						Key:   "AddAccounts",
-						Value: AddAccounts,
-					},
-					requests.PermissionKeyValue{
-						Key:   "UpdateAccountContent",
-						Value: UpdateAccountContent,
-					},
-					requests.PermissionKeyValue{
-						Key:   "UpdateAccountProperties",
-						Value: UpdateAccountProperties,
-					},
-					requests.PermissionKeyValue{
-						Key:   "InitiateCPMAccountManagementOperations",
-						Value: InitiateCPMAccountManagementOperations,
-					},
-					requests.PermissionKeyValue{
-						Key:   "SpecifyNextAccountContent",
-						Value: SpecifyNextAccountContent,
-					},
-					requests.PermissionKeyValue{
-						Key:   "ManageSafe",
-						Value: ManageSafe,
-					},
-					requests.PermissionKeyValue{
-						Key:   "ManageSafeMembers",
-						Value: ManageSafeMembers,
-					},
-					requests.PermissionKeyValue{
-						Key:   "BackupSafe",
-						Value: BackupSafe,
-					},
-					requests.PermissionKeyValue{
-						Key:   "ViewAuditLog",
-						Value: ViewAuditLog,
-					},
-					requests.PermissionKeyValue{
-						Key:   "ViewSafeMembers",
-						Value: ViewSafeMembers,
-					},
-					requests.PermissionKeyValue{
-						Key:   "AccessWithoutConfirmation",
-						Value: AccessWithoutConfirmation,
-					},
-					requests.PermissionKeyValue{
-						Key:   "CreateFolders",
-						Value: CreateFolders,
-					},
-					requests.PermissionKeyValue{
-						Key:   "DeleteFolders",
-						Value: DeleteFolders,
-					},
-					requests.PermissionKeyValue{
-						Key:   "MoveAccountsAndFolders",
-						Value: MoveAccountsAndFolders,
-					},
-				},
+				Permissions:              RolePermissions,
 			},
 		}
 
@@ -394,6 +443,7 @@ func init() {
 	addMembersCmd.MarkFlagRequired("member-name")
 	addMembersCmd.Flags().StringVarP(&SearchIn, "search-in", "i", "Vault", "Search in Domain or Vault")
 	addMembersCmd.Flags().StringVarP(&MembershipExpirationDate, "member-expiration-date", "e", "", "When the membership will expire")
+	addMembersCmd.Flags().StringVarP(&Role, "role", "r", "", "The role of the safe member being added for automated permissioning")
 	addMembersCmd.Flags().BoolVar(&UseAccounts, "use-accounts", false, "Use accounts in safe")
 	addMembersCmd.Flags().BoolVar(&RetrieveAccounts, "retrieve-accounts", false, "Retrieve accounts in safe")
 	addMembersCmd.Flags().BoolVar(&ListAccounts, "list-accounts", false, "List accounts in safe")
@@ -401,6 +451,9 @@ func init() {
 	addMembersCmd.Flags().BoolVar(&UpdateAccountContent, "update-account-content", false, "Update account content in safe")
 	addMembersCmd.Flags().BoolVar(&UpdateAccountProperties, "update-account-properties", false, "Update account properties in safe")
 	addMembersCmd.Flags().BoolVar(&InitiateCPMAccountManagementOperations, "init-cpm-account-managment-operations", false, "Perform cpm actions on accounts inside of safe")
+	addMembersCmd.Flags().BoolVar(&RenameAccounts, "rename-accounts", false, "Rename accounts in safe")
+	addMembersCmd.Flags().BoolVar(&DeleteAccounts, "delete-accounts", false, "Delete accounts in safe")
+	addMembersCmd.Flags().BoolVar(&UnlockAccounts, "unlock-accounts", false, "Unlock accounts in safe")
 	addMembersCmd.Flags().BoolVar(&SpecifyNextAccountContent, "specify-next-account-content", false, "Specify next account's content within safe")
 	addMembersCmd.Flags().BoolVar(&ManageSafe, "manage-safe", false, "Manage the safe")
 	addMembersCmd.Flags().BoolVar(&ManageSafeMembers, "manage-safe-members", false, "Manage members of the safe")
@@ -411,6 +464,8 @@ func init() {
 	addMembersCmd.Flags().BoolVar(&CreateFolders, "create-folders", false, "Create folders within safe")
 	addMembersCmd.Flags().BoolVar(&DeleteFolders, "delete-folders", false, "Delete folders within safe")
 	addMembersCmd.Flags().BoolVar(&MoveAccountsAndFolders, "move-accounts-and-folders", false, "Move accounts and folders")
+	addMembersCmd.Flags().BoolVar(&RequestsAuthorizationLevel1, "requests-authz-level-1", false, "Approver for level 1 requests for access")
+	addMembersCmd.Flags().BoolVar(&RequestsAuthorizationLevel2, "requests-authz-level-2", false, "Approver for level 2 requests for access")
 
 	// remove-member
 	removeMembersCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Name of the safe")
