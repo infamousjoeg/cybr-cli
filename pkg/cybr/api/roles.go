@@ -6,7 +6,7 @@ import (
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 )
 
-// Get pre-defined role permissions for new safe member
+// GetRolePermissions assigns pre-defined safe permissions for new safe member
 func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
 	var permissions []requests.PermissionKeyValue
 
