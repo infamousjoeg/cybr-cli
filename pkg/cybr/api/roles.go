@@ -11,493 +11,110 @@ func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
 	var permissions []requests.PermissionKeyValue
 
 	// Set permissions variable to pre-define safe permissions based on role given
-	if role == "ApplicationIdentity" {
+	if role == "BreakGlass" ||
+		role == "EndUser" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "RetrieveAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "AccessWithoutConfirmation",
-				Value: true,
-			},
+			{Key: "UseAccounts", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "AIMWebService" {
-		permissions = []requests.PermissionKeyValue{}
-
-		return permissions, nil
-	}
-
-	if role == "AppProvider" {
+	} else if role == "BreakGlass" ||
+		role == "ApplicationIdentity" ||
+		role == "AppProvider" ||
+		role == "EndUser" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "RetrieveAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
+			{Key: "RetrieveAccounts", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "BreakGlass" {
+	} else if role != "AIMWebService" &&
+		role != "SafeManager" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "UseAccounts",
-				Value: true,
-			},
-			{
-				Key:   "RetrieveAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "AddAccounts",
-				Value: true,
-			},
-			{
-				Key:   "UpdateAccountContent",
-				Value: true,
-			},
-			{
-				Key:   "UpdateAccountProperties",
-				Value: true,
-			},
-			{
-				Key:   "InitiateCPMAccountManagementOperations",
-				Value: true,
-			},
-			{
-				Key:   "SpecifyNextAccountContent",
-				Value: true,
-			},
-			{
-				Key:   "RenameAccounts",
-				Value: true,
-			},
-			{
-				Key:   "DeleteAccounts",
-				Value: true,
-			},
-			{
-				Key:   "UnlockAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ManageSafe",
-				Value: true,
-			},
-			{
-				Key:   "ManageSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "BackupSafe",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "AccessWithoutConfirmation",
-				Value: true,
-			},
-			{
-				Key:   "CreateFolders",
-				Value: true,
-			},
-			{
-				Key:   "DeleteFolders",
-				Value: true,
-			},
-			{
-				Key:   "MoveAccountsAndFolders",
-				Value: true,
-			},
+			{Key: "ListAccounts", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "AccountProvisioner" {
+	} else if role == "BreakGlass" ||
+		role == "AccountProvisioner" ||
+		role == "CPDeployer" ||
+		role == "ComponentOrchestrator" ||
+		role == "APIAutomation" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "AddAccounts",
-				Value: true,
-			},
-			{
-				Key:   "UpdateAccountContent",
-				Value: true,
-			},
-			{
-				Key:   "UpdateAccountProperties",
-				Value: true,
-			},
-			{
-				Key:   "InitiateCPMAccountManagementOperations",
-				Value: true,
-			},
-			{
-				Key:   "RenameAccounts",
-				Value: true,
-			},
-			{
-				Key:   "DeleteAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "CreateFolders",
-				Value: true,
-			},
-			{
-				Key:   "DeleteFolders",
-				Value: true,
-			},
+			{Key: "AddAccounts", Value: true},
+			{Key: "UpdateAccountProperties", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "CPDeployer" {
+	} else if role == "BreakGlass" ||
+		role == "AccountProvisioner" ||
+		role == "APIAutomation" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "AddAccounts",
-				Value: true,
-			},
-			{
-				Key:   "UpdateAccountProperties",
-				Value: true,
-			},
-			{
-				Key:   "InitiateCPMAccountManagementOperations",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "AccessWithoutConfirmation",
-				Value: true,
-			},
+			{Key: "UpdateAccountContent", Value: true},
+			{Key: "RenameAccounts", Value: true},
+			{Key: "DeleteAccounts", Value: true},
+			{Key: "CreateFolders", Value: true},
+			{Key: "DeleteFolders", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "PasswordScheduler" {
+	} else if role == "BreakGlass" ||
+		role == "AccountProvisioner" ||
+		role == "CPDeployer" ||
+		role == "PasswordScheduler" ||
+		role == "ComponentOrchestrator" ||
+		role == "APIAutomation" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "InitiateCPMAccountManagementOperations",
-				Value: true,
-			},
-			{
-				Key:   "UnlockAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "AccessWithoutConfirmation",
-				Value: true,
-			},
+			{Key: "InitiateCPMAccountManagementOperations", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "SafeManager" {
+	} else if role == "BreakGlass" ||
+		role == "PasswordScheduler" ||
+		role == "APIAutomation" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "ManageSafe",
-				Value: true,
-			},
-			{
-				Key:   "ManageSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "BackupSafe",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "AccessWithoutConfirmation",
-				Value: true,
-			},
+			{Key: "UnlockAccounts", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "ComponentOrchestrator" {
+	} else if role == "BreakGlass" ||
+		role == "SafeManager" ||
+		role == "APIAutomation" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "AddAccounts",
-				Value: true,
-			},
-			{
-				Key:   "UpdateAccountProperties",
-				Value: true,
-			},
-			{
-				Key:   "InitiateCPMAccountManagementOperations",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "AccessWithoutConfirmation",
-				Value: true,
-			},
+			{Key: "ManageSafe", Value: true},
+			{Key: "ManageSafeMembers", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "EndUser" {
+	} else if role == "BreakGlass" ||
+		role == "SafeManager" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "UseAccounts",
-				Value: true,
-			},
-			{
-				Key:   "RetrieveAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
+			{Key: "BackupSafe", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "VaultAdmin" {
+	} else if role != "AIMWebService" &&
+		role != "ApplicationIdentity" &&
+		role != "AppProvider" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
+			{Key: "ViewAuditLog", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "ApproverLevel1" {
+	} else if role != "AIMWebService" &&
+		role != "ApplicationIdentity" &&
+		role != "ComponentOrchestrator" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "RequestsAuthorizationLevel1",
-				Value: true,
-			},
+			{Key: "ViewSafeMembers", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "ApproverLevel2" {
+	} else if role == "BreakGlass" ||
+		role == "ApplicationIdentity" ||
+		role == "CPDeployer" ||
+		role == "PasswordScheduler" ||
+		role == "SafeManager" ||
+		role == "ComponentOrchestrator" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "RequestsAuthorizationLevel2",
-				Value: true,
-			},
+			{Key: "AccessWithoutConfirmation", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "APIAutomation" {
+	} else if role == "BreakGlass" ||
+		role == "APIAutomation" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "AddAccounts",
-				Value: true,
-			},
-			{
-				Key:   "UpdateAccountContent",
-				Value: true,
-			},
-			{
-				Key:   "UpdateAccountProperties",
-				Value: true,
-			},
-			{
-				Key:   "InitiateCPMAccountManagementOperations",
-				Value: true,
-			},
-			{
-				Key:   "RenameAccounts",
-				Value: true,
-			},
-			{
-				Key:   "DeleteAccounts",
-				Value: true,
-			},
-			{
-				Key:   "UnlockAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ManageSafe",
-				Value: true,
-			},
-			{
-				Key:   "ManageSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
-			{
-				Key:   "CreateFolders",
-				Value: true,
-			},
-			{
-				Key:   "DeleteFolders",
-				Value: true,
-			},
-			{
-				Key:   "MoveAccountsAndFolders",
-				Value: true,
-			},
+			{Key: "MoveAccountsAndFolders", Value: true},
 		}
-
-		return permissions, nil
-	}
-
-	if role == "Auditor" {
+	} else if role == "BreakGlass" {
 		permissions = []requests.PermissionKeyValue{
-			{
-				Key:   "ListAccounts",
-				Value: true,
-			},
-			{
-				Key:   "ViewAuditLog",
-				Value: true,
-			},
-			{
-				Key:   "ViewSafeMembers",
-				Value: true,
-			},
+			{Key: "SpecifyNextAccountContent", Value: true},
 		}
-
-		return permissions, nil
+	} else if role == "ApproverLevel1" {
+		permissions = []requests.PermissionKeyValue{
+			{Key: "RequestsAuthorizationLevel1", Value: true},
+		}
+	} else if role == "ApproverLevel2" {
+		permissions = []requests.PermissionKeyValue{
+			{Key: "RequestsAuthorizationLevel2", Value: true},
+		}
+	} else {
+		return permissions, fmt.Errorf("Unknown role value")
 	}
 
-	return permissions, fmt.Errorf("Unknown role value")
+	return permissions, nil
 }
