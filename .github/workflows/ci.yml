@@ -71,6 +71,8 @@ jobs:
         run: export GO111MODULE=on
       - name: Create ./bin/ directory
         run: mkdir -p bin
+      - name: Fix x/sys Issues
+        run: go get -u golang.org/x/sys
       - name: Build Binaries
         run: |
           CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o ./bin/${{ matrix.goos }}_cybr .
