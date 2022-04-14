@@ -23,8 +23,19 @@ func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
 		permissions = []requests.PermissionKeyValue{
 			{Key: "RetrieveAccounts", Value: true},
 		}
-	} else if role != "AIMWebService" &&
-		role != "SafeManager" {
+	} else if role == "BreakGlass" ||
+		role == "VaultAdmin" ||
+		role == "ApplicationIdentity" ||
+		role == "AppProvider" ||
+		role == "EndUser" ||
+		role == "AccountProvisioner" ||
+		role == "Auditor" ||
+		role == "CPDeployer" ||
+		role == "ComponentOrchestrator" ||
+		role == "APIAutomation" ||
+		role == "PasswordScheduler" ||
+		role == "ApproverLevel1" ||
+		role == "ApproverLevel2" {
 		permissions = []requests.PermissionKeyValue{
 			{Key: "ListAccounts", Value: true},
 		}
@@ -74,15 +85,33 @@ func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
 		permissions = []requests.PermissionKeyValue{
 			{Key: "BackupSafe", Value: true},
 		}
-	} else if role != "AIMWebService" &&
-		role != "ApplicationIdentity" &&
-		role != "AppProvider" {
+	} else if role == "BreakGlass" ||
+		role == "VaultAdmin" ||
+		role == "SafeManager" ||
+		role == "EndUser" ||
+		role == "AccountProvisioner" ||
+		role == "Auditor" ||
+		role == "CPDeployer" ||
+		role == "ComponentOrchestrator" ||
+		role == "APIAutomation" ||
+		role == "PasswordScheduler" ||
+		role == "ApproverLevel1" ||
+		role == "ApproverLevel2" {
 		permissions = []requests.PermissionKeyValue{
 			{Key: "ViewAuditLog", Value: true},
 		}
-	} else if role != "AIMWebService" &&
-		role != "ApplicationIdentity" &&
-		role != "ComponentOrchestrator" {
+	} else if role == "BreakGlass" ||
+		role == "VaultAdmin" ||
+		role == "SafeManager" ||
+		role == "EndUser" ||
+		role == "AccountProvisioner" ||
+		role == "Auditor" ||
+		role == "CPDeployer" ||
+		role == "ComponentOrchestrator" ||
+		role == "APIAutomation" ||
+		role == "PasswordScheduler" ||
+		role == "ApproverLevel1" ||
+		role == "ApproverLevel2" {
 		permissions = []requests.PermissionKeyValue{
 			{Key: "ViewSafeMembers", Value: true},
 		}

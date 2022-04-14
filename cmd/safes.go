@@ -157,6 +157,23 @@ var addMembersCmd = &cobra.Command{
 	Short: "Add a member to a safe with specific permissions",
 	Long: `This method adds an existing user as a Safe member.
 	The user who runs this web service requires Manage Safe Members permissions in the Vault.
+
+	Available Roles:
+		- BreakGlass
+		- VaultAdmin
+		- SafeManager
+		- EndUser
+		- Auditor
+		- AIMWebService
+		- AppProvider
+		- ApplicationIdentity
+		- AccountProvisioner
+		- CPDeployer
+		- ComponentOrchestrator
+		- APIAutomation
+		- PasswordScheduler
+		- ApproverLevel1
+		- ApproverLevel2
 	
 	Example Usage:
 	$ cybr safes add-member -s SafeName -m MemberName --list-account --use-account --retrieve-account
