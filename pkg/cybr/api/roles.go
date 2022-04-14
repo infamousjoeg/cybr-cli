@@ -99,20 +99,6 @@ func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
 		role == "ApproverLevel2" {
 		permissions = []requests.PermissionKeyValue{
 			{Key: "ViewAuditLog", Value: true},
-		}
-	} else if role == "BreakGlass" ||
-		role == "VaultAdmin" ||
-		role == "SafeManager" ||
-		role == "EndUser" ||
-		role == "AccountProvisioner" ||
-		role == "Auditor" ||
-		role == "CPDeployer" ||
-		role == "ComponentOrchestrator" ||
-		role == "APIAutomation" ||
-		role == "PasswordScheduler" ||
-		role == "ApproverLevel1" ||
-		role == "ApproverLevel2" {
-		permissions = []requests.PermissionKeyValue{
 			{Key: "ViewSafeMembers", Value: true},
 		}
 	} else if role == "BreakGlass" ||
