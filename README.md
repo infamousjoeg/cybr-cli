@@ -3,8 +3,10 @@
 A "Swiss Army Knife" command-line interface (CLI) for easy human and non-human interaction with CyberArk's suite of products.
 
 Current products supported:
-* CyberArk Privileged Access Security (PAS)
-* CyberArk Conjur Secrets Manager Enterprise & Open Source
+* CyberArk Privileged Access Manager (PAM)
+* CyberArk Secrets Manager Central Credential Provider (CCP)
+* CyberArk Conjur Secrets Manager Enterprise & [Open Source](https://conjur.org)
+* CyberArk Cloud Entitlements Manager ([Free trial](https://www.cyberark.com/try-buy/cloud-entitlements-manager/))
 
 **Want to get dangerous quickly?** Check out the example bash script at [dev/add-delete-pas-application.sh](dev/add-delete-pas-application.sh).
 
@@ -13,13 +15,16 @@ Current products supported:
 ## Table of Contents <!-- omit in toc -->
 
 - [Install](#install)
-  - [MacOS](#macos)
-  - [Windows or Linux](#windows-or-linux)
-  - [AWS CloudShell](#aws-cloudshell)
-  - [Install from Source](#install-from-source)
+	- [MacOS](#macos)
+	- [Windows or Linux](#windows-or-linux)
+	- [AWS CloudShell](#aws-cloudshell)
+	- [Install from Source](#install-from-source)
 - [Usage](#usage)
+- [Autocomplete](#autocomplete)
 - [Example Source Code](#example-source-code)
-  - [Logon to the PAS REST API Web Service](#logon-to-the-pas-rest-api-web-service)
+	- [Logon to the PAS REST API Web Service](#logon-to-the-pas-rest-api-web-service)
+- [Security](#security)
+	- [`cybr safes add-member --role` Role Permissions](#cybr-safes-add-member---role-role-permissions)
 - [Testing](#testing)
 - [Maintainers](#maintainers)
 - [Contributions](#contributions)
@@ -115,6 +120,32 @@ func main() {
 	fmt.Printf("Session Token:\r\n%s\r\n\r\n", token)
 }
 ```
+
+## Security
+
+If there is a security concern or bug discovered, please responsibly disclose all information to joe (dot) garcia (at) cyberark (dot) com.
+
+### `cybr safes add-member --role` Role Permissions
+
+All safe member roles defined below are based on best practices and recommendations put forth by CyberArk's PAS Programs Office, creators of the CyberArk Blueprint for Identity Security.
+
+|Role|Safe Authorizations|
+|---|---|
+|BreakGlass|All authorizations except Authorize Password Requests|
+|VaultAdmin|- List Accounts<br>- View Audit Log<br>- View Safe Members|
+|SafeManager|- Manage Safe<br>- Manage Safe Members<br>- View Audit Log<br>- View Safe Members<br>- Access Safe w/o Confirmation|
+|EndUser|- Use/Retrieve/List Accounts<br>- View Audit Log<br>- View Safe Members|
+|Auditor|- List Accounts<br>- View Audit Log<br>- View Safe Members|
+|AIMWebService|No authorizations|
+|AppProvider|- Retrieve/List Accounts<br>- View Safe Members|
+|ApplicationIdentity|- Retrieve/List Accounts|
+|AccountProvisioner|- List/Add/Delete Accounts<br>- Update Password Properties<br>- Initiate CPM Password Management Operations<br>- View Audit Log<br>- View Safe Members<br>- Access Safe w/o Confirmation|
+|CPDeployer|- List/Add Accounts<br>- Update Password Properties<br>- Initiate CPM Password Management Operations<br>- Manage Safe Member<br>- View Audit Log, View Safe Members<br>- Access Safe w/o Confirmation|
+|ComponentOrchestrator|- List/Add Accounts<br>- Update Password Properties<br>- Initiate CPM Password Management Operations<br>- View Audit Log<br>- Access Safe w/o Confirmation|
+|APIAutomation|- List/Add/Rename/Delete/Unlock Accounts<br>- Update Password Content/Properties<br>- Initiate CPM Password Management Operations<br>- Manage Safe<br>- Manage Safe Members<br>- View Audit Log<br>- View Safe Members<br>- Create/Delete Folders<br>- Move Accounts/Folders|
+|PasswordScheduler|- List Accounts<br>- Initiate CPM Password Management Operation<br>- View Audit Log<br>- View Safe Members<br>- Access Safe w/o Confirmation|
+|ApproverLevel1|- List Accounts<br>- View Audit Log<br>- View Safe Members<br>- Authorize Password Requests (Level 1)|
+|ApproverLevel2|- List Acccounts<br>- View Audit Log<br>- View Safe Members<br>- Authorize Password Requests (Level 2)|
 
 ## Testing
 
