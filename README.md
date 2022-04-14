@@ -127,6 +127,8 @@ If there is a security concern or bug discovered, please responsibly disclose al
 
 ### `cybr safes add-member --role` Role Permissions
 
+All safe member roles defined below are based on best practices and recommendations put forth by CyberArk's PAS Programs Office, creators of the CyberArk Blueprint for Identity Security.
+
 |Role|Safe Authorizations|
 |---|---|
 |BreakGlass|All authorizations except Authorize Password Requests|
