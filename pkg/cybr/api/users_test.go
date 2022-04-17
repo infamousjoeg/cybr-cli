@@ -63,8 +63,9 @@ func TestRemoveUserInvalidUserID(t *testing.T) {
 func TestAddRemoveUser(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 	user := requests.AddUser{
-		Username:               "testcliuser",
-		UserType:               "EPVUser",
+		Username: "testcliuser",
+		UserType: "EPVUser",
+		// file deepcode ignore HardcodedPassword/test: dummy secret for testing
 		InitialPassword:        "Cyberark1",
 		AuthenticationMethod:   []string{"AuthTypePass"},
 		Location:               "\\",
