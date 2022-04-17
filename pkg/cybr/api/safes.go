@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/queries"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/responses"
 	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
@@ -24,8 +25,8 @@ func (c Client) ListSafes() (*responses.ListSafes, error) {
 }
 
 // ListSafeMembers List all members of a safe
-func (c Client) ListSafeMembers(safeName string) (*responses.ListSafeMembers, error) {
-	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Safes/%s/Members", c.BaseURL, url.QueryEscape(safeName))
+func (c Client) ListSafeMembers(safeName string, query *queries.ListSafeMembers) (*responses.ListSafeMembers, error) {
+	url := fmt.Sprintf("%s/PasswordVault/api/Safes/%s/Members%s", c.BaseURL, url.QueryEscape(safeName), httpJson.GetURLQuery(query))
 	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.ListSafeMembers{}, fmt.Errorf("Failed to list members of safe '%s'. %s", safeName, err)

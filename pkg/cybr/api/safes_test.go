@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/queries"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 )
 
@@ -23,7 +24,15 @@ func TestListSafesSuccess(t *testing.T) {
 func TestListSafeMembersSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	members, err := client.ListSafeMembers("PasswordManager")
+	query := &queries.ListSafeMembers{
+		Search: "",
+		Sort:   "",
+		Offset: 0,
+		Limit:  50,
+		Filter: "",
+	}
+
+	members, err := client.ListSafeMembers("PasswordManager", query)
 	if err != nil {
 		t.Errorf("Failed to list safes. %s", err)
 	}
@@ -36,7 +45,15 @@ func TestListSafeMembersSuccess(t *testing.T) {
 func TestListSafeMembersInvalidSafeName(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	_, err = client.ListSafeMembers("notReal")
+	query := &queries.ListSafeMembers{
+		Search: "",
+		Sort:   "",
+		Offset: 0,
+		Limit:  50,
+		Filter: "",
+	}
+
+	_, err = client.ListSafeMembers("notReal", query)
 	if !strings.Contains(err.Error(), "404") {
 		t.Errorf("Expecting 404 error to be returned but got. %s", err)
 	}
