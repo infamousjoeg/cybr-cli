@@ -45,6 +45,7 @@ func GetAuthURL(baseURL string, authType string, serviceID string) string {
 
 func getPem(url string) (string, error) {
 	conf := &tls.Config{
+		// file deepcode ignore TooPermissiveTrustManager: conjur.pem is not a trusted third-party certificate
 		InsecureSkipVerify: true,
 	}
 

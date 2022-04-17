@@ -73,7 +73,8 @@ func TestAddAndDeleteAccountSuccess(t *testing.T) {
 		UserName:   "add-account-test",
 		PlatformID: "UnixSSH",
 		SecretType: "password",
-		Secret:     "superSecret",
+		// file deepcode ignore HardcodedPassword/test: dummy secret for testing
+		Secret: "superSecret",
 	}
 
 	addedAccount, err := client.AddAccount(account)
@@ -100,7 +101,8 @@ func TestAddAccountInvalidSafeName(t *testing.T) {
 		UserName:   "add-account-test",
 		PlatformID: "UnixSSH",
 		SecretType: "password",
-		Secret:     "superSecret",
+		// file deepcode ignore HardcodedPassword/test: dummy secret for testing
+		Secret: "superSecret",
 	}
 
 	_, err = client.AddAccount(account)
