@@ -10,7 +10,7 @@ type ListSafeMembers struct {
 type Members struct {
 	SafeName                  string      `json:"safeName"`
 	SafeNumber                int         `json:"safeNumber"`
-	MemberId                  int         `json:"memberId"`
+	MemberID                  int         `json:"memberId"`
 	MemberName                string      `json:"memberName"`
 	MemberType                string      `json:"memberType"`
 	IsExpiredMembershipEnable bool        `json:"isExpiredMembershipEnable"`
