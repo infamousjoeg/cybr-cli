@@ -100,6 +100,8 @@ var safesCmd = &cobra.Command{
 	
 	Example Usage:
 	List All Safes: $ cybr safes list
+	List All Safes with Safe Member: $ cybr safes list -u UserName
+	List All Safes with Safe Member: $ cybr safes list -g GroupName
 	List Safe Members: $ cybr safes member list -s SafeName
 	Add Safe: $ cybr safes add -s SafeName -d Description --cpm ManagingCPM --days 0`,
 	Aliases: []string{"safe"},
@@ -111,7 +113,9 @@ var listSafesCmd = &cobra.Command{
 	Long: `List all safes the logged on user can read from PAS REST API.
 	
 	Example Usage:
-	$ cybr safes list`,
+	$ cybr safes list
+	$ cybr safes list -u UserName
+	$ cybr safes list -g GroupName`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
 		client, err := pasapi.GetConfigWithLogger(getLogger())
@@ -119,6 +123,29 @@ var listSafesCmd = &cobra.Command{
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
 		}
+
+		if User != "" {
+			safeNames, err := client.FilterSafes("memberType eq user AND includePredefinedUsers eq true", User)
+			if err != nil {
+				log.Fatalf("Failed to list safes for user %s. %s", User, err)
+				return
+			}
+			for _, safeName := range safeNames {
+				fmt.Println(safeName)
+			}
+			return
+		} else if Group != "" {
+			safeNames, err := client.FilterSafes("memberType eq group AND includePredefinedUsers eq true", Group)
+			if err != nil {
+				log.Fatalf("Failed to list safes for group %s. %s", Group, err)
+				return
+			}
+			for _, safeName := range safeNames {
+				fmt.Println(safeName)
+			}
+			return
+		}
+
 		// List All Safes
 		safes, err := client.ListSafes()
 		if err != nil {
@@ -150,13 +177,13 @@ var listMembersCmd = &cobra.Command{
 		}
 
 		if User != "" && Group != "" {
-			Filter = ""
+			Filter = "includePredefinedUsers eq true"
 			Search = fmt.Sprintf("%s %s", User, Group)
 		} else if User != "" {
-			Filter = "memberType eq user"
+			Filter = "memberType eq user AND includePredefinedUsers eq true"
 			Search = User
 		} else if Group != "" {
-			Filter = "memberType eq group"
+			Filter = "memberType eq group AND includePredefinedUsers eq true"
 			Search = Group
 		}
 
@@ -457,6 +484,9 @@ var updateSafeCmd = &cobra.Command{
 }
 
 func init() {
+	listSafesCmd.Flags().StringVarP(&User, "user", "u", "", "Username to filter request on")
+	listSafesCmd.Flags().StringVarP(&Group, "group", "g", "", "Group to filter request on")
+
 	listMembersCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Safe name to filter request on")
 	listMembersCmd.Flags().StringVarP(&User, "user", "u", "", "Username to filter request on")
 	listMembersCmd.Flags().StringVarP(&Group, "group", "g", "", "Group to filter request on")
