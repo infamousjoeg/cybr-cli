@@ -5,6 +5,7 @@ import (
 	"log"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/queries"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/spf13/cobra"
@@ -86,6 +87,10 @@ var (
 	Role string
 	// RolePermissions contain the pre-defined safe permissions of defined role
 	RolePermissions []requests.PermissionKeyValue
+	// User is the user to search for as a safe member
+	User string
+	// Group is the group to search for as a safe member
+	Group string
 )
 
 var safesCmd = &cobra.Command{
@@ -95,6 +100,8 @@ var safesCmd = &cobra.Command{
 	
 	Example Usage:
 	List All Safes: $ cybr safes list
+	List All Safes with Safe Member: $ cybr safes list -u UserName
+	List All Safes with Safe Member: $ cybr safes list -g GroupName
 	List Safe Members: $ cybr safes member list -s SafeName
 	Add Safe: $ cybr safes add -s SafeName -d Description --cpm ManagingCPM --days 0`,
 	Aliases: []string{"safe"},
@@ -106,7 +113,9 @@ var listSafesCmd = &cobra.Command{
 	Long: `List all safes the logged on user can read from PAS REST API.
 	
 	Example Usage:
-	$ cybr safes list`,
+	$ cybr safes list
+	$ cybr safes list -u UserName
+	$ cybr safes list -g GroupName`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
 		client, err := pasapi.GetConfigWithLogger(getLogger())
@@ -114,6 +123,29 @@ var listSafesCmd = &cobra.Command{
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
 		}
+
+		if User != "" {
+			safeNames, err := client.FilterSafes("memberType eq user AND includePredefinedUsers eq true", User)
+			if err != nil {
+				log.Fatalf("Failed to list safes for user %s. %s", User, err)
+				return
+			}
+			for _, safeName := range safeNames {
+				fmt.Println(safeName)
+			}
+			return
+		} else if Group != "" {
+			safeNames, err := client.FilterSafes("memberType eq group AND includePredefinedUsers eq true", Group)
+			if err != nil {
+				log.Fatalf("Failed to list safes for group %s. %s", Group, err)
+				return
+			}
+			for _, safeName := range safeNames {
+				fmt.Println(safeName)
+			}
+			return
+		}
+
 		// List All Safes
 		safes, err := client.ListSafes()
 		if err != nil {
@@ -132,7 +164,9 @@ var listMembersCmd = &cobra.Command{
 	the user logged on can read from PAS REST API.
 	
 	Example Usage:
-	$ cybr safes list-members -s SafeName`,
+	$ cybr safes list-members -s SafeName
+	$ cybr safes list-members -s SafeName -u UserName
+	$ cybr safes list-members -s SafeName -g GroupName`,
 	Aliases: []string{"list-member"},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
@@ -141,8 +175,28 @@ var listMembersCmd = &cobra.Command{
 			log.Fatalf("Failed to read configuration file. %s", err)
 			return
 		}
+
+		if User != "" && Group != "" {
+			Filter = "includePredefinedUsers eq true"
+			Search = fmt.Sprintf("%s %s", User, Group)
+		} else if User != "" {
+			Filter = "memberType eq user AND includePredefinedUsers eq true"
+			Search = User
+		} else if Group != "" {
+			Filter = "memberType eq group AND includePredefinedUsers eq true"
+			Search = Group
+		}
+
+		query := &queries.ListSafeMembers{
+			Search: Search,
+			Sort:   Sort,
+			Offset: Offset,
+			Limit:  Limit,
+			Filter: Filter,
+		}
+
 		// Add a safe with the configuration options given via CLI subcommands
-		members, err := client.ListSafeMembers(Safe)
+		members, err := client.ListSafeMembers(Safe, query)
 		if err != nil {
 			log.Fatalf("Failed to retrieve a list of all safe members for %s. %s", Safe, err)
 			return
@@ -430,7 +484,15 @@ var updateSafeCmd = &cobra.Command{
 }
 
 func init() {
+	listSafesCmd.Flags().StringVarP(&User, "user", "u", "", "Username to filter request on")
+	listSafesCmd.Flags().StringVarP(&Group, "group", "g", "", "Group to filter request on")
+
 	listMembersCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Safe name to filter request on")
+	listMembersCmd.Flags().StringVarP(&User, "user", "u", "", "Username to filter request on")
+	listMembersCmd.Flags().StringVarP(&Group, "group", "g", "", "Group to filter request on")
+	listMembersCmd.Flags().StringVarP(&Sort, "sort", "r", "", "Property or properties by which to sort returned safes, followed by asc (default) or desc to control sort direction. Separate multiple properties with commas, up to a maximum of three properties")
+	listMembersCmd.Flags().IntVarP(&Offset, "offset", "o", 0, "Offset of the first safe that is returned in the collection of results")
+	listMembersCmd.Flags().IntVarP(&Limit, "limit", "l", 0, "Maximum number of returned safes. If not specified, the default value is 50. The maximum number that can be specified is 1000")
 	listMembersCmd.MarkFlagRequired("safe")
 
 	addSafeCmd.Flags().StringVarP(&SafeName, "safe", "s", "", "Safe name to create")
