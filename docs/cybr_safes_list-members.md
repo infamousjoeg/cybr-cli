@@ -9,6 +9,8 @@ List all safe members on safes or a specific safe that
 	
 	Example Usage:
 	$ cybr safes list-members -s SafeName
+	$ cybr safes list-members -s SafeName -u UserName
+	$ cybr safes list-members -s SafeName -g GroupName
 
 ```
 cybr safes list-members [flags]
@@ -17,8 +19,13 @@ cybr safes list-members [flags]
 ### Options
 
 ```
-  -h, --help          help for list-members
-  -s, --safe string   Safe name to filter request on
+  -g, --group string   Group to filter request on
+  -h, --help           help for list-members
+  -l, --limit int      Maximum number of returned safes. If not specified, the default value is 50. The maximum number that can be specified is 1000
+  -o, --offset int     Offset of the first safe that is returned in the collection of results
+  -s, --safe string    Safe name to filter request on
+  -r, --sort string    Property or properties by which to sort returned safes, followed by asc (default) or desc to control sort direction. Separate multiple properties with commas, up to a maximum of three properties
+  -u, --user string    Username to filter request on
 ```
 
 ### Options inherited from parent commands

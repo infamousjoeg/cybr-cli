@@ -8,6 +8,8 @@ All safe actions that can be taken via PAS REST API.
 	
 	Example Usage:
 	List All Safes: $ cybr safes list
+	List All Safes with Safe Member: $ cybr safes list -u UserName
+	List All Safes with Safe Member: $ cybr safes list -g GroupName
 	List Safe Members: $ cybr safes member list -s SafeName
 	Add Safe: $ cybr safes add -s SafeName -d Description --cpm ManagingCPM --days 0
 

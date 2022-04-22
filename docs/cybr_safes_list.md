@@ -8,6 +8,8 @@ List all safes the logged on user can read from PAS REST API.
 	
 	Example Usage:
 	$ cybr safes list
+	$ cybr safes list -u UserName
+	$ cybr safes list -g GroupName
 
 ```
 cybr safes list [flags]
@@ -16,7 +18,9 @@ cybr safes list [flags]
 ### Options
 
 ```
-  -h, --help   help for list
+  -g, --group string   Group to filter request on
+  -h, --help           help for list
+  -u, --user string    Username to filter request on
 ```
 
 ### Options inherited from parent commands
