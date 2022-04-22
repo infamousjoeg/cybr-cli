@@ -20,6 +20,7 @@ Current products supported:
 	- [AWS CloudShell](#aws-cloudshell)
 	- [Install from Source](#install-from-source)
 - [Usage](#usage)
+	- [Documentation](#documentation)
 - [Autocomplete](#autocomplete)
 - [Example Source Code](#example-source-code)
 	- [Logon to the PAS REST API Web Service](#logon-to-the-pas-rest-api-web-service)
@@ -67,6 +68,8 @@ $ cybr help
 
 * `$ cybr help` for top-level commands list
 * `$ cybr [command] -h` for specific command details and sub-commands list
+
+### Documentation
 
 All commands are documentated [in the docs/ directory](docs/cybr.md).
 
