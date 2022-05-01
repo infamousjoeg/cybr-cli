@@ -1,0 +1,39 @@
+stages:
+  - test
+  - build
+
+format:
+  stage: test
+  script:
+    - go fmt $(go list ./... | grep -v /vendor/)
+
+vet:
+  stage: test
+  script:
+    - go vet $(go list ./... | grep -v /vendor/)
+
+unit-test:
+  stage: test
+  variables:
+    PAS_HOSTNAME: "https://cyberark.joegarcia.dev"
+    CONJUR_HOSTNAME: "https://conjur.joegarcia.dev"
+    CONJUR_AUTHENTICATE_URL: "$CONJUR_HOSTNAME/authn-jwt/gitlab/cyberarkdemo/authenticate"
+    CONJUR_RETRIEVE_URL: "$CONJUR_HOSTNAME/secrets/cyberarkdemo/variable"
+  script:
+    - echo "Authenticating with Job's JWT to Conjur"
+    - export SESSION_TOKEN=$(curl -X POST $CONJUR_AUTHENTICATE_URL -H "Content-Type:application/x-www-form-urlencoded" -H "Accept-Encoding:base64" --data-urlencode "jwt=${CI_JOB_JWT}")
+    - export PAS_USERNAME=$(curl -v -H "Authorization:Token token=\"${SESSION_TOKEN}\"" $CONJUR_RETRIEVE_URL/SyncVault/LOB_CI/D-Win-SvcAccts/Operating%20System-WinDomain-10.0.4.48-Svc_CybrCLI/username)
+    - export PAS_PASSWORD=$(curl -H "Authorization:Token token=\"${SESSION_TOKEN}\"" $CONJUR_RETRIEVE_URL/SyncVault/LOB_CI/D-Win-SvcAccts/Operating%20System-WinDomain-10.0.4.48-Svc_CybrCLI/password)
+    - export CCP_CLIENT_CERT=$(curl -H "Authorization:Token token=\"${SESSION_TOKEN}\"" $CONJUR_RETRIEVE_URL/SyncVault/LOB_CI/D-App-CybrCLI/Website-GenericWebApp-httpscyberark.joegarcia.dev-ccp_client_certificate/password | base64 --decode)
+    - export CCP_CLIENT_PRIVATE_KEY=$(curl -H "Authorization:Token token=\"${SESSION_TOKEN}\"" $CONJUR_RETRIEVE_URL/SyncVault/LOB_CI/D-App-CybrCLI/Website-GenericWebApp-httpscyberark.joegarcia.dev-ccp_client_key/password  | base64 --decode)
+    - echo "Running authenticated unit tests for cybr-cli"
+    - go test -race $(go list ./... | grep -v /vendor/)
+
+compile:
+  stage: build
+  script:
+    - mkdir -p mybinaries
+    - go build -o mybinaries ./...
+  artifacts:
+    paths:
+      - mybinaries
