@@ -22,7 +22,7 @@ func (c Client) ListPlatforms(query *queries.ListPlatforms) (*responses.ListPlat
 	return &ListPlatformsResponse, err
 }
 
-// GetAccount details for specific account
+// GetPlatform details for specific platform
 func (c Client) GetPlatform(platformID string) (*responses.GetPlatform, error) {
 	url := fmt.Sprintf("%s/PasswordVault/api/platforms/%s", c.BaseURL, platformID)
 	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)

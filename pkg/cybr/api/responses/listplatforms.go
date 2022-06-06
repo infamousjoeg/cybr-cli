@@ -18,12 +18,12 @@ type ListPlatform struct {
 
 // General contains the general details of a platform
 type General struct {
-	Id             string `json:"id"`
+	ID             string `json:"id"`
 	Name           string `json:"name"`
 	SystemType     string `json:"systemType"`
 	Active         bool   `json:"active"`
 	Description    string `json:"description,omitempty"`
-	PlatformBaseId string `json:"platformBaseId"`
+	PlatformBaseID string `json:"platformBaseId"`
 	PlatformType   string `json:"platformType"`
 }
 
@@ -68,7 +68,7 @@ type CredentialsManagement struct {
 type SessionManagement struct {
 	RequirePrivilegedSessionMonitoringAndIsolation bool   `json:"requirePrivilegedSessionMonitoringAndIsolation"`
 	RecordAndSaveSessionActivity                   bool   `json:"recordAndSaveSessionActivity"`
-	PSMServerId                                    string `json:"psmServerId,omitempty"`
+	PSMServerID                                    string `json:"psmServerId,omitempty"`
 }
 
 // PrivilegedAccessWorkflows contains the privileged access workflows of a platform
