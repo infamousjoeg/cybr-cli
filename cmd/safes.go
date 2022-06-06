@@ -512,7 +512,7 @@ func init() {
 	updateSafeCmd.Flags().StringVarP(&SafeName, "safe", "s", "", "New safe name to change to")
 	updateSafeCmd.Flags().StringVarP(&Description, "desc", "d", "", "New description to change to")
 	updateSafeCmd.Flags().BoolVarP(&OLACEnabled, "olac", "O", false, "Enable object-level access control (OLAC) on safe (cannot be disabled)")
-	updateSafeCmd.Flags().StringVarP(&ManagingCPM, "cpm", "", "", "New managing CPM user to change to")
+	updateSafeCmd.Flags().StringVarP(&ManagingCPM, "cpm", "", "PasswordManager", "New managing CPM user to change to other than PasswordManager")
 	updateSafeCmd.MarkFlagRequired("target-safe")
 
 	// add-member
