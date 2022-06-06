@@ -317,6 +317,22 @@ var conjurInfoCmd = &cobra.Command{
 	},
 }
 
+var conjurWhoamiCmd = &cobra.Command{
+	Use:   "whoami",
+	Short: "Get current user info logged into Conjur",
+	Long: `Get current user information logged into Conjur.
+	
+	Example Usage:
+	$ cybr conjur whoami`,
+	Run: func(cmd *cobra.Command, args []string) {
+		result, err := conjur.Whoami()
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+		prettyprint.PrintJSON(result)
+	},
+}
+
 var conjurListResourcesCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List conjur resources",
@@ -459,6 +475,7 @@ func init() {
 	conjurCmd.AddCommand(conjurSetSecretCmd)
 	conjurCmd.AddCommand(conjurEnableAuthnCmd)
 	conjurCmd.AddCommand(conjurInfoCmd)
+	conjurCmd.AddCommand(conjurWhoamiCmd)
 	conjurCmd.AddCommand(conjurListResourcesCmd)
 	conjurCmd.AddCommand(conjurRotateAPIKeyCmd)
 	conjurCmd.AddCommand(conjurLogoffCmd)
