@@ -1,22 +1,22 @@
-## cybr conjur logoff
+## cybr conjur whoami
 
-Logoff to Conjur
+Get current user info logged into Conjur
 
 ### Synopsis
 
-Logoff to conjur and remove the ~/.netrc and ~/.conjurrc files
+Get current user information logged into Conjur.
 	
 	Example Usage:
-	$ cybr conjur logoff
+	$ cybr conjur whoami
 
 ```
-cybr conjur logoff [flags]
+cybr conjur whoami [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for logoff
+  -h, --help   help for whoami
 ```
 
 ### Options inherited from parent commands
