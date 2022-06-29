@@ -45,6 +45,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
+        context: .
         tags: |
           infamousjoeg/cybr-cli/cybr-cli:${{ steps.client_version.outputs.prop }}
           infamousjoeg/cybr-cli/cybr-cli:latest
