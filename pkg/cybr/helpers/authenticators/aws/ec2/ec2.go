@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/aws"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws"
 )
 
 type EC2 struct {

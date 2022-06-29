@@ -85,7 +85,8 @@ var conjurLogonCmd = &cobra.Command{
 	Long: `Authenticate to Conjur using API Key or password
 	
 	Example Usage:
-	$ cybr conjur logon -a account -b https://conjur.example.com -l admin`,
+	$ cybr conjur logon -a account -b https://conjur.example.com -l admin
+	$ cybr conjur logon -a account -b https://conjur.example.com -l serviceAccountUser --authn-ldap`,
 	Aliases: []string{"login"},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Print("Enter password: ")

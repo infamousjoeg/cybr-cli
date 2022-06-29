@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/aws"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws"
 )
 
 // Lambda represents a lambda function and the environment variables where the AWS credentials are located

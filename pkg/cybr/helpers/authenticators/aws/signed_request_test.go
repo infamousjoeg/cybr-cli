@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/aws"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authn/aws"
 )
 
 const (

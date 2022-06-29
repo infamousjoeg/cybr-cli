@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/aws"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws"
 )
 
 // ECS aws resource type

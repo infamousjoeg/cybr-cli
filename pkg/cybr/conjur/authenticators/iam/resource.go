@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/aws"
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/aws/ec2"
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/aws/ecs"
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/aws/lambda"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws/ec2"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws/ecs"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws/lambda"
 )
 
 func getAwsResources() []aws.AwsResource {

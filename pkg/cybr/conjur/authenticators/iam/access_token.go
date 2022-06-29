@@ -3,7 +3,7 @@ package iam
 import (
 	"io/ioutil"
 
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/aws"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws"
 )
 
 // GetConjurAccessToken Get Conjur access token from Conjur

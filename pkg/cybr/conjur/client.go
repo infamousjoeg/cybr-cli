@@ -10,6 +10,7 @@ import (
 
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/conjur/authenticators"
 )
 
 var (
@@ -78,6 +79,18 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 	return client, &loginPair, err
 }
 
+// GetConjurClientNew create conjur client based on the provided config
+func GetConjurClientNew(authenticatorName string) (*conjurapi.Client, *authn.LoginPair, error) {
+	authenticator, err := authenticators.GetAuthenticator(authenticatorName)
+	if err != nil {
+		return nil, nil, fmt.Errorf("%s", err)
+	}
+
+	client, err := authenticator.Authenticate()
+
+	return client, &authn.LoginPair{}, nil
+}
+
 // GetConjurClient create conjur client and login pair for ~/.conjurrc and ~/.netrc
 func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 	client, loginPair, err := getClientFromEnvironmentVariable()
@@ -121,6 +134,7 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 }
 
 // sendConjurAuthenticatedHTTPRequest Send a HTTP request with the conjur session token in the authorization header
+// This is used for API endpoints not included in the conjur-api-go SDK (info, whoami, enableauthn)
 func sendConjurAuthenticatedHTTPRequest(client *conjurapi.Client, loginPair *authn.LoginPair, url string, method string, body io.Reader) (*http.Response, error) {
 	sessionToken, err := client.Authenticate(*loginPair)
 	if err != nil {
