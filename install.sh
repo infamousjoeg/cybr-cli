@@ -1,7 +1,5 @@
 #!/bin/bash
 set -eou pipefail
-IFS=$'/t/n'
 
-wget https://github.com/infamousjoeg/cybr-cli/releases/latest/download/linux_cybr
-sudo chmod +x linux_cybr
-sudo mv linux_cybr /usr/bin/cybr
+wget https://github.com/infamousjoeg/cybr-cli/releases/latest/download/cybr-cli_linux_amd64.tar.gz
+sudo tar -xzvf cybr-cli_linux_amd64.tar.gz -C /usr/local/bin
