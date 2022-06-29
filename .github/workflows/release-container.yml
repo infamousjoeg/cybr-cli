@@ -37,7 +37,10 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: nfmsjoeg/cybr-cli:${{ steps.client_version.outputs.prop }}
+        context: .
+        tags: |
+          nfmsjoeg/cybr-cli:${{ steps.client_version.outputs.prop }}
+          nfmsjoeg/cybr-cli:latest
     - name: Login to GitHub Container Repository
       uses: docker/login-action@v1
       with:
@@ -48,4 +51,6 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: infamousjoeg/cybr-cli/cybr-cli:${{ steps.client_version.outputs.prop }}
+        tags: |
+          infamousjoeg/cybr-cli/cybr-cli:${{ steps.client_version.outputs.prop }}
+          infamousjoeg/cybr-cli/cybr-cli:latest
