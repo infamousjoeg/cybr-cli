@@ -20,9 +20,9 @@ func (c Client) ListAccounts(query *queries.ListAccounts) (*responses.ListAccoun
 	}
 
 	jsonString, _ := json.Marshal(response)
-	ListSafesResponse := responses.ListAccount{}
-	err = json.Unmarshal(jsonString, &ListSafesResponse)
-	return &ListSafesResponse, err
+	ListAccountsResponse := responses.ListAccount{}
+	err = json.Unmarshal(jsonString, &ListAccountsResponse)
+	return &ListAccountsResponse, err
 }
 
 // GetAccount details for specific account
