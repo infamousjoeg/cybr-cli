@@ -18,12 +18,6 @@ jobs:
       with:
         path: 'release.json'
         prop_path: 'version'
-    - name: Build Docker Container Package
-      run: |
-        docker build -t nfmsjoeg/cybr-cli:$TAG_NAME .
-        docker save nfmsjoeg/cybr-cli:$TAG_NAME > ./bin/docker_cybr.tar
-      env:
-        TAG_NAME: ${{ steps.client_version.outputs.prop }}
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
     - name: Set up Docker Buildx
