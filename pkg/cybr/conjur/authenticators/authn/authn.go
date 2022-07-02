@@ -18,7 +18,7 @@ func (r Authn) Authenticate() (*conjurapi.Client, error) {
 	return &conjurapi.Client{}, nil
 }
 
-// New will create a new authn Conjur Client
+// New will returns a new authn object
 func New() Authn {
 	return Authn{
 		GetAuthnURL:      "http://169.254.169.254/latest/meta-data/iam/security-credentials/",

@@ -11,6 +11,7 @@ import (
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/conjur"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
@@ -115,9 +116,9 @@ var conjurLogonCmd = &cobra.Command{
 			log.Fatalf("Failed to create ~/.conjurrc file. %s\n", err)
 		}
 
-		authnURL := conjur.GetAuthURL(BaseURL, "authn", "")
+		authnURL := authenticators.GetAuthURL(BaseURL, "authn", "")
 		if AuthnLDAP != "" {
-			authnURL = conjur.GetAuthURL(BaseURL, "authn-ldap", AuthnLDAP)
+			authnURL = authenticators.GetAuthURL(BaseURL, "authn-ldap", AuthnLDAP)
 		}
 
 		apiKey, err := conjur.Login(authnURL, Account, Username, byteSecretVal, certPath)
