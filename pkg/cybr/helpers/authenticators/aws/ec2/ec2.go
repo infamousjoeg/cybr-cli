@@ -9,13 +9,14 @@ import (
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws"
 )
 
+// EC2 holds the relevant internal metadata URLs for AWS EC2
 type EC2 struct {
-	GetIamRoleUrl       string
-	GetIamCredentialUrl string
+	GetIamRoleURL       string
+	GetIamCredentialURL string
 }
 
 func (r EC2) getIamRoleName() (string, error) {
-	resp, err := http.Get(r.GetIamRoleUrl)
+	resp, err := http.Get(r.GetIamRoleURL)
 	if err != nil {
 		return "", fmt.Errorf("Failed to retrieve IAM role name. %s", err)
 	}
@@ -30,7 +31,7 @@ func (r EC2) getIamRoleName() (string, error) {
 }
 
 func (r EC2) getIamCredential(iamRoleName string) (aws.Credential, error) {
-	resp, err := http.Get(fmt.Sprintf(r.GetIamCredentialUrl, iamRoleName))
+	resp, err := http.Get(fmt.Sprintf(r.GetIamCredentialURL, iamRoleName))
 	if err != nil {
 		return aws.Credential{}, fmt.Errorf("Failed to retrieve AM credential for role '%s'. %s", iamRoleName, err)
 	}
@@ -50,7 +51,7 @@ func (r EC2) getIamCredential(iamRoleName string) (aws.Credential, error) {
 	return cred, nil
 }
 
-// Name name of the resource type
+// Name of the resource type
 func (r EC2) Name() string {
 	return "ec2"
 }
@@ -67,7 +68,7 @@ func (r EC2) GetCredential() (aws.Credential, error) {
 // New will create a new EC2 AWS Resource
 func New() EC2 {
 	return EC2{
-		GetIamRoleUrl:       "http://169.254.169.254/latest/meta-data/iam/security-credentials/",
-		GetIamCredentialUrl: "http://169.254.169.254/latest/meta-data/iam/security-credentials/%s",
+		GetIamRoleURL:       "http://169.254.169.254/latest/meta-data/iam/security-credentials/",
+		GetIamCredentialURL: "http://169.254.169.254/latest/meta-data/iam/security-credentials/%s",
 	}
 }

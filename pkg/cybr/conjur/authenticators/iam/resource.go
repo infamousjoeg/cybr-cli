@@ -10,8 +10,8 @@ import (
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws/lambda"
 )
 
-func getAwsResources() []aws.AwsResource {
-	resources := []aws.AwsResource{}
+func getAwsResources() []aws.Resource {
+	resources := []aws.Resource{}
 	resources = append(resources, ec2.New())
 	resources = append(resources, lambda.New())
 	resources = append(resources, ecs.New())
@@ -19,7 +19,7 @@ func getAwsResources() []aws.AwsResource {
 }
 
 // GetAwsResource will return an interface that has the ability to retrieve IAM AWS credentials from the desired metadata endpoint
-func GetAwsResource(name string) (aws.AwsResource, error) {
+func GetAwsResource(name string) (aws.Resource, error) {
 	resources := getAwsResources()
 	for _, r := range resources {
 		if strings.ToLower(name) == r.Name() {

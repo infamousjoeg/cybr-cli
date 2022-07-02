@@ -2,8 +2,9 @@ package authn
 
 import "github.com/cyberark/conjur-api-go/conjurapi"
 
+// Authn is the struct that holds the details of the authentication
 type Authn struct {
-	GetAuthnUrl      string
+	GetAuthnURL      string
 	GetAuthnResource string
 }
 
@@ -12,7 +13,7 @@ func (r Authn) Name() string {
 	return "authn"
 }
 
-// GetConfig will retrieve the details of the authenticator
+// Authenticate will authenticate the user and return a Conjur API client
 func (r Authn) Authenticate() (*conjurapi.Client, error) {
 	return &conjurapi.Client{}, nil
 }
@@ -20,7 +21,7 @@ func (r Authn) Authenticate() (*conjurapi.Client, error) {
 // New will create a new authn Conjur Client
 func New() Authn {
 	return Authn{
-		GetAuthnUrl:      "http://169.254.169.254/latest/meta-data/iam/security-credentials/",
+		GetAuthnURL:      "http://169.254.169.254/latest/meta-data/iam/security-credentials/",
 		GetAuthnResource: "http://169.254.169.254/latest/meta-data/iam/security-credentials/%s",
 	}
 }

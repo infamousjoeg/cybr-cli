@@ -4,8 +4,9 @@ import (
 	"github.com/cyberark/conjur-api-go/conjurapi"
 )
 
+// IAM represents the IAM authenticator
 type IAM struct {
-	GetAuthnUrl      string
+	GetAuthnURL      string
 	GetAuthnResource string
 }
 
@@ -14,15 +15,15 @@ func (r IAM) Name() string {
 	return "authn-iam"
 }
 
-// GetConfig will retrieve the details of the authenticator
+// Authenticate will create a new authn-iam Conjur Client
 func (r IAM) Authenticate() (*conjurapi.Client, error) {
 	return &conjurapi.Client{}, nil
 }
 
-// Authenticate will create a new authn-iam Conjur Client
+// New returns a new IAM object
 func New() IAM {
 	return IAM{
-		GetAuthnUrl:      "http://169.254.169.254/latest/meta-data/iam/security-credentials/",
+		GetAuthnURL:      "http://169.254.169.254/latest/meta-data/iam/security-credentials/",
 		GetAuthnResource: "http://169.254.169.254/latest/meta-data/iam/security-credentials/%s",
 	}
 }

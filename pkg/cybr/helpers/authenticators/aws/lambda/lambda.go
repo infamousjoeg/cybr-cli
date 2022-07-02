@@ -44,6 +44,7 @@ func (r Lambda) GetCredential() (aws.Credential, error) {
 	}, nil
 }
 
+// New returns a new Lambda object
 func New() Lambda {
 	return Lambda{
 		AccessKey:       "AWS_ACCESS_KEY_ID",

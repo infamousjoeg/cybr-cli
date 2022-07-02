@@ -16,6 +16,7 @@ func getAuthenticators() []authenticators.Authenticator {
 	return authenticators
 }
 
+// GetAuthenticator will return the authenticator client for the given name
 func GetAuthenticator(name string) (authenticators.Authenticator, error) {
 	authenticators := getAuthenticators()
 	for _, r := range authenticators {

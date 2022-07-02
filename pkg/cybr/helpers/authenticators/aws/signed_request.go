@@ -69,18 +69,22 @@ func headerAsJSONString(amzDate string, token, payloadHash, authorizationHeader 
 	return fmt.Sprintf(headerTemplate, host, amzDate, token, payloadHash, authorizationHeader)
 }
 
+// GetDate returns the date in the format of yyyyMMdd
 func GetDate(t time.Time) string {
 	return t.UTC().Format("20060102")
 }
 
+// GetAmzDate returns the date in the format of yyyyMMdd'T'HHmmss'Z'
 func GetAmzDate(t time.Time) string {
 	return t.UTC().Format("20060102T150405Z")
 }
 
+// SHA256Hash returns the SHA256 hash of the input string
 func SHA256Hash(input string) string {
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(input)))
 }
 
+// CreateStringToSign returns the string for AWS STS to sign
 func CreateStringToSign(datestamp string, amzDate string, cannonicalRequest string) string {
 	algorithm := "AWS4-HMAC-SHA256"
 	credentialScope := getCredentialScope(datestamp)
@@ -88,6 +92,7 @@ func CreateStringToSign(datestamp string, amzDate string, cannonicalRequest stri
 	return stringToSign
 }
 
+// CreateCanonicalRequest returns the canonical request including signed headers from AWS STS
 func CreateCanonicalRequest(amzdate string, token, signedHeaders, payloadHash string) string {
 	canonicalURI := "/"
 	canonicalQueryString := "Action=GetCallerIdentity&Version=2011-06-15"
@@ -96,6 +101,7 @@ func CreateCanonicalRequest(amzdate string, token, signedHeaders, payloadHash st
 	return canonicalRequest
 }
 
+// GetAuthenticationRequest returns the signed request for AWS STS
 func GetAuthenticationRequest(accessKey string, secretAccessKey string, token string, dateTime time.Time) (string, error) {
 	amzDate := GetAmzDate(dateTime)
 	dateStamp := GetDate(dateTime)
@@ -120,6 +126,7 @@ func GetAuthenticationRequest(accessKey string, secretAccessKey string, token st
 	return headerAsJSONString(amzDate, token, payloadHash, authorizationHeader), nil
 }
 
+// GetAuthenticationRequestNow returns the signed request for AWS STS using the current time
 func GetAuthenticationRequestNow(accessKey string, secretAccessKey string, token string) (string, error) {
 	return GetAuthenticationRequest(accessKey, secretAccessKey, token, time.Now())
 }
