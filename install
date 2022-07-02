@@ -1,7 +1,3 @@
 #!/bin/bash
 
-<<<<<<< HEAD
-go build -o ~/bin/cybr .
-=======
 go build -o "$HOME/bin/cybr" .
->>>>>>> main
