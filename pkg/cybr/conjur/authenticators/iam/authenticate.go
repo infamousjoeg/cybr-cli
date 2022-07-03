@@ -2,14 +2,39 @@ package iam
 
 import (
 	"bytes"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
+	"time"
 )
 
 func getAuthnURL(authnURL string, account string, login string) string {
 	identifier := url.QueryEscape(login)
 	return fmt.Sprintf("%s/%s/%s/authenticate", authnURL, account, identifier)
+}
+
+func newHTTPSClient(ignoreSSLVerify bool, cert []byte) (*http.Client, error) {
+	// If not certificate provided do not create a certifictae pool
+	if cert == nil {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: ignoreSSLVerify},
+		}
+		return &http.Client{Transport: tr, Timeout: time.Second * 10}, nil
+	}
+
+	// certificate is provided so create pool and append to TLSClientConfig
+	pool := x509.NewCertPool()
+	ok := pool.AppendCertsFromPEM(cert)
+	if !ok {
+		return nil, fmt.Errorf("Can't append Conjur SSL cert")
+	}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{RootCAs: pool},
+	}
+	return &http.Client{Transport: tr, Timeout: time.Second * 10}, nil
 }
 
 // Authenticate to conjur using the authnURL and conjurAuthnRequest

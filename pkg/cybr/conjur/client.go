@@ -23,6 +23,7 @@ var (
 	envAuthenticatorKey  = "CONJUR_AUTHENTICATOR"
 	envAwsTypeKey        = "CONJUR_AWS_TYPE"
 	envAuthnServiceIDKey = "CONJUR_AUTHN_SERVICE_ID"
+	envSSLVerifyKey      = "CONJUR_SSL_VERIFY"
 
 	envAccount        = os.Getenv(envAccountKey)
 	envApplianceURL   = os.Getenv(envApplianceURLKey)
@@ -32,6 +33,7 @@ var (
 	envAuthenticator  = os.Getenv(envAuthenticatorKey)
 	envAwsType        = os.Getenv(envAwsTypeKey)
 	envAuthnServiceID = os.Getenv(envAuthnServiceIDKey)
+	envSSLVerify      = os.Getenv(envSSLVerifyKey)
 )
 
 func validateEnvironmentConfig(value string, keyName string, errMsg string) string {
@@ -106,11 +108,17 @@ func getClientFromAuthenticator() (*conjurapi.Client, *authn.LoginPair, error) {
 			fmt.Errorf("environment variable(s) not provided: %s", strings.TrimRight(errMsg, ", "))
 	}
 
+	envSSLVerifyBool := true
+	if envSSLVerify == strings.ToLower("false") || envSSLVerify == strings.ToLower("no") || envSSLVerify == "0" {
+		envSSLVerifyBool = false
+	}
+
 	config := helpersauthn.Config{
-		Account:      envAccount,
-		ApplianceURL: envApplianceURL,
-		Login:        envLogin,
-		ServiceID:    envAuthnServiceID,
+		Account:         envAccount,
+		ApplianceURL:    envApplianceURL,
+		Login:           envLogin,
+		ServiceID:       envAuthnServiceID,
+		IgnoreSSLVerify: envSSLVerifyBool,
 	}
 
 	authenticator, err := authenticators.GetAuthenticator(envAuthenticator, config)
