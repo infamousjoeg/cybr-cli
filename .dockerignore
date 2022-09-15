@@ -1,0 +1,14 @@
+.DS_STORE
+.github
+bin
+dev
+docs
+.git
+.gitignore
+.gitlab-ci.yml
+Jenkinsfile
+generate-docs
+install
+install.sh
+make
+secrets.yml
