@@ -18,9 +18,9 @@ func getAuthnURL(authnURL string, account string, login string) string {
 
 func newHTTPSClient(ignoreSSLVerify bool, cert []byte) (*http.Client, error) {
 	// If not certificate provided do not create a certifictae pool
-	if cert == nil {
+	if ignoreSSLVerify {
 		tr := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: ignoreSSLVerify},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
 		return &http.Client{Transport: tr, Timeout: time.Second * 10}, nil
 	}
