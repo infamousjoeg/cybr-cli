@@ -18,6 +18,6 @@ COPY --from=builder /app/cybr /app/
 RUN useradd -ms /bin/bash cybr && \
     chmod 777 /home/cybr && \
     mkdir -p /home/cybr/.cybr && \
-    chown -R cybr /home/cybr/.cybr 
+    chown -R cybr /home/cybr/.cybr
 ENV PATH="/app:${PATH}"
 ENTRYPOINT ["/app/cybr"]
