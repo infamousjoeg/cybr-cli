@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
 
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/queries"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
@@ -12,17 +11,13 @@ import (
 )
 
 // UnsuspendUser activates a suspended user. It does not activate an inactive user.
-func (c Client) UnsuspendUser(username string) error {
-	url := fmt.Sprintf("%s/PasswordVault/WebServices/PIMServices.svc/Users/%s", c.BaseURL, url.QueryEscape(username))
+func (c Client) UnsuspendUser(userID int) error {
+	url := fmt.Sprintf("%s/PasswordVault/api/Users/%d/activate", c.BaseURL, userID)
 
-	body := requests.UnsuspendUser{
-		Suspended: false,
-	}
-
-	response, err := httpJson.Put(url, c.SessionToken, body, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
-		return fmt.Errorf("Failed to unsuspend user '%s'. %s. %s", username, string(returnedError), err)
+		return fmt.Errorf("Failed to unsuspend user with id '%d'. %s. %s", userID, string(returnedError), err)
 	}
 	return nil
 }
