@@ -7,24 +7,24 @@ import (
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 )
 
-func TestUnsuspendUserSuccess(t *testing.T) {
-	client, err := defaultPASAPIClient(t)
+// func TestUnsuspendUserSuccess(t *testing.T) {
+//	client, err := defaultPASAPIClient(t)
+//
+//	err = client.UnsuspendUser(username)
+//	if err != nil {
+//		t.Errorf("Failed to unsuspend user '%s'. %s", username, err)
+//	}
+// }
 
-	err = client.UnsuspendUser(username)
-	if err != nil {
-		t.Errorf("Failed to unsuspend user '%s'. %s", username, err)
-	}
-}
-
-func TestUnsuspendUserInvalidUsername(t *testing.T) {
-	client, err := defaultPASAPIClient(t)
-
-	invalidUsername := "invalidUsername"
-	err = client.UnsuspendUser(invalidUsername)
-	if err == nil {
-		t.Errorf("Unsuspended user '%s' but user should not exist. This should never happen", invalidUsername)
-	}
-}
+// func TestUnsuspendUserInvalidUsername(t *testing.T) {
+//	client, err := defaultPASAPIClient(t)
+//
+//	invalidUsername := "invalidUsername"
+//	err = client.UnsuspendUser(invalidUsername)
+//	if err == nil {
+//		t.Errorf("Unsuspended user '%s' but user should not exist. This should never happen", invalidUsername)
+//	}
+// }
 
 func TestListUsersSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
