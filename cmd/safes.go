@@ -86,7 +86,7 @@ var (
 	// Role of safe member to determine pre-defined safe permissions
 	Role string
 	// RolePermissions contain the pre-defined safe permissions of defined role
-	RolePermissions []requests.PermissionKeyValue
+	RolePermissions map[string]string
 	// User is the user to search for as a safe member
 	User string
 	// Group is the group to search for as a safe member
@@ -242,95 +242,12 @@ var addMembersCmd = &cobra.Command{
 
 		// If no role is specified, default to user-provided safe permissions
 		if Role == "" {
-			RolePermissions = []requests.PermissionKeyValue{
-				{
-					Key:   "UseAccounts",
-					Value: UseAccounts,
-				},
-				{
-					Key:   "RetrieveAccounts",
-					Value: RetrieveAccounts,
-				},
-				{
-					Key:   "ListAccounts",
-					Value: ListAccounts,
-				},
-				{
-					Key:   "AddAccounts",
-					Value: AddAccounts,
-				},
-				{
-					Key:   "UpdateAccountContent",
-					Value: UpdateAccountContent,
-				},
-				{
-					Key:   "UpdateAccountProperties",
-					Value: UpdateAccountProperties,
-				},
-				{
-					Key:   "InitiateCPMAccountManagementOperations",
-					Value: InitiateCPMAccountManagementOperations,
-				},
-				{
-					Key:   "SpecifyNextAccountContent",
-					Value: SpecifyNextAccountContent,
-				},
-				{
-					Key:   "RenameAccounts",
-					Value: RenameAccounts,
-				},
-				{
-					Key:   "DeleteAccounts",
-					Value: DeleteAccounts,
-				},
-				{
-					Key:   "UnlockAccounts",
-					Value: UnlockAccounts,
-				},
-				{
-					Key:   "ManageSafe",
-					Value: ManageSafe,
-				},
-				{
-					Key:   "ManageSafeMembers",
-					Value: ManageSafeMembers,
-				},
-				{
-					Key:   "BackupSafe",
-					Value: BackupSafe,
-				},
-				{
-					Key:   "ViewAuditLog",
-					Value: ViewAuditLog,
-				},
-				{
-					Key:   "ViewSafeMembers",
-					Value: ViewSafeMembers,
-				},
-				{
-					Key:   "AccessWithoutConfirmation",
-					Value: AccessWithoutConfirmation,
-				},
-				{
-					Key:   "CreateFolders",
-					Value: CreateFolders,
-				},
-				{
-					Key:   "DeleteFolders",
-					Value: DeleteFolders,
-				},
-				{
-					Key:   "MoveAccountsAndFolders",
-					Value: MoveAccountsAndFolders,
-				},
-				{
-					Key:   "RequestsAuthorizationLevel1",
-					Value: RequestsAuthorizationLevel1,
-				},
-				{
-					Key:   "RequestsAuthorizationLevel2",
-					Value: RequestsAuthorizationLevel2,
-				},
+			var RolePermissionsString string
+			RolePermissionsString = fmt.Sprintf("UseAccounts=%v,RetrieveAccounts=%v,ListAccounts=%v,AddAccounts=%v,UpdateAccountContent=%v,UpdateAccountProperties=%v,InitiateCPMAccountManagementOperations=%v,SpecifyNextAccountContent=%v,RenameAccounts=%v,DeleteAccounts=%v,UnlockAccounts=%v,ManageSafe=%v,ManageSafeMembers=%v,BackupSafe=%v,ViewAuditLog=%v,ViewSafeMembers=%v,AccessWithoutConfirmation=%v,CreateFolders=%v,DeleteFolders=%v,MoveAccountsAndFolders=%v,RequestsAuthorizationLevel1=%v,RequestsAuthorizationLevel2=%v", UseAccounts, RetrieveAccounts, ListAccounts, AddAccounts, UpdateAccountContent, UpdateAccountProperties, InitiateCPMAccountManagementOperations, SpecifyNextAccountContent, RenameAccounts, DeleteAccounts, UnlockAccounts, ManageSafe, ManageSafeMembers, BackupSafe, ViewAuditLog, ViewSafeMembers, AccessWithoutConfirmation, CreateFolders, DeleteFolders, MoveAccountsAndFolders, RequestsAuthorizationLevel1, RequestsAuthorizationLevel2)
+			RolePermissions, err = keyValueStringToMap(RolePermissionsString)
+			if err != nil {
+				log.Fatalf("Failed to parse role permissions. %s", err)
+				return
 			}
 		}
 
@@ -344,12 +261,10 @@ var addMembersCmd = &cobra.Command{
 		}
 
 		newMember := requests.AddSafeMember{
-			Member: requests.AddSafeMemberInternal{
-				MemberName:               MemberName,
-				SearchIn:                 SearchIn,
-				MembershipExpirationDate: MembershipExpirationDate,
-				Permissions:              RolePermissions,
-			},
+			MemberName:               MemberName,
+			SearchIn:                 SearchIn,
+			MembershipExpirationDate: MembershipExpirationDate,
+			Permissions:              RolePermissions,
 		}
 
 		// Add a safe with the configuration options given via CLI subcommands
