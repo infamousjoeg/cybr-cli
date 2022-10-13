@@ -18,7 +18,7 @@ func (c *Client) Logon(req requests.Logon) error {
 	}
 
 	// Handle cyberark, ldap, and radius push, append & challenge/response authentication methods
-	url := fmt.Sprintf("%s/PasswordVault/api/auth/%s/logon", c.BaseURL, c.AuthType)
+	url := fmt.Sprintf("%s/passwordvault/api/auth/%s/logon", c.BaseURL, c.AuthType)
 	token, err := httpJson.SendRequestRaw(url, "POST", "", req, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return fmt.Errorf("Failed to authenticate to the PAS REST API. %s", err)
@@ -31,7 +31,7 @@ func (c *Client) Logon(req requests.Logon) error {
 // Logoff the PAS REST API Web Service
 func (c Client) Logoff() error {
 	// Set URL for request
-	url := fmt.Sprintf("%s/PasswordVault/api/auth/logoff", c.BaseURL)
+	url := fmt.Sprintf("%s/passwordvault/api/auth/logoff", c.BaseURL)
 	_, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return fmt.Errorf("Unable to logoff PAS REST API Web Service. %s", err)

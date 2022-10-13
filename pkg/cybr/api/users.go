@@ -12,7 +12,7 @@ import (
 
 // UnsuspendUser activates a suspended user. It does not activate an inactive user.
 func (c Client) UnsuspendUser(userID int) error {
-	url := fmt.Sprintf("%s/PasswordVault/api/Users/%d/activate", c.BaseURL, userID)
+	url := fmt.Sprintf("%s/passwordvault/api/Users/%d/activate", c.BaseURL, userID)
 
 	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
@@ -24,7 +24,7 @@ func (c Client) UnsuspendUser(userID int) error {
 
 // ListUsers returns a list of all existing users in the Vault except for the Master and the Batch built-in users.
 func (c Client) ListUsers(query *queries.ListUsers) (responses.ListUsers, error) {
-	url := fmt.Sprintf("%s/PasswordVault/api/Users%s", c.BaseURL, httpJson.GetURLQuery(query))
+	url := fmt.Sprintf("%s/passwordvault/api/Users%s", c.BaseURL, httpJson.GetURLQuery(query))
 
 	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
@@ -40,7 +40,7 @@ func (c Client) ListUsers(query *queries.ListUsers) (responses.ListUsers, error)
 
 // DeleteUser from PAS
 func (c Client) DeleteUser(userID int) error {
-	url := fmt.Sprintf("%s/PasswordVault/api/Users/%d", c.BaseURL, userID)
+	url := fmt.Sprintf("%s/passwordvault/api/Users/%d", c.BaseURL, userID)
 
 	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
@@ -53,7 +53,7 @@ func (c Client) DeleteUser(userID int) error {
 
 // AddUser to PAS
 func (c Client) AddUser(user requests.AddUser) (responses.AddUser, error) {
-	url := fmt.Sprintf("%s/PasswordVault/api/Users", c.BaseURL)
+	url := fmt.Sprintf("%s/passwordvault/api/Users", c.BaseURL)
 
 	response, err := httpJson.Post(url, c.SessionToken, user, c.InsecureTLS, c.Logger)
 	if err != nil {
