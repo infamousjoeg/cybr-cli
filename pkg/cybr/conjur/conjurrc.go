@@ -11,6 +11,8 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators"
 )
 
 var conjurrcTemplate string = `---
@@ -29,18 +31,6 @@ func GetConjurRcPath(homeDir string) string {
 // GetConjurPemPath returns path to the ~/conjur-<account>.pem file os-agnostic
 func GetConjurPemPath(homeDir string, account string) string {
 	return filepath.FromSlash(fmt.Sprintf("%s/conjur-%s.pem", homeDir, account))
-}
-
-// GetAuthURL returns a proper LDAP Authentication authn_url for the ~/.conjurrc file
-func GetAuthURL(baseURL string, authType string, serviceID string) string {
-	authURL := baseURL
-	if authType != "" {
-		authURL = authURL + "/" + authType
-	}
-	if serviceID != "" {
-		authURL = authURL + "/" + serviceID
-	}
-	return authURL
 }
 
 func getPem(url string) (string, error) {
@@ -113,7 +103,7 @@ func createConjurRcFile(account string, url string, certFileName string, authnLD
 		conjurrcContent := strings.Replace(conjurrcTemplate, "{{ ACCOUNT }}", account, 1)
 		conjurrcContent = strings.Replace(conjurrcContent, "{{ APPLIANCE_URL }}", url, 1)
 		conjurrcContent = strings.Replace(conjurrcContent, "{{ CERT_FILE }}", certFileName, 1)
-		ldapURL := GetAuthURL(url, "authn-ldap", authnLDAP)
+		ldapURL := authenticators.GetAuthURL(url, "authn-ldap", authnLDAP)
 		conjurrcContent = strings.Replace(conjurrcContent, "{{ AUTHN_LDAP_URL }}", ldapURL, 1)
 		if authnLDAP == "" {
 			removeLine := "authn_url: " + ldapURL

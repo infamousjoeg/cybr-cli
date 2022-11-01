@@ -2,134 +2,137 @@ package api
 
 import (
 	"fmt"
-
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
+	"strings"
 )
 
+// The content will look like
+// port=something, sp
+func keyValueStringToMap(content string) (map[string]string, error) {
+	if content == "" {
+		return nil, nil
+	}
+
+	if !strings.Contains(content, "=") {
+		return nil, fmt.Errorf("Invalid platform prop content. The provided content does not container a '='")
+	}
+
+	m := make(map[string]string)
+
+	// TODO: Gotta be a better way to do this
+	replaceWith := "^||||^"
+
+	// If the address or property contains a `\,` then replace
+	content = strings.ReplaceAll(content, "\\,", replaceWith)
+	props := strings.Split(content, ",")
+	for _, prop := range props {
+		if !strings.Contains(prop, "=") {
+			return nil, fmt.Errorf("Property '%s' is invalid because it does not contain a '=' to seperate key from value", prop)
+		}
+		kvs := strings.SplitN(prop, "=", 2)
+		key := strings.Trim(kvs[0], " ")
+		value := strings.Trim(strings.ReplaceAll(kvs[1], replaceWith, ","), " ")
+		m[key] = value
+	}
+
+	return m, nil
+}
+
 // GetRolePermissions assigns pre-defined safe permissions for new safe member
-func GetRolePermissions(role string) ([]requests.PermissionKeyValue, error) {
-	var permissions []requests.PermissionKeyValue
+func GetRolePermissions(role string) (map[string]string, error) {
+	var permissions map[string]string
 
 	// Set permissions variable to pre-define safe permissions based on role given
-	if role == "BreakGlass" ||
-		role == "EndUser" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "UseAccounts", Value: true},
+	if role == "BreakGlass" {
+		permissions, err := keyValueStringToMap("UseAccounts=true,RetrieveAccounts=true,ListAccounts=true,AddAccounts=true,UpdateAccountContent=true,UpdateAccountProperties=true,InitiateCPMAccountManagementOperations=true,SpecifyNextAccountContent=true,RenameAccounts=true,DeleteAccounts=true,UnlockAccounts=true,ManageSafe=true,ManageSafeMembers=true,BackupSafe=true,ViewAuditLog=true,ViewSafeMembers=true,AccessWithoutConfirmation=true,CreateFolders=true,DeleteFolders=true,MoveAccountsAndFolders=true,RequestsAuthorizationLevel1=true,RequestsAuthorizationLevel2=false")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "ApplicationIdentity" ||
-		role == "AppProvider" ||
-		role == "EndUser" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "RetrieveAccounts", Value: true},
+		return permissions, nil
+	} else if role == "VaultAdmin" {
+		permissions, err := keyValueStringToMap("ListAccounts=true,ViewAuditLog=true,ViewSafeMembers=true")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "VaultAdmin" ||
-		role == "ApplicationIdentity" ||
-		role == "AppProvider" ||
-		role == "EndUser" ||
-		role == "AccountProvisioner" ||
-		role == "Auditor" ||
-		role == "CPDeployer" ||
-		role == "ComponentOrchestrator" ||
-		role == "APIAutomation" ||
-		role == "PasswordScheduler" ||
-		role == "ApproverLevel1" ||
-		role == "ApproverLevel2" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "ListAccounts", Value: true},
+		return permissions, nil
+	} else if role == "SafeManager" {
+		permissions, err := keyValueStringToMap("ManageSafe=true,ManageSafeMembers=true,ViewAuditLog=true,ViewSafeMembers=true,AccessWithoutConfirmation=true")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "AccountProvisioner" ||
-		role == "CPDeployer" ||
-		role == "ComponentOrchestrator" ||
-		role == "APIAutomation" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "AddAccounts", Value: true},
-			{Key: "UpdateAccountProperties", Value: true},
+		return permissions, nil
+	} else if role == "EndUser" {
+		permissions, err := keyValueStringToMap("UseAccounts=true,RetrieveAccounts=true,ListAccounts=true,ViewAuditLog=true,ViewSafeMembers=true")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "AccountProvisioner" ||
-		role == "APIAutomation" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "UpdateAccountContent", Value: true},
-			{Key: "RenameAccounts", Value: true},
-			{Key: "DeleteAccounts", Value: true},
-			{Key: "CreateFolders", Value: true},
-			{Key: "DeleteFolders", Value: true},
+		return permissions, nil
+	} else if role == "Auditor" {
+		permissions, err := keyValueStringToMap("ListAccounts=true,ViewAuditLog=true,ViewSafeMembers=true")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "AccountProvisioner" ||
-		role == "CPDeployer" ||
-		role == "PasswordScheduler" ||
-		role == "ComponentOrchestrator" ||
-		role == "APIAutomation" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "InitiateCPMAccountManagementOperations", Value: true},
+		return permissions, nil
+	} else if role == "AIMWebService" {
+		permissions, err := keyValueStringToMap("")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "PasswordScheduler" ||
-		role == "APIAutomation" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "UnlockAccounts", Value: true},
+		return permissions, nil
+	} else if role == "AppProvider" {
+		permissions, err := keyValueStringToMap("RetrieveAccounts=true,ListAccounts=true")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "SafeManager" ||
-		role == "APIAutomation" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "ManageSafe", Value: true},
-			{Key: "ManageSafeMembers", Value: true},
+		return permissions, nil
+	} else if role == "ApplicationIdentity" {
+		permissions, err := keyValueStringToMap("RetrieveAccounts=true,ListAccounts=true")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "SafeManager" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "BackupSafe", Value: true},
+		return permissions, nil
+	} else if role == "AccountProvisioner" {
+		permissions, err := keyValueStringToMap("ListAccounts=true,AddAccounts=true,UpdateAccountProperties=true,InitiateCPMAccountManagementOperations=true,DeleteAccounts=true,ViewAuditLog=true,ViewSafeMembers=true,AccessWithoutConfirmation=true")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "VaultAdmin" ||
-		role == "SafeManager" ||
-		role == "EndUser" ||
-		role == "AccountProvisioner" ||
-		role == "Auditor" ||
-		role == "CPDeployer" ||
-		role == "ComponentOrchestrator" ||
-		role == "APIAutomation" ||
-		role == "PasswordScheduler" ||
-		role == "ApproverLevel1" ||
-		role == "ApproverLevel2" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "ViewAuditLog", Value: true},
-			{Key: "ViewSafeMembers", Value: true},
+		return permissions, nil
+	} else if role == "CPDeployer" {
+		permissions, err := keyValueStringToMap("ListAccounts=true,AddAccounts=true,UpdateAccountProperties=true,InitiateCPMAccountManagementOperations=true,ManageSafeMembers=true,ViewAuditLog=true,ViewSafeMembers=true,AccessWithoutConfirmation=true")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "ApplicationIdentity" ||
-		role == "CPDeployer" ||
-		role == "PasswordScheduler" ||
-		role == "SafeManager" ||
-		role == "ComponentOrchestrator" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "AccessWithoutConfirmation", Value: true},
+		return permissions, nil
+	} else if role == "ComponentOrchestrator" {
+		permissions, err := keyValueStringToMap("ListAccounts=true,AddAccounts=true,UpdateAccountProperties=true,InitiateCPMAccountManagementOperations=true,ViewAuditLog=true,AccessWithoutConfirmation=true")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" ||
-		role == "APIAutomation" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "MoveAccountsAndFolders", Value: true},
+		return permissions, nil
+	} else if role == "APIAutomation" {
+		permissions, err := keyValueStringToMap("ListAccounts=true,AddAccounts=true,UpdateAccountContent=true,UpdateAccountProperties=true,InitiateCPMAccountManagementOperations=true,RenameAccounts=true,DeleteAccounts=true,UnlockAccounts=true,ManageSafe=true,ManageSafeMembers=true,ViewAuditLog=true,ViewSafeMembers=true,AccessWithoutConfirmation=true,CreateFolders=true,DeleteFolders=true,MoveAccountsAndFolders=true")
+		if err != nil {
+			return nil, err
 		}
-	} else if role == "BreakGlass" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "SpecifyNextAccountContent", Value: true},
+		return permissions, nil
+	} else if role == "PasswordScheduler" {
+		permissions, err := keyValueStringToMap("ListAccounts=true,InitiateCPMAccountManagementOperations=true,ViewAuditLog=true,ViewSafeMembers=true,AccessWithoutConfirmation=true")
+		if err != nil {
+			return nil, err
 		}
+		return permissions, nil
 	} else if role == "ApproverLevel1" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "RequestsAuthorizationLevel1", Value: true},
+		permissions, err := keyValueStringToMap("ListAccounts=true,ViewAuditLog=true,ViewSafeMembers=true,RequestsAuthorizationLevel1=true")
+		if err != nil {
+			return nil, err
 		}
+		return permissions, nil
 	} else if role == "ApproverLevel2" {
-		permissions = []requests.PermissionKeyValue{
-			{Key: "RequestsAuthorizationLevel2", Value: true},
+		permissions, err := keyValueStringToMap("ListAccounts=true,ViewAuditLog=true,ViewSafeMembers=true,RequestsAuthorizationLevel2=true")
+		if err != nil {
+			return nil, err
 		}
+		return permissions, nil
 	} else {
 		return permissions, fmt.Errorf("Unknown role value")
 	}
-
-	return permissions, nil
 }
