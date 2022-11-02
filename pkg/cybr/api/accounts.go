@@ -13,7 +13,7 @@ import (
 
 // ListAccounts CyberArk user has access to
 func (c Client) ListAccounts(query *queries.ListAccounts) (*responses.ListAccount, error) {
-	url := fmt.Sprintf("%s/PasswordVault/api/Accounts%s", c.BaseURL, httpJson.GetURLQuery(query))
+	url := fmt.Sprintf("%s/passwordvault/api/Accounts%s", c.BaseURL, httpJson.GetURLQuery(query))
 	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.ListAccount{}, fmt.Errorf("Failed to list accounts. %s", err)
@@ -27,7 +27,7 @@ func (c Client) ListAccounts(query *queries.ListAccounts) (*responses.ListAccoun
 
 // GetAccount details for specific account
 func (c Client) GetAccount(accountID string) (*responses.GetAccount, error) {
-	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s", c.BaseURL, accountID)
+	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s", c.BaseURL, accountID)
 	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.GetAccount{}, fmt.Errorf("Failed to get account. %s", err)
@@ -41,7 +41,7 @@ func (c Client) GetAccount(accountID string) (*responses.GetAccount, error) {
 
 // AddAccount to cyberark
 func (c Client) AddAccount(account requests.AddAccount) (*responses.GetAccount, error) {
-	url := fmt.Sprintf("%s/PasswordVault/api/Accounts", c.BaseURL)
+	url := fmt.Sprintf("%s/passwordvault/api/Accounts", c.BaseURL)
 	logger := c.GetLogger().AddSecret(account.Secret)
 	response, err := httpJson.Post(url, c.SessionToken, account, c.InsecureTLS, logger)
 	logger = logger.ClearSecrets()
@@ -59,7 +59,7 @@ func (c Client) AddAccount(account requests.AddAccount) (*responses.GetAccount, 
 
 // DeleteAccount from cyberark
 func (c Client) DeleteAccount(accountID string) error {
-	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s", c.BaseURL, accountID)
+	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s", c.BaseURL, accountID)
 	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
@@ -71,7 +71,7 @@ func (c Client) DeleteAccount(accountID string) error {
 
 // GetJITAccess from a specific account
 func (c Client) GetJITAccess(accountID string) error {
-	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s/grantAdministrativeAccess", c.BaseURL, accountID)
+	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/grantAdministrativeAccess", c.BaseURL, accountID)
 	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
@@ -83,7 +83,7 @@ func (c Client) GetJITAccess(accountID string) error {
 
 // RevokeJITAccess from a specific account
 func (c Client) RevokeJITAccess(accountID string) error {
-	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s/RevokeAdministrativeAccess", c.BaseURL, accountID)
+	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/RevokeAdministrativeAccess", c.BaseURL, accountID)
 	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
@@ -95,7 +95,7 @@ func (c Client) RevokeJITAccess(accountID string) error {
 
 // GetAccountPassword This method enables users to retrieve the password or SSH key of an existing account that is identified by its Account ID. It enables users to specify a reason and ticket ID, if required
 func (c Client) GetAccountPassword(accountID string, request requests.GetAccountPassword) (string, error) {
-	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s/Password/Retrieve", c.BaseURL, accountID)
+	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/Password/Retrieve", c.BaseURL, accountID)
 
 	response, err := httpJson.SendRequestRaw(url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
 	if err != nil {
@@ -108,7 +108,7 @@ func (c Client) GetAccountPassword(accountID string, request requests.GetAccount
 
 // GetAccountSSHKey This method enables users to retrieve the password or SSH key of an existing account that is identified by its Account ID. It enables users to specify a reason and ticket ID, if required
 func (c Client) GetAccountSSHKey(accountID string, request requests.GetAccountPassword) (string, error) {
-	url := fmt.Sprintf("%s/PasswordVault/api/Accounts/%s/Secret/Retrieve", c.BaseURL, accountID)
+	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/Secret/Retrieve", c.BaseURL, accountID)
 
 	response, err := httpJson.SendRequestRaw(url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
 	if err != nil {
@@ -121,7 +121,7 @@ func (c Client) GetAccountSSHKey(accountID string, request requests.GetAccountPa
 
 // VerifyAccountCredentials marks an account for verification
 func (c Client) VerifyAccountCredentials(accountID string) error {
-	url := fmt.Sprintf("%s/PasswordVault/API/Accounts/%s/Verify", c.BaseURL, accountID)
+	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/Verify", c.BaseURL, accountID)
 	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
@@ -133,7 +133,7 @@ func (c Client) VerifyAccountCredentials(accountID string) error {
 
 // ChangeAccountCredentials marks an account for immediate change
 func (c Client) ChangeAccountCredentials(accountID string, changeEntireGroup bool) error {
-	url := fmt.Sprintf("%s/PasswordVault/API/Accounts/%s/Change", c.BaseURL, accountID)
+	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/Change", c.BaseURL, accountID)
 	body := requests.ChangeAccountCredential{
 		ChangeEntireGroup: changeEntireGroup,
 	}
@@ -148,7 +148,7 @@ func (c Client) ChangeAccountCredentials(accountID string, changeEntireGroup boo
 
 // ReconileAccountCredentials marks an account for reconciliation
 func (c Client) ReconileAccountCredentials(accountID string) error {
-	url := fmt.Sprintf("%s/PasswordVault/API/Accounts/%s/Reconcile", c.BaseURL, accountID)
+	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/Reconcile", c.BaseURL, accountID)
 	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)

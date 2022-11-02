@@ -20,6 +20,7 @@ Current products supported:
 	- [AWS CloudShell](#aws-cloudshell)
 	- [Install from Source](#install-from-source)
 - [Usage](#usage)
+	- [Authenticating with authn-iam (AWS IAM Role Authentication)](#authenticating-with-authn-iam-aws-iam-role-authentication)
 	- [Documentation](#documentation)
 - [Autocomplete](#autocomplete)
 - [Example Source Code](#example-source-code)
@@ -68,6 +69,23 @@ $ cybr help
 
 * `$ cybr help` for top-level commands list
 * `$ cybr [command] -h` for specific command details and sub-commands list
+
+### Authenticating with authn-iam (AWS IAM Role Authentication)
+
+Set the following environment variables:
+
+* `CONJUR_ACCOUNT` - The Conjur account name
+* `CONJUR_APPLIANCE_URL` - The URL of the Conjur service (e.g. https://conjur.example.com)
+* `CONJUR_AUTHN_LOGIN` - The Host ID for the IAM role (e.g. `host/cloud/aws/ec2/1234567890/ConjurAWSRoleEC2`)
+* `CONJUR_AUTHENTICATOR` - The authenticator ID (e.g. `authn-iam`)
+* `CONJUR_AUTHN_SERVICE_ID` - The authenticator web service ID (e.g. `prod`)
+* `CONJUR_AWS_TYPE` - The AWS type (e.g. `ec2` or `ecs` or `lambda`)
+
+Once environment variables are set, ensure no .conjurrc or .netrc exists in the user's home directory:
+
+`rm -f ~/.conjurrc ~/.netrc`
+
+Then run any command you wish to run within `cybr conjur`. Use the `--help` flag to see all available commands.
 
 ### Documentation
 

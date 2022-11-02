@@ -11,6 +11,7 @@ import (
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/conjur"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
@@ -85,7 +86,8 @@ var conjurLogonCmd = &cobra.Command{
 	Long: `Authenticate to Conjur using API Key or password
 	
 	Example Usage:
-	$ cybr conjur logon -a account -b https://conjur.example.com -l admin`,
+	$ cybr conjur logon -a account -b https://conjur.example.com -l admin
+	$ cybr conjur logon -a account -b https://conjur.example.com -l serviceAccountUser --authn-ldap`,
 	Aliases: []string{"login"},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Print("Enter password: ")
@@ -114,9 +116,9 @@ var conjurLogonCmd = &cobra.Command{
 			log.Fatalf("Failed to create ~/.conjurrc file. %s\n", err)
 		}
 
-		authnURL := conjur.GetAuthURL(BaseURL, "authn", "")
+		authnURL := authenticators.GetAuthURL(BaseURL, "authn", "")
 		if AuthnLDAP != "" {
-			authnURL = conjur.GetAuthURL(BaseURL, "authn-ldap", AuthnLDAP)
+			authnURL = authenticators.GetAuthURL(BaseURL, "authn-ldap", AuthnLDAP)
 		}
 
 		apiKey, err := conjur.Login(authnURL, Account, Username, byteSecretVal, certPath)
