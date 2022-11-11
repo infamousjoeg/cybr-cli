@@ -15,6 +15,9 @@ var (
 
 	// PlatformType specifies the type of platform to list
 	PlatformType string
+
+	// PlatformName specifies the name of the platform to list
+	PlatformName string
 )
 
 var platformsCmd = &cobra.Command{
@@ -45,6 +48,7 @@ var listPlatformsCmd = &cobra.Command{
 		query := &queries.ListPlatforms{
 			Active:       Active,
 			PlatformType: PlatformType,
+			PlatformName: PlatformName,
 		}
 
 		apps, err := client.ListPlatforms(query)
@@ -85,6 +89,7 @@ func init() {
 	// Listing platforms
 	listPlatformsCmd.Flags().BoolVarP(&Active, "active", "a", false, "Filter according to whether the platform is active or not.")
 	listPlatformsCmd.Flags().StringVarP(&PlatformType, "platform-type", "t", "", "Filter according to the platform type. Valid values: Group or Regular")
+	listPlatformsCmd.Flags().StringVarP(&PlatformName, "platform-name", "n", "", "Filter according to the platform name. Partial matches are supported.")
 
 	// Getting a platform
 	getPlatformsCmd.Flags().StringVarP(&PlatformID, "platform-id", "i", "", "Platform ID to list from")
