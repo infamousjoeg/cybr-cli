@@ -14,6 +14,13 @@ codesign --deep --force --options=runtime \
 
 mkdir -p "$root/cybr-cli"
 
+pushd "./darwin/$arch" || exit
+    tar -czf "cybr-cli_darwin_$arch.tar.gz" cybr
+    md5 -qs "cybr-cli_darwin_$arch.tar.gz" > "cybr-cli_darwin_$arch.tar.gz.md5"
+    shasum -a 256 "cybr-cli_darwin_$arch.tar.gz" | cut -f1 -d' ' > "cybr-cli_darwin_$arch.tar.gz.sha256"
+    open .
+popd || exit
+
 # Build pkg installer structure
 ditto "$root/cybr" "$root/cybr-cli/usr/local/bin/"
 
