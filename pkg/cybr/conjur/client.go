@@ -134,20 +134,6 @@ func getClientFromAuthenticator() (*conjurapi.Client, *authn.LoginPair, error) {
 // GetConjurClient creates a Conjur API client and login pair from environment variables, an authenticator,
 // or .netrc & .conjurrc files
 func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
-	client, loginPair, err := getClientFromEnvironmentVariable()
-
-	client, loginPair, err = getClientFromAuthenticator()
-
-	// Partial environment variables were provided, assume user is attempting to use environment variables
-	if err != nil {
-		return &conjurapi.Client{}, &authn.LoginPair{}, err
-	}
-
-	// Return client created from environment variables
-	if *client != (conjurapi.Client{}) {
-		return client, loginPair, nil
-	}
-
 	homeDir, err := GetHomeDirectory()
 	if err != nil {
 		return nil, nil, fmt.Errorf("%s", err)
@@ -160,6 +146,23 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 	baseURL := GetURLFromConjurRc(conjurrcPath)
 	certPath := GetCertFromConjurRc(conjurrcPath)
 
+	// If .conjurrc is empty, attempt to get client from environment variables
+	if account == "" && baseURL == "" && certPath == "" {
+		// Get client from environment variables
+		client, loginPair, err := getClientFromEnvironmentVariable()
+		// If partial environment variables were provided, try authenticator
+		client, loginPair, err = getClientFromAuthenticator()
+		// Partial environment variables were provided, assume user is attempting to use environment variables
+		if err != nil {
+			return &conjurapi.Client{}, &authn.LoginPair{}, err
+		}
+		// If no error returned, return client created from environment variables
+		if *client != (conjurapi.Client{}) {
+			return client, loginPair, nil
+		}
+	}
+
+	// If .conjurrc is not empty, attempt to get client from .netrc & .conjurrc files
 	config := conjurapi.Config{
 		Account:      account,
 		ApplianceURL: baseURL,
@@ -167,12 +170,12 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 		NetRCPath:    netrcPath,
 	}
 
-	loginPair, err = conjurapi.LoginPairFromNetRC(config)
+	loginPair, err := conjurapi.LoginPairFromNetRC(config)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to retrieve credentials from ~/.netrc. %s", err)
 	}
 
-	client, err = conjurapi.NewClientFromKey(config, *loginPair)
+	client, err := conjurapi.NewClientFromKey(config, *loginPair)
 	return client, loginPair, err
 }
 
