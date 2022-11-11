@@ -35,17 +35,3 @@ jobs:
         tags: |
           nfmsjoeg/cybr-cli:${{ steps.client_version.outputs.prop }}
           nfmsjoeg/cybr-cli:latest
-    - name: Login to GitHub Container Repository
-      uses: docker/login-action@v1
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GHCR_PAT }}
-    - name: Build and Push Docker Container to GitHub Packages
-      uses: docker/build-push-action@v2
-      with:
-        push: true
-        context: .
-        tags: |
-          infamousjoeg/cybr-cli/cybr-cli:${{ steps.client_version.outputs.prop }}
-          infamousjoeg/cybr-cli/cybr-cli:latest
