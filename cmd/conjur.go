@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -49,7 +50,16 @@ var (
 	InspectResources bool
 )
 
-func loadPolicy(policyBranch string, policyFilePath string, policyMode conjurapi.PolicyMode) {
+func isInputFromPipe() bool {
+	stat, _ := os.Stdin.Stat()
+	return (stat.Mode() & os.ModeCharDevice) == 0
+}
+
+func loadPolicyFile(policyBranch string, policyFilePath string, policyMode conjurapi.PolicyMode) {
+	if policyFilePath == "" {
+		log.Fatal("Policy file path is required")
+	}
+
 	client, _, err := conjur.GetConjurClient()
 	if err != nil {
 		log.Fatalf("Failed to initialize conjur client. %s", err)
@@ -61,6 +71,19 @@ func loadPolicy(policyBranch string, policyFilePath string, policyMode conjurapi
 	}
 
 	response, err := client.LoadPolicy(policyMode, policyBranch, bufio.NewReader(file))
+	if err != nil {
+		log.Fatalf("Failed to load policy. %v. %s", response, err)
+	}
+	prettyprint.PrintJSON(response)
+}
+
+func loadPolicyPipe(policyBranch, policyContent string, policyMode conjurapi.PolicyMode) {
+	client, _, err := conjur.GetConjurClient()
+	if err != nil {
+		log.Fatalf("Failed to initialize conjur client. %s", err)
+	}
+
+	response, err := client.LoadPolicy(policyMode, policyBranch, strings.NewReader(policyContent))
 	if err != nil {
 		log.Fatalf("Failed to load policy. %v. %s", response, err)
 	}
@@ -209,7 +232,16 @@ var conjurAppendPolicyCmd = &cobra.Command{
 	Example Usage:
 	$ cybr conjur append-policy --branch root --file ./path/to/root.yml`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loadPolicy(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePost)
+		if isInputFromPipe() {
+			// Read from stdin
+			policy, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				log.Fatalf("Failed to read from stdin. %s", err)
+			}
+			loadPolicyPipe(PolicyBranch, string(policy), conjurapi.PolicyModePost)
+		} else {
+			loadPolicyFile(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePost)
+		}
 	},
 }
 
@@ -222,7 +254,16 @@ var conjurUpdatePolicyCmd = &cobra.Command{
 	Example Usage:
 	$ cybr conjur update-policy --branch root --file ./path/to/root.yml`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loadPolicy(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePatch)
+		if isInputFromPipe() {
+			// Read from stdin
+			policy, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				log.Fatalf("Failed to read from stdin. %s", err)
+			}
+			loadPolicyPipe(PolicyBranch, string(policy), conjurapi.PolicyModePut)
+		} else {
+			loadPolicyFile(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePatch)
+		}
 	},
 }
 
@@ -235,7 +276,16 @@ var conjurReplacePolicyCmd = &cobra.Command{
 	Example Usage:
 	$ cybr conjur replace-policy --branch root --file ./path/to/root.yml`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loadPolicy(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePut)
+		if isInputFromPipe() {
+			// Read from stdin
+			policy, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				log.Fatalf("Failed to read from stdin. %s", err)
+			}
+			loadPolicyPipe(PolicyBranch, string(policy), conjurapi.PolicyModePut)
+		} else {
+			loadPolicyFile(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePut)
+		}
 	},
 }
 
@@ -429,7 +479,6 @@ func init() {
 	conjurAppendPolicyCmd.Flags().StringVarP(&PolicyBranch, "branch", "b", "", "The policy branch in which policy is being loaded")
 	conjurAppendPolicyCmd.MarkFlagRequired("branch")
 	conjurAppendPolicyCmd.Flags().StringVarP(&PolicyFilePath, "file", "f", "", "The policy file that will be loaded into the branch")
-	conjurAppendPolicyCmd.MarkFlagRequired("file")
 
 	// update-policy
 	conjurUpdatePolicyCmd.Flags().StringVarP(&PolicyBranch, "branch", "b", "", "The policy branch in which policy is being loaded")
