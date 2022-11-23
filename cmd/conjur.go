@@ -18,6 +18,8 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+const stdinErrMsg = "Failed to read from stdin."
+
 var (
 	// Account conjur account
 	Account string
@@ -236,7 +238,7 @@ var conjurAppendPolicyCmd = &cobra.Command{
 			// Read from stdin
 			policy, err := ioutil.ReadAll(os.Stdin)
 			if err != nil {
-				log.Fatalf("Failed to read from stdin. %s", err)
+				log.Fatalf("%s %s", stdinErrMsg, err)
 			}
 			loadPolicyPipe(PolicyBranch, string(policy), conjurapi.PolicyModePost)
 		} else {
@@ -258,7 +260,7 @@ var conjurUpdatePolicyCmd = &cobra.Command{
 			// Read from stdin
 			policy, err := ioutil.ReadAll(os.Stdin)
 			if err != nil {
-				log.Fatalf("Failed to read from stdin. %s", err)
+				log.Fatalf("%s %s", stdinErrMsg, err)
 			}
 			loadPolicyPipe(PolicyBranch, string(policy), conjurapi.PolicyModePut)
 		} else {
@@ -280,7 +282,7 @@ var conjurReplacePolicyCmd = &cobra.Command{
 			// Read from stdin
 			policy, err := ioutil.ReadAll(os.Stdin)
 			if err != nil {
-				log.Fatalf("Failed to read from stdin. %s", err)
+				log.Fatalf("%s %s", stdinErrMsg, err)
 			}
 			loadPolicyPipe(PolicyBranch, string(policy), conjurapi.PolicyModePut)
 		} else {
