@@ -1,4 +1,4 @@
-module github.com/infamousjoeg/cybr-cli
+module github.com/david-lang/cybr-cli
 
 go 1.15
 
