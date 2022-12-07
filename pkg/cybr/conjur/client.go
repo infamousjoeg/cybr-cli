@@ -151,8 +151,9 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 		// Get client from environment variables
 		client, loginPair, err := getClientFromEnvironmentVariable()
 		// If partial environment variables were provided, try authenticator
-		//todo: add conditional
-		//client, loginPair, err = getClientFromAuthenticator()
+		if err != nil {
+			client, loginPair, err = getClientFromAuthenticator()
+		}
 		// Partial environment variables were provided, assume user is attempting to use environment variables
 		if err != nil {
 			return &conjurapi.Client{}, &authn.LoginPair{}, err
