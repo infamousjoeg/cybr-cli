@@ -122,7 +122,7 @@ func createConjurRcFile(account string, url string, certFileName string, authnLD
 func getFieldFromConjurRc(conjurrcFileName string, fieldName string) string {
 	file, err := os.Open(conjurrcFileName)
 	if err != nil {
-		log.Fatal(err)
+		return ""
 	}
 	defer file.Close()
 
