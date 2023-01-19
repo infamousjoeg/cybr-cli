@@ -50,7 +50,7 @@ func validateEnvironmentConfig(value string, keyName string, errMsg string) stri
 func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, error) {
 	// Do not get client from environment variables because none provided
 	if envAccount == "" && envApplianceURL == "" && envLogin == "" && envAPIKey == "" && envAuthenticator == "" {
-		return &conjurapi.Client{}, &authn.LoginPair{}, nil
+		return &conjurapi.Client{}, &authn.LoginPair{}, fmt.Errorf("please use cybr conjur logon or provide proper environment variables")
 	}
 
 	// Get client from environment variables
@@ -65,7 +65,7 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 	if errMsg != "" {
 		return &conjurapi.Client{},
 			&authn.LoginPair{},
-			fmt.Errorf("environment variable(s) not provided: %s", strings.TrimRight(errMsg, ", "))
+			fmt.Errorf("please use cybr conjur logon or provide proper environment variables")
 	}
 
 	authnURL := helpersauthn.GetAuthURL(envApplianceURL, "authn", "")
@@ -105,7 +105,7 @@ func getClientFromAuthenticator() (*conjurapi.Client, *authn.LoginPair, error) {
 	if errMsg != "" {
 		return &conjurapi.Client{},
 			&authn.LoginPair{},
-			fmt.Errorf("environment variable(s) not provided: %s", strings.TrimRight(errMsg, ", "))
+			fmt.Errorf("please use cybr conjur logon or provide proper environment variables")
 	}
 
 	envSSLVerifyBool := false
