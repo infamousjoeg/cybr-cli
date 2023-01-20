@@ -99,6 +99,25 @@ func removeFile(path string) {
 	}
 }
 
+func readPassword() []byte {
+	// Convert Password variable to byte array
+	byteSecretVal := []byte(Password)
+
+	// If password is not provided, prompt for password
+	if len(byteSecretVal) == 0 {
+		fmt.Print("Enter password: ")
+		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			log.Fatalf("An error occurred trying to read password from " +
+				"Stdin. Exiting...")
+		}
+		fmt.Println()
+		return byteSecretVal
+	}
+
+	return byteSecretVal
+}
+
 var conjurCmd = &cobra.Command{
 	Use:   "conjur",
 	Short: "Conjur actions",
@@ -115,13 +134,7 @@ var conjurLogonCmd = &cobra.Command{
 	$ cybr conjur logon -a account -b https://conjur.example.com -l serviceAccountUser --authn-ldap`,
 	Aliases: []string{"login"},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print("Enter password: ")
-		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
-		if err != nil {
-			log.Fatalln("An error occurred trying to read password from " +
-				"Stdin. Exiting...")
-		}
-		fmt.Println()
+		byteSecretVal := readPassword()
 
 		homeDir, err := conjur.GetHomeDirectory()
 		if err != nil {
@@ -473,6 +486,7 @@ func init() {
 	// Logon command
 	conjurLogonCmd.Flags().StringVarP(&Username, "login", "l", "", "Conjur login name")
 	conjurLogonCmd.MarkFlagRequired("login")
+	conjurLogonCmd.Flags().StringVarP(&Password, "password", "p", "", "Conjur password")
 	conjurLogonCmd.Flags().StringVarP(&Account, "account", "a", "", "Conjur account")
 	conjurLogonCmd.MarkFlagRequired("account")
 	conjurLogonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Conjur appliance URL")
