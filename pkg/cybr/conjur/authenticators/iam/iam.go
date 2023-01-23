@@ -44,7 +44,7 @@ func (r IAM) Authenticate(config authenticators.Config) (*conjurapi.Client, erro
 	authnURL := authenticators.GetAuthURL(config.ApplianceURL, "authn-iam", config.ServiceID)
 
 	// Authenticate to Conjur using the AWS STS signed headers and receive a session token
-	accessToken, err := Authenticate(authnURL, config.Account, config.Login, conjurAuthnRequest, false, nil)
+	accessToken, err := Authenticate(authnURL, config.Account, config.Login, conjurAuthnRequest, config.IgnoreSSLVerify, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to authenticate to Conjur with service type '%s'. %s", r.AwsServiceType, err)
 	}

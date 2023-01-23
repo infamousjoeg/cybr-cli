@@ -50,7 +50,7 @@ func validateEnvironmentConfig(value string, keyName string, errMsg string) stri
 func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, error) {
 	// Do not get client from environment variables because none provided
 	if envAccount == "" && envApplianceURL == "" && envLogin == "" && envAPIKey == "" && envAuthenticator == "" {
-		return &conjurapi.Client{}, &authn.LoginPair{}, nil
+		return &conjurapi.Client{}, &authn.LoginPair{}, fmt.Errorf("please use cybr conjur logon or provide proper environment variables")
 	}
 
 	// Get client from environment variables
@@ -65,7 +65,7 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 	if errMsg != "" {
 		return &conjurapi.Client{},
 			&authn.LoginPair{},
-			fmt.Errorf("environment variable(s) not provided: %s", strings.TrimRight(errMsg, ", "))
+			fmt.Errorf("please use cybr conjur logon or provide proper environment variables")
 	}
 
 	authnURL := helpersauthn.GetAuthURL(envApplianceURL, "authn", "")
@@ -105,12 +105,12 @@ func getClientFromAuthenticator() (*conjurapi.Client, *authn.LoginPair, error) {
 	if errMsg != "" {
 		return &conjurapi.Client{},
 			&authn.LoginPair{},
-			fmt.Errorf("environment variable(s) not provided: %s", strings.TrimRight(errMsg, ", "))
+			fmt.Errorf("please use cybr conjur logon or provide proper environment variables")
 	}
 
-	envSSLVerifyBool := true
-	if envSSLVerify == strings.ToLower("false") || envSSLVerify == strings.ToLower("no") || envSSLVerify == "0" {
-		envSSLVerifyBool = false
+	envSSLVerifyBool := false
+	if envSSLVerify == strings.ToLower("true") || envSSLVerify == strings.ToLower("yes") || envSSLVerify == "1" {
+		envSSLVerifyBool = true
 	}
 
 	config := helpersauthn.Config{
@@ -142,24 +142,25 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 	netrcPath := GetNetRcPath(homeDir)
 	conjurrcPath := GetConjurRcPath(homeDir)
 
-	account := GetAccountFromConjurRc(conjurrcPath)
-	baseURL := GetURLFromConjurRc(conjurrcPath)
-	certPath := GetCertFromConjurRc(conjurrcPath)
+	account := strings.TrimSpace(GetAccountFromConjurRc(conjurrcPath))
+	baseURL := strings.TrimSpace(GetURLFromConjurRc(conjurrcPath))
+	certPath := strings.TrimSpace(GetCertFromConjurRc(conjurrcPath))
 
 	// If .conjurrc is empty, attempt to get client from environment variables
-	if account == "" && baseURL == "" && certPath == "" {
+	if len(account) == 0 && len(baseURL) == 0 && len(certPath) == 0 {
 		// Get client from environment variables
 		client, loginPair, err := getClientFromEnvironmentVariable()
+		if err == nil {
+			return client, loginPair, nil
+		}
 		// If partial environment variables were provided, try authenticator
 		client, loginPair, err = getClientFromAuthenticator()
 		// Partial environment variables were provided, assume user is attempting to use environment variables
-		if err != nil {
-			return &conjurapi.Client{}, &authn.LoginPair{}, err
-		}
-		// If no error returned, return client created from environment variables
-		if *client != (conjurapi.Client{}) {
+		if err == nil {
 			return client, loginPair, nil
 		}
+
+		return &conjurapi.Client{}, &authn.LoginPair{}, err
 	}
 
 	// If .conjurrc is not empty, attempt to get client from .netrc & .conjurrc files
