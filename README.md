@@ -61,7 +61,7 @@ chmod +x ~/.local/bin/cybr
 
 ```shell
 $ git clone https://github.com/infamousjoeg/pas-api-go.git
-$ ./install
+$ make install
 $ cybr help
 ```
 
@@ -170,7 +170,9 @@ All safe member roles defined below are based on best practices and recommendati
 
 ## Testing
 
-`go test -v ./...`
+To vet the code, run `make vet`.
+To test the code, run `make test`.
+To run all tests, run `make test-all`.
 
 ## Maintainers
 
