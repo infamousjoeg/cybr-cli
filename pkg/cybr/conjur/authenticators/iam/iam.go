@@ -68,7 +68,7 @@ func (r IAM) Authenticate(config authenticators.Config) (*conjurapi.Client, erro
 func New() (IAM, error) {
 	// Get the AWS Service Type (EC2, ECS, or Lambda)
 	awsServiceType := strings.ToLower(os.Getenv("CONJUR_AWS_TYPE"))
-	if awsServiceType != "ec2" && awsServiceType != "ecs" && awsServiceType != "lambda" {
+	if awsServiceType != "ec2" && awsServiceType != "ecs" && awsServiceType != "lambda" && awsServiceType != "cli" {
 		return IAM{}, fmt.Errorf("CONJUR_AWS_TYPE environment variable is not set or is not set to EC2, ECS, or Lambda")
 	}
 
