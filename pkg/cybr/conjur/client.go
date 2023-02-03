@@ -22,6 +22,7 @@ var (
 	envCertFileKey       = "CONJUR_CERT_FILE"
 	envAuthenticatorKey  = "CONJUR_AUTHENTICATOR"
 	envAwsTypeKey        = "CONJUR_AWS_TYPE"
+	envAwsRoleKey        = "CONJUR_AUTHN_IAM_ROLE"
 	envAuthnServiceIDKey = "CONJUR_AUTHN_SERVICE_ID"
 	envSSLVerifyKey      = "CONJUR_SSL_VERIFY"
 
@@ -32,6 +33,7 @@ var (
 	envCertFile       = os.Getenv(envCertFileKey)
 	envAuthenticator  = os.Getenv(envAuthenticatorKey)
 	envAwsType        = os.Getenv(envAwsTypeKey)
+	envAwsRole        = os.Getenv(envAwsRoleKey)
 	envAuthnServiceID = os.Getenv(envAuthnServiceIDKey)
 	envSSLVerify      = os.Getenv(envSSLVerifyKey)
 )
@@ -98,6 +100,9 @@ func getClientFromAuthenticator() (*conjurapi.Client, *authn.LoginPair, error) {
 	errMsg = validateEnvironmentConfig(envAuthnServiceID, envAuthnServiceIDKey, errMsg)
 	if envAuthenticator == "authn-iam" {
 		errMsg = validateEnvironmentConfig(envAwsType, envAwsTypeKey, errMsg)
+	}
+	if strings.ToLower(envAwsType) == "cli" {
+		errMsg = validateEnvironmentConfig(envAwsRole, envAwsRoleKey, errMsg)
 	}
 
 	// Partial environment variables were provided so return an error

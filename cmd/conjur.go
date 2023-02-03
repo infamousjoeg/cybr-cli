@@ -413,9 +413,6 @@ var conjurListResourcesCmd = &cobra.Command{
 			log.Fatalf("Failed to initialize conjur client. %s", err)
 		}
 
-		fmt.Printf("client: %+v\n", client)
-		fmt.Printf("error: %+v\n", err)
-
 		filter := conjurapi.ResourceFilter{
 			Kind:   Kind,
 			Search: Search,
