@@ -15,32 +15,46 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v2
-      - name: Lint All
-        uses: Jerome1337/golint-action@v1.0.2
+      - name: Install Go
+        uses: actions/setup-go@v4
         with:
-          golint-path: './...'
+          go-version-file: 'go.mod'
+          cache: false
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Lint All
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: language
+          args: --timeout 5m --issues-exit-code=0
 
   test:
     name: Test
     runs-on: self-hosted
     needs:
       - lint
+    permissions:
+      id-token: write
+      contents: read
     env:
       PAS_HOSTNAME: ${{ secrets.PAS_HOSTNAME }}
-      PAS_USERNAME: ${{ secrets.PAS_USERNAME }}
-      PAS_PASSWORD: ${{ secrets.PAS_PASSWORD }}
       CCP_CLIENT_CERT: ${{ secrets.CCP_CLIENT_CERT }}
       CCP_CLIENT_PRIVATE_KEY: ${{ secrets.CCP_CLIENT_PRIVATE_KEY }}
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
-          stable: 'true'
-          go-version: '^1.15.8'
+          go-version-file: 'go.mod'
+          cache: false
+      - name: Import Secrets using CyberArk Conjur Secret Fetcher
+        uses: infamousjoeg/conjur-action@v2.0.4
+        with:
+          url: ${{ secrets.CONJUR_URL }}
+          account: ${{ secrets.CONJUR_ACCOUNT }}
+          authn_id: ${{ secrets.CONJUR_AUTHN_ID }}
+          secrets: SyncVault/LOB_CI/D-Win-SvcAccts/Operating System-WinDomain-10.0.4.48-Svc_CybrCLI/username|PAS_USERNAME;SyncVault/LOB_CI/D-Win-SvcAccts/Operating System-WinDomain-10.0.4.48-Svc_CybrCLI/password|PAS_PASSWORD
       - name: Test All
         run: go test -v ./...
 
@@ -59,11 +73,12 @@ jobs:
         goarch: [amd64]
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v2
-      - name: Setup go version 1.15
-        uses: actions/setup-go@v2
+        uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@v4
         with:
-          go-version: '^1.15.2'
+          go-version-file: 'go.mod'
+          cache: false
       - name: Get current date & time
         id: date
         run: echo "::set-output name=date::$(date +'%Y%m%d_%H%M%S')"
