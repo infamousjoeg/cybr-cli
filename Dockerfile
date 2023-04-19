@@ -19,5 +19,6 @@ RUN useradd -ms /bin/bash cybr && \
     chmod 777 /home/cybr && \
     mkdir -p /home/cybr/.cybr && \
     chown -R cybr /home/cybr/.cybr
+USER cybr
 ENV PATH="/app:${PATH}"
 ENTRYPOINT ["/app/cybr"]
