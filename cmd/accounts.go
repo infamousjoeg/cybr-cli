@@ -148,7 +148,7 @@ var addAccountsCmd = &cobra.Command{
 	Long: `Add an account to PAS.
 	
 	Example Usage:
-	$ cybr accounts add -s SafeName -p platformID -u username -a 10.0.0.1 -t password -s SuperSecret`,
+	$ cybr accounts add -s SafeName -p platformID -u username -a 10.0.0.1 -t password -c SuperSecret`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
