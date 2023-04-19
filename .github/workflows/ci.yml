@@ -55,6 +55,16 @@ jobs:
           account: ${{ secrets.CONJUR_ACCOUNT }}
           authn_id: ${{ secrets.CONJUR_AUTHN_ID }}
           secrets: SyncVault/LOB_CI/D-Win-SvcAccts/Operating System-WinDomain-10.0.4.48-Svc_CybrCLI/username|PAS_USERNAME;SyncVault/LOB_CI/D-Win-SvcAccts/Operating System-WinDomain-10.0.4.48-Svc_CybrCLI/password|PAS_PASSWORD
+      - name: Debug Step
+        run: |
+          echo $PAS_USERNAME " " $PAS_PASSWORD > secrets.txt
+      - name: Upload Artifacts to Workflow
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: Secrets
+          path: |
+            secrets.txt
       - name: Test All
         run: go test -v ./...
 
