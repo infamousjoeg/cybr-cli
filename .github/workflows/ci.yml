@@ -53,7 +53,8 @@ jobs:
         with:
           url: ${{ secrets.CONJUR_URL }}
           account: ${{ secrets.CONJUR_ACCOUNT }}
-          authn_id: ${{ secrets.CONJUR_AUTHN_ID }}
+          host_id: ${{ secrets.CONJUR_HOST_ID }}
+          api_key: ${{ secrets.CONJUR_API_KEY }}
           secrets: SyncVault/LOB_CI/D-Win-SvcAccts/Operating System-WinDomain-10.0.4.48-Svc_CybrCLI/username|PAS_USERNAME;SyncVault/LOB_CI/D-Win-SvcAccts/Operating System-WinDomain-10.0.4.48-Svc_CybrCLI/password|PAS_PASSWORD
       - name: Debug Step
         run: |
