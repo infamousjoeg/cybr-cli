@@ -7,7 +7,7 @@ Add an account
 Add an account to PAS.
 	
 	Example Usage:
-	$ cybr accounts add -s SafeName -p platformID -u username -a 10.0.0.1 -t password -s SuperSecret
+	$ cybr accounts add -s SafeName -p platformID -u username -a 10.0.0.1 -t password -c SuperSecret
 
 ```
 cybr accounts add [flags]
