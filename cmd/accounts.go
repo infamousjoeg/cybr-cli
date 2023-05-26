@@ -364,6 +364,54 @@ var moveAccountCmd = &cobra.Command{
 	},
 }
 
+var unlockAccountCmd = &cobra.Command{
+	Use:   "unlock",
+	Short: "Unlock an account",
+	Long: `Unlock an account
+
+	Example Usage:
+	$ cybr accounts unlock -i 24_1`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		err = client.Unlock(AccountID)
+		if err != nil {
+			log.Fatalf("%s", err)
+			return
+		}
+
+		fmt.Printf("Successfully unlocked account '%s'\n", AccountID)
+	},
+}
+
+var checkInAccountCmd = &cobra.Command{
+	Use:   "checkin",
+	Short: "Check-in an account",
+	Long: `Check-in an account that was checked-out by the same user
+
+	Example Usage:
+	$ cybr accounts checkin -i 24_1`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		err = client.CheckIn(AccountID)
+		if err != nil {
+			log.Fatalf("%s", err)
+			return
+		}
+
+		fmt.Printf("Successfully checked in account '%s'\n", AccountID)
+	},
+}
+
 func init() {
 	// Listing an account
 	listAccountsCmd.Flags().StringVarP(&Search, "search", "s", "", "List of keywords to search for in accounts, separated by a space")
@@ -422,6 +470,14 @@ func init() {
 	moveAccountCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Safe name in which the account will be moved into")
 	moveAccountCmd.MarkFlagRequired("safe")
 
+	// unlock
+	unlockAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to unlock")
+	unlockAccountCmd.MarkFlagRequired("account-id")
+
+	// check-in
+	checkInAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to check-in")
+	checkInAccountCmd.MarkFlagRequired("account-id")
+
 	// Add cmd to account cmd
 	accountsCmd.AddCommand(listAccountsCmd)
 	accountsCmd.AddCommand(getAccountsCmd)
@@ -432,6 +488,8 @@ func init() {
 	accountsCmd.AddCommand(changeAccountCmd)
 	accountsCmd.AddCommand(reconcileAccountCmd)
 	accountsCmd.AddCommand(moveAccountCmd)
+	accountsCmd.AddCommand(unlockAccountCmd)
+	accountsCmd.AddCommand(checkInAccountCmd)
 
 	// Add accounts cmd to root
 	rootCmd.AddCommand(accountsCmd)

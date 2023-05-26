@@ -214,3 +214,39 @@ func TestReconcileAccountCredentialsInvalidAccount(t *testing.T) {
 		t.Errorf("Set account for reconcile but it should not exist")
 	}
 }
+
+func TestUnlockSuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.Unlock(accountID)
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+}
+
+func TestUnlockFailure(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.Unlock(invalidAccountID)
+	if err == nil {
+		t.Errorf("Set account for unlock but it should not exist")
+	}
+}
+
+func TestCheckInSuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.CheckIn(accountID)
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+}
+
+func TestCheckInFailure(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.CheckIn(invalidAccountID)
+	if err == nil {
+		t.Errorf("Set account for check in but it should not exist")
+	}
+}
