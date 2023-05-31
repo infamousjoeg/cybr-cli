@@ -1,5 +1,7 @@
 # cybr-cli <!-- omit in toc -->
 
+![image](https://github.com/infamousjoeg/cybr-cli/assets/1924063/ff018174-2880-46f1-bd24-3262d1276b41)
+
 A "Swiss Army Knife" command-line interface (CLI) for easy human and non-human interaction with CyberArk's suite of products.
 
 Current products supported:
