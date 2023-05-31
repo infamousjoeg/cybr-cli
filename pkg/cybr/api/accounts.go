@@ -14,7 +14,7 @@ import (
 // ListAccounts CyberArk user has access to
 func (c Client) ListAccounts(query *queries.ListAccounts) (*responses.ListAccount, error) {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts%s", c.BaseURL, httpJson.GetURLQuery(query))
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Get(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.ListAccount{}, fmt.Errorf("Failed to list accounts. %s", err)
 	}
@@ -28,7 +28,7 @@ func (c Client) ListAccounts(query *queries.ListAccounts) (*responses.ListAccoun
 // GetAccount details for specific account
 func (c Client) GetAccount(accountID string) (*responses.GetAccount, error) {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s", c.BaseURL, accountID)
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Get(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.GetAccount{}, fmt.Errorf("Failed to get account. %s", err)
 	}
@@ -43,7 +43,7 @@ func (c Client) GetAccount(accountID string) (*responses.GetAccount, error) {
 func (c Client) AddAccount(account requests.AddAccount) (*responses.GetAccount, error) {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts", c.BaseURL)
 	logger := c.GetLogger().AddSecret(account.Secret)
-	response, err := httpJson.Post(url, c.SessionToken, account, c.InsecureTLS, logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, account, c.InsecureTLS, logger)
 	logger = logger.ClearSecrets()
 
 	if err != nil {
@@ -60,7 +60,7 @@ func (c Client) AddAccount(account requests.AddAccount) (*responses.GetAccount, 
 // DeleteAccount from cyberark
 func (c Client) DeleteAccount(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s", c.BaseURL, accountID)
-	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Delete(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to delete account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -72,7 +72,7 @@ func (c Client) DeleteAccount(accountID string) error {
 // GetJITAccess from a specific account
 func (c Client) GetJITAccess(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/grantAdministrativeAccess", c.BaseURL, accountID)
-	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to get JIT access for account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -84,7 +84,7 @@ func (c Client) GetJITAccess(accountID string) error {
 // RevokeJITAccess from a specific account
 func (c Client) RevokeJITAccess(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/RevokeAdministrativeAccess", c.BaseURL, accountID)
-	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to revoke JIT access for account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -97,7 +97,7 @@ func (c Client) RevokeJITAccess(accountID string) error {
 func (c Client) GetAccountPassword(accountID string, request requests.GetAccountPassword) (string, error) {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/Password/Retrieve", c.BaseURL, accountID)
 
-	response, err := httpJson.SendRequestRaw(url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
+	response, err := httpJson.SendRequestRaw(false, url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return "", fmt.Errorf("Failed to retrieve the account password '%s'. %s. %s", accountID, string(returnedError), err)
@@ -110,7 +110,7 @@ func (c Client) GetAccountPassword(accountID string, request requests.GetAccount
 func (c Client) GetAccountSSHKey(accountID string, request requests.GetAccountPassword) (string, error) {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/Secret/Retrieve", c.BaseURL, accountID)
 
-	response, err := httpJson.SendRequestRaw(url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
+	response, err := httpJson.SendRequestRaw(false, url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return "", fmt.Errorf("Failed to retrieve the account SSH Key '%s'. %s. %s", accountID, string(returnedError), err)
@@ -122,7 +122,7 @@ func (c Client) GetAccountSSHKey(accountID string, request requests.GetAccountPa
 // VerifyAccountCredentials marks an account for verification
 func (c Client) VerifyAccountCredentials(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/Verify", c.BaseURL, accountID)
-	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to verify account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -137,7 +137,7 @@ func (c Client) ChangeAccountCredentials(accountID string, changeEntireGroup boo
 	body := requests.ChangeAccountCredential{
 		ChangeEntireGroup: changeEntireGroup,
 	}
-	response, err := httpJson.Post(url, c.SessionToken, body, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, body, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to mark change on account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -149,7 +149,7 @@ func (c Client) ChangeAccountCredentials(accountID string, changeEntireGroup boo
 // ReconileAccountCredentials marks an account for reconciliation
 func (c Client) ReconileAccountCredentials(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/Reconcile", c.BaseURL, accountID)
-	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to mark reconcile on account '%s'. %s. %s", accountID, string(returnedError), err)

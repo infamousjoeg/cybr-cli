@@ -11,7 +11,7 @@ import (
 // ServerVerify is an unauthenticated endpoint for testing Web Service availability
 func (c Client) ServerVerify() (*responses.ServerVerify, error) {
 	url := fmt.Sprintf("%s/passwordvault/WebServices/PIMServices.svc/Verify", c.BaseURL)
-	response, err := httpJson.SendRequest(url, "GET", "", nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.SendRequest(false, url, "GET", "", nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.ServerVerify{}, fmt.Errorf("Error verifying PAS REST API Web Service. %s", err)
 	}

@@ -13,7 +13,7 @@ import (
 // ListApplications returns all Application Identities setup in PAS
 func (c Client) ListApplications(location string) (*responses.ListApplications, error) {
 	url := fmt.Sprintf("%s/passwordvault/WebServices/PIMServices.svc/Applications?Location=%s", c.BaseURL, location)
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Get(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.ListApplications{}, fmt.Errorf("Error listing applications in location '%s'. %s", location, err)
 	}
@@ -26,7 +26,7 @@ func (c Client) ListApplications(location string) (*responses.ListApplications, 
 // ListApplicationAuthenticationMethods returns all auth methods for a specific Application Identity
 func (c Client) ListApplicationAuthenticationMethods(appID string) (*responses.ListApplicationAuthenticationMethods, error) {
 	url := fmt.Sprintf("%s/passwordvault/WebServices/PIMServices.svc/Applications/%s/Authentications", c.BaseURL, appID)
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Get(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.ListApplicationAuthenticationMethods{}, fmt.Errorf("Error listing application's '%s' authentication methods. %s", appID, err)
 	}
@@ -39,7 +39,7 @@ func (c Client) ListApplicationAuthenticationMethods(appID string) (*responses.L
 // AddApplication add an applications to PAS
 func (c Client) AddApplication(application requests.AddApplication) error {
 	url := fmt.Sprintf("%s/passwordvault/WebServices/PIMServices.svc/Applications", c.BaseURL)
-	response, err := httpJson.Post(url, c.SessionToken, application, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, application, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Error adding application '%s' authentication methods. %s. %s", application.Application.AppID, string(returnedError), err)
@@ -50,7 +50,7 @@ func (c Client) AddApplication(application requests.AddApplication) error {
 // DeleteApplication delete an applications to PAS
 func (c Client) DeleteApplication(appID string) error {
 	url := fmt.Sprintf("%s/passwordvault/WebServices/PIMServices.svc/Applications/%s", c.BaseURL, url.QueryEscape(appID))
-	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Delete(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Error deleting application '%s' authentication methods. %s. %s", appID, string(returnedError), err)
@@ -61,7 +61,7 @@ func (c Client) DeleteApplication(appID string) error {
 // AddApplicationAuthenticationMethod add authentication method to an application
 func (c Client) AddApplicationAuthenticationMethod(appID string, authenticationMethod requests.AddApplicationAuthentication) error {
 	url := fmt.Sprintf("%s/passwordvault/WebServices/PIMServices.svc/Applications/%s/Authentications/", c.BaseURL, url.QueryEscape(appID))
-	response, err := httpJson.Post(url, c.SessionToken, authenticationMethod, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, authenticationMethod, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Error adding application authentication method to '%s'. %s. %s", appID, string(returnedError), err)
@@ -72,7 +72,7 @@ func (c Client) AddApplicationAuthenticationMethod(appID string, authenticationM
 // DeleteApplicationAuthenticationMethod delete an applications authentication method
 func (c Client) DeleteApplicationAuthenticationMethod(appID string, authnMethodID string) error {
 	url := fmt.Sprintf("%s/passwordvault/WebServices/PIMServices.svc/Applications/%s/Authentications/%s", c.BaseURL, url.QueryEscape(appID), url.QueryEscape(authnMethodID))
-	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Delete(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Error deleting application '%s' authentication methods. %s. %s", appID, string(returnedError), err)

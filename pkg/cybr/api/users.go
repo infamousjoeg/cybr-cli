@@ -14,7 +14,7 @@ import (
 func (c Client) UnsuspendUser(userID int) error {
 	url := fmt.Sprintf("%s/passwordvault/api/Users/%d/activate", c.BaseURL, userID)
 
-	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to unsuspend user with id '%d'. %s. %s", userID, string(returnedError), err)
@@ -26,7 +26,7 @@ func (c Client) UnsuspendUser(userID int) error {
 func (c Client) ListUsers(query *queries.ListUsers) (responses.ListUsers, error) {
 	url := fmt.Sprintf("%s/passwordvault/api/Users%s", c.BaseURL, httpJson.GetURLQuery(query))
 
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Get(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return responses.ListUsers{}, fmt.Errorf("Failed to list users. %s. %s", string(returnedError), err)
@@ -42,7 +42,7 @@ func (c Client) ListUsers(query *queries.ListUsers) (responses.ListUsers, error)
 func (c Client) DeleteUser(userID int) error {
 	url := fmt.Sprintf("%s/passwordvault/api/Users/%d", c.BaseURL, userID)
 
-	response, err := httpJson.Delete(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Delete(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to delete user '%d'. %s. %s", userID, string(returnedError), err)
@@ -55,7 +55,7 @@ func (c Client) DeleteUser(userID int) error {
 func (c Client) AddUser(user requests.AddUser) (responses.AddUser, error) {
 	url := fmt.Sprintf("%s/passwordvault/api/Users", c.BaseURL)
 
-	response, err := httpJson.Post(url, c.SessionToken, user, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, user, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return responses.AddUser{}, fmt.Errorf("Failed to add user '%s'. %s. %s", user.Username, string(returnedError), err)

@@ -12,7 +12,7 @@ import (
 // ListPlatforms available in CyberArk
 func (c Client) ListPlatforms(query *queries.ListPlatforms) (*responses.ListPlatforms, error) {
 	url := fmt.Sprintf("%s/passwordvault/api/platforms%s", c.BaseURL, httpJson.GetURLQuery(query))
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Get(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.ListPlatforms{}, fmt.Errorf("Failed to list platforms. %s", err)
 	}
@@ -25,7 +25,7 @@ func (c Client) ListPlatforms(query *queries.ListPlatforms) (*responses.ListPlat
 // GetPlatform details for specific platform
 func (c Client) GetPlatform(platformID string) (*responses.GetPlatform, error) {
 	url := fmt.Sprintf("%s/passwordvault/api/platforms/%s", c.BaseURL, platformID)
-	response, err := httpJson.Get(url, c.SessionToken, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Get(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.GetPlatform{}, fmt.Errorf("Failed to get platform. %s", err)
 	}

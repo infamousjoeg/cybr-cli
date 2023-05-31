@@ -56,7 +56,7 @@ func logRequest(req *http.Request, logger logger.Logger) {
 	req.Body = ioutil.NopCloser(bytes.NewReader([]byte(body)))
 }
 
-func getResponse(url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (http.Response, error) {
+func getResponse(identity bool, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (http.Response, error) {
 	if insecureTLS {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	} else {
@@ -86,7 +86,11 @@ func getResponse(url string, method string, token string, body interface{}, inse
 	req.Header.Add("Content-Type", "application/json")
 	// if token is provided, add header Authorization
 	if token != "" {
-		req.Header.Add("Authorization", token)
+		if identity {
+			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		} else {
+			req.Header.Add("Authorization", token)
+		}
 	}
 
 	logRequest(req, logger)
@@ -104,8 +108,8 @@ func getResponse(url string, method string, token string, body interface{}, inse
 }
 
 // SendRequest is an http request and get response as serialized json map[string]interface{}
-func SendRequest(url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
-	res, err := getResponse(url, method, token, body, insecureTLS, logger)
+func SendRequest(identity bool, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
+	res, err := getResponse(identity, url, method, token, body, insecureTLS, logger)
 
 	if err != nil && strings.Contains(err.Error(), "Failed to send request") {
 		return nil, err
@@ -132,8 +136,8 @@ func SendRequest(url string, method string, token string, body interface{}, inse
 }
 
 // SendRequestRaw is an http request and get response as byte[]
-func SendRequestRaw(url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) ([]byte, error) {
-	res, err := getResponse(url, method, token, body, insecureTLS, logger)
+func SendRequestRaw(identity bool, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) ([]byte, error) {
+	res, err := getResponse(identity, url, method, token, body, insecureTLS, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -146,25 +150,25 @@ func SendRequestRaw(url string, method string, token string, body interface{}, i
 }
 
 // Get a get request and get response as serialized json map[string]interface{}
-func Get(url string, token string, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodGet, token, "", insecureTLS, logger)
+func Get(identity bool, url string, token string, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
+	response, err := SendRequest(identity, url, http.MethodGet, token, "", insecureTLS, logger)
 	return response, err
 }
 
 // Post a post request and get response as serialized json map[string]interface{}
-func Post(url string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodPost, token, body, insecureTLS, logger)
+func Post(identity bool, url string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
+	response, err := SendRequest(identity, url, http.MethodPost, token, body, insecureTLS, logger)
 	return response, err
 }
 
 // Put a put request and get response as serialized json map[string]interface{}
-func Put(url string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodPut, token, body, insecureTLS, logger)
+func Put(identity bool, url string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
+	response, err := SendRequest(identity, url, http.MethodPut, token, body, insecureTLS, logger)
 	return response, err
 }
 
 // Delete a delete request and get response as serialized json map[string]interface{}
-func Delete(url string, token string, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
-	response, err := SendRequest(url, http.MethodDelete, token, "", insecureTLS, logger)
+func Delete(identity bool, url string, token string, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
+	response, err := SendRequest(identity, url, http.MethodDelete, token, "", insecureTLS, logger)
 	return response, err
 }
