@@ -84,6 +84,9 @@ func getResponse(identity bool, url string, method string, token string, body in
 	// attach the header
 	req.Header = make(http.Header)
 	req.Header.Add("Content-Type", "application/json")
+	if identity {
+		req.Header.Add("X-IDAP-NATIVE-CLIENT", "true")
+	}
 	// if token is provided, add header Authorization
 	if token != "" {
 		if identity {
