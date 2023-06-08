@@ -3,14 +3,10 @@ package identity
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
-	"net/http/httputil"
-	"strings"
-	"time"
 
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity/requests"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity/responses"
 )
@@ -19,43 +15,17 @@ import (
 func StartAuthentication(c api.Client, req requests.StartAuthentication) (*responses.StartAuthentication, error) {
 	identityTenant := fmt.Sprintf("https://%s.id.cyberark.cloud", req.TenantID)
 	url := fmt.Sprintf("%s/Security/StartAuthentication", identityTenant)
-	s := fmt.Sprintf("{ \"TenantId\": \"%s\", \"User\": \"%s\", \"Version\": \"1.0\" }", req.TenantID, req.User)
-	payload := strings.NewReader(s)
 
-	client := &http.Client{
-		Timeout: time.Second * 30, // Maximum of 30 secs
-	}
+	headers := http.Header{}
+	headers.Add("X-IDAP-NATIVE-CLIENT", "true")
+	headers.Add("Content-Type", "application/json")
 
-	httpRequest, err := http.NewRequest("POST", url, payload)
+	res, err := httpjson.SendRequestRawWithHeaders(url, "POST", headers, req, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return &responses.StartAuthentication{}, fmt.Errorf("Failed to start authentication. %s", err)
 	}
-
-	httpRequest.Header.Add("X-IDAP-NATIVE-CLIENT", "true")
-	httpRequest.Header.Add("Content-Type", "application/json")
-
-	dump, err := httputil.DumpRequestOut(httpRequest, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("%s\n", dump)
-
-	res, err := client.Do(httpRequest)
-	if err != nil {
-		fmt.Println(err)
-		return &responses.StartAuthentication{}, fmt.Errorf("Failed to start authentication. %s", err)
-	}
-	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println(err)
-		return &responses.StartAuthentication{}, fmt.Errorf("Failed to start authentication. %s", err)
-	}
-	fmt.Println(string(body))
 
 	StartAuthResponse := &responses.StartAuthentication{}
-	err = json.Unmarshal(body, StartAuthResponse)
+	err = json.Unmarshal(res, StartAuthResponse)
 	return StartAuthResponse, err
 }

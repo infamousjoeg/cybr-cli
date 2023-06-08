@@ -152,6 +152,52 @@ func SendRequestRaw(identity bool, url string, method string, token string, body
 	return content, err
 }
 
+// SendRequestRawWithHeaders is an http request and get response as byte[]
+func SendRequestRawWithHeaders(url, method string, headers http.Header, body interface{}, insecureTLS bool, logger logger.Logger) ([]byte, error) {
+	if insecureTLS {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	} else {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: false}
+	}
+	httpClient := http.Client{
+		Timeout: time.Second * 30, // Maximum of 30 secs
+	}
+
+	var res *http.Response
+
+	content, err := bodyToBytes(body)
+	if err != nil {
+		return []byte(""), err
+	}
+
+	// create the request
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(content))
+	if err != nil {
+		return []byte(""), fmt.Errorf("Failed to create new request. %s", err)
+	}
+
+	// attach the header
+	req.Header = headers
+
+	logRequest(req, logger)
+
+	// send request
+	res, err = httpClient.Do(req)
+	if err != nil {
+		return []byte(""), fmt.Errorf("Failed to send request. %s", err)
+	}
+
+	if res.StatusCode >= 300 {
+		return []byte(""), fmt.Errorf("Received non-200 status code '%d'", res.StatusCode)
+	}
+
+	content, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		return []byte(""), fmt.Errorf("Failed to read body. %s", err)
+	}
+	return content, err
+}
+
 // Get a get request and get response as serialized json map[string]interface{}
 func Get(identity bool, url string, token string, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
 	response, err := SendRequest(identity, url, http.MethodGet, token, "", insecureTLS, logger)
