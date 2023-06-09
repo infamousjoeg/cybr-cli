@@ -5,15 +5,14 @@ import (
 	"log"
 	"os"
 	"strings"
-	"syscall"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
-	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/util"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity"
 	identityrequests "github.com/infamousjoeg/cybr-cli/pkg/cybr/identity/requests"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity/responses"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 // Global variables for logon command
@@ -26,92 +25,64 @@ var (
 	NonInteractive     bool   // Flag for non-interactive logon
 	Password           string // Password for PAS REST API
 	ConcurrentSession  bool   // Flag to allow concurrent sessions
+	SelectedChallenges []int  // Slice of selected challenges for Identity authentication
 )
 
-func logonToPAS(username, password, authType, baseURL string, insecureTLS, nonInteractive, concurrentSession bool) error {
+func logonToPAS(c pasapi.Client, username, password string, nonInteractive, concurrentSession bool) error {
+	var err error
 	// Check if non-interactive flag is not provided and password is not empty
 	if !nonInteractive && password != "" {
 		return fmt.Errorf("An error occured because --non-interactive must be provided when using --password flag")
 	}
-
 	// If the execution is not non-interactive, ask the user to input password
 	if !nonInteractive {
-		fmt.Print("Enter password: ")
-		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
-		fmt.Println()
+		password, err = util.ReadPassword()
 		if err != nil {
 			return fmt.Errorf("An error occurred trying to read password from Stdin. Exiting")
 		}
-		password = string(byteSecretVal)
 	}
-
 	// Check if password is empty
 	if password == "" {
 		return fmt.Errorf("Provided password is empty")
 	}
-
-	// Create new client for PAS REST API
-	client := pasapi.Client{
-		BaseURL:     baseURL,
-		AuthType:    authType,
-		InsecureTLS: insecureTLS,
-	}
-
 	// Create credentials for logon
 	credentials := requests.Logon{
 		Username:          username,
 		Password:          password,
 		ConcurrentSession: concurrentSession,
 	}
-
 	// Logon to the PAS REST API
-	err := client.Logon(credentials)
+	err = c.Logon(credentials)
 	if err != nil && !strings.Contains(err.Error(), "ITATS542I") {
 		return fmt.Errorf("Failed to Logon to the PVWA. %s", err)
 	}
-
 	// Deal with OTPCode here if error contains challenge error code and redo client.Logon()
 	if err != nil {
-		fmt.Print("Enter one-time passcode: ")
-		byteOTPCode, err := terminal.ReadPassword(int(syscall.Stdin))
-		credentials.Password = string(byteOTPCode)
-		fmt.Println()
-		if err != nil {
-			return fmt.Errorf("An error occurred trying to read one-time passcode from Stdin. Exiting")
-		}
-		err = client.Logon(credentials)
+		// Get OTP code from Stdin
+		credentials, err = util.ReadOTPcode(credentials)
+		err = c.Logon(credentials)
 		if err != nil {
 			return fmt.Errorf("Failed to respond to challenge. Possible timeout occurred. %s", err)
 		}
 	}
-
 	// Set client config
-	err = client.SetConfig()
+	err = c.SetConfig()
 	if err != nil {
 		return fmt.Errorf("Failed to create configuration file. %s", err)
 	}
-
 	return nil
 }
 
-func startAuthIdentity(username, authType, tenantID, baseURL string) (interface{}, error) {
-	// Create new client for Identity
-	client := pasapi.Client{
-		BaseURL:     baseURL,
-		AuthType:    authType,
-		TenantID:    tenantID,
-		InsecureTLS: false,
-	}
-
+func startAuthIdentity(c pasapi.Client, username string) (*responses.StartAuthentication, error) {
 	// Create credentials for logon
 	startAuth := identityrequests.StartAuthentication{
 		User:     username,
-		TenantID: tenantID,
+		TenantID: c.TenantID,
 		Version:  "1.0",
 	}
 
 	// Start authentication
-	response, err := identity.StartAuthentication(client, startAuth)
+	response, err := identity.StartAuthentication(c, startAuth)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to start authentication. %s", err)
 	}
@@ -136,26 +107,90 @@ var logonCmd = &cobra.Command{
 	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com -i`,
 	Aliases: []string{"login"},
 	Run: func(cmd *cobra.Command, args []string) {
+		// Create new client for PAS REST API
+		c := pasapi.Client{
+			BaseURL:     BaseURL,
+			AuthType:    AuthenticationType,
+			TenantID:    TenantID,
+			InsecureTLS: InsecureTLS,
+		}
 		// Check if auth type is "identity" and no tenant id is provided
-		if AuthenticationType == "identity" && TenantID == "" {
+		if c.AuthType == "identity" && c.TenantID == "" {
 			log.Fatalf("An error occured because --tenant-id must be provided when using --auth-type identity")
 		}
 
 		// Get password from environment variable PAS_PASSWORD
 		Password := os.Getenv("PAS_PASSWORD")
 
-		if AuthenticationType != "identity" {
-			err := logonToPAS(Username, Password, AuthenticationType, BaseURL, InsecureTLS, NonInteractive, ConcurrentSession)
+		// Handle authentication depending on auth type
+		if c.AuthType != "identity" {
+			err := logonToPAS(c, Username, Password, NonInteractive, ConcurrentSession)
 			if err != nil {
 				log.Fatalf("%s", err)
 			}
+			// Handle Identity authentication
 		} else {
-			response, err := startAuthIdentity(Username, AuthenticationType, TenantID, BaseURL)
+			// Start authentication
+			response, err := startAuthIdentity(c, Username)
 			if err != nil {
 				log.Fatalf("%s", err)
 			}
 
-			prettyprint.PrintJSON(response)
+			// If token is present, set config and exit
+			if response.Result.Token != "" {
+				// Set token
+				c.SessionToken = response.Result.Token
+				// Set client config
+				err = c.SetConfig()
+				if err != nil {
+					log.Fatalf("Failed to create configuration file. %s", err)
+				}
+				// Logon success message
+				fmt.Printf("Successfully logged onto PAS as user %s.\n", Username)
+				return
+			}
+
+			if response.Result.Challenges[0].Mechanisms[0].PromptSelectMech == "Password" {
+				// Get password from Stdin
+				Password, err = util.ReadPassword()
+				if err != nil {
+					log.Fatalf("An error occurred trying to read password from Stdin. Exiting")
+				}
+				AnswerChallenge1 := identityrequests.AdvanceAuthentication{
+					SessionID:   response.Result.SessionID,
+					MechanismID: response.Result.Challenges[0].Mechanisms[0].MechanismID,
+					Action:      "Answer",
+					Answer:      Password,
+				}
+				fmt.Printf("Session ID: %s\n", AnswerChallenge1.SessionID)
+				fmt.Printf("Mechanism ID: %s\n", AnswerChallenge1.MechanismID)
+				fmt.Printf("Action: %s\n", AnswerChallenge1.Action)
+				fmt.Printf("Answer: %s\n", AnswerChallenge1.Answer)
+			} else {
+				// Ask for user input for challenges
+				for _, challenge := range response.Result.Challenges {
+					for i, mechanism := range challenge.Mechanisms {
+						fmt.Printf("%d. %s\n", i+1, mechanism.PromptSelectMech)
+					}
+
+					// Get user input
+					fmt.Printf("> ")
+					var input int
+					fmt.Scanln(&input)
+					// Keep asking for input until valid
+					for input < 1 || input > len(response.Result.Challenges[0].Mechanisms) {
+						fmt.Printf("Please enter a valid number between 1 and %d\n", len(response.Result.Challenges[0].Mechanisms))
+						fmt.Scanln(&input)
+					}
+					// Add selected challenge to slice
+					SelectedChallenges = append(SelectedChallenges, input)
+				}
+
+				// Print selected challenges' PromptSelectMech
+				for _, challenge := range SelectedChallenges {
+					fmt.Printf("Selected: %s\n", response.Result.Challenges[0].Mechanisms[challenge-1].PromptSelectMech)
+				}
+			}
 		}
 
 		// Logon success message
