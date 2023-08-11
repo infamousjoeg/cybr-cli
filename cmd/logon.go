@@ -8,6 +8,7 @@ import (
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/util"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity"
 	identityrequests "github.com/infamousjoeg/cybr-cli/pkg/cybr/identity/requests"
@@ -145,7 +146,7 @@ var logonCmd = &cobra.Command{
 				log.Fatalf("%s", err)
 			}
 			if Verbose {
-				fmt.Printf("Start Authentication Response: %+v\n", startResponse)
+				prettyprint.PrintColor("cyan", fmt.Sprintf("Start Authentication Response: %+v", startResponse))
 			}
 			if startResponse.Result.Token != "" {
 				c.SessionToken = "Bearer " + startResponse.Result.Token
@@ -153,7 +154,9 @@ var logonCmd = &cobra.Command{
 
 			// Loop through challenges until c.SessionToken is set
 			for attempts := 0; c.SessionToken == "" && attempts < maxAttempts; attempts++ {
-				fmt.Printf("Challenge #%d\n", attempts+1)
+			loop:
+				// Print challenge number
+				prettyprint.PrintColor("yellow", fmt.Sprintf("+ Challenge #%d", attempts+1))
 
 				if startResponse.Result.Challenges[0].Mechanisms[0].PromptSelectMech == "Password" && attempts == 0 {
 					// Get password from Stdin
@@ -168,10 +171,10 @@ var logonCmd = &cobra.Command{
 					AnswerChallenge.Answer = Password
 
 					if Verbose {
-						fmt.Printf("Session ID: %s\n", AnswerChallenge.SessionID)
-						fmt.Printf("Mechanism ID: %s\n", AnswerChallenge.MechanismID)
-						fmt.Printf("Action: %s\n", AnswerChallenge.Action)
-						fmt.Printf("Answer: %s\n", AnswerChallenge.Answer)
+						prettyprint.PrintColor("cyan", fmt.Sprintf("Session ID: %s", AnswerChallenge.SessionID))
+						prettyprint.PrintColor("cyan", fmt.Sprintf("Mechanism ID: %s", AnswerChallenge.MechanismID))
+						prettyprint.PrintColor("cyan", fmt.Sprintf("Action: %s", AnswerChallenge.Action))
+						prettyprint.PrintColor("cyan", fmt.Sprintf("Answer: %s", AnswerChallenge.Answer))
 					}
 
 					// Answer challenge
@@ -180,7 +183,7 @@ var logonCmd = &cobra.Command{
 						log.Fatalf("Failed to answer challenge. %s", err)
 					}
 					if Verbose {
-						fmt.Printf("Advance Authentication Response: %+v\n", advanceResponse)
+						prettyprint.PrintColor("cyan", fmt.Sprintf("Advance Authentication Response: %+v", advanceResponse))
 					}
 					if advanceResponse.Result.Token != "" {
 						c.SessionToken = "Bearer " + advanceResponse.Result.Token
@@ -189,12 +192,15 @@ var logonCmd = &cobra.Command{
 					if !advanceResponse.Success {
 						log.Fatalf("Identity returned unsuccessful response. %s", *advanceResponse.Message)
 					}
+
+					attempts++
+					goto loop
 				}
 
 				if advanceResponse.Result.Summary == "StartNextChallenge" {
 					// Ask for user input for challenges
 					for i, mechanism := range startResponse.Result.Challenges[1].Mechanisms {
-						fmt.Printf("%d. %s\n", i+1, mechanism.PromptSelectMech)
+						prettyprint.PrintColor("green", fmt.Sprintf("%d. %s", i+1, mechanism.PromptSelectMech))
 					}
 
 					// Get user input
@@ -203,7 +209,7 @@ var logonCmd = &cobra.Command{
 					fmt.Scanln(&input)
 					// Keep asking for input until valid
 					for input < 1 || input > len(startResponse.Result.Challenges[1].Mechanisms) {
-						fmt.Printf("Please enter a valid number between 1 and %d\n", len(startResponse.Result.Challenges[1].Mechanisms))
+						prettyprint.PrintColor("red", fmt.Sprintf("Please enter a valid number between 1 and %d", len(startResponse.Result.Challenges[1].Mechanisms)))
 						fmt.Scanln(&input)
 					}
 					// Add selected challenge to slice
@@ -212,7 +218,7 @@ var logonCmd = &cobra.Command{
 					// Print selected challenges' PromptSelectMech
 					for _, challenge := range SelectedChallenges {
 						if Verbose {
-							fmt.Printf("Selected: %s\n", startResponse.Result.Challenges[1].Mechanisms[challenge-1].PromptSelectMech)
+							prettyprint.PrintColor("cyan", fmt.Sprintf("Selected: %s", startResponse.Result.Challenges[1].Mechanisms[challenge-1].PromptSelectMech))
 						}
 						selectedMechanismID := startResponse.Result.Challenges[1].Mechanisms[challenge-1].MechanismID
 						selectedAnswerType := startResponse.Result.Challenges[1].Mechanisms[challenge-1].AnswerType
@@ -223,9 +229,9 @@ var logonCmd = &cobra.Command{
 							StartOobChallenge.Action = "StartOOB"
 
 							if Verbose {
-								fmt.Printf("Session ID: %s\n", StartOobChallenge.SessionID)
-								fmt.Printf("Mechanism ID: %s\n", StartOobChallenge.MechanismID)
-								fmt.Printf("Action: %s\n", StartOobChallenge.Action)
+								prettyprint.PrintColor("cyan", fmt.Sprintf("Session ID: %s", StartOobChallenge.SessionID))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("Mechanism ID: %s", StartOobChallenge.MechanismID))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("Action: %s", StartOobChallenge.Action))
 							}
 
 							// Answer challenge
@@ -234,7 +240,7 @@ var logonCmd = &cobra.Command{
 								log.Fatalf("Failed to answer challenge. %s", err)
 							}
 							if Verbose {
-								fmt.Printf("Advance Authentication Response: %+v\n", challengeResponse)
+								prettyprint.PrintColor("cyan", fmt.Sprintf("Advance Authentication Response: %+v", challengeResponse))
 							}
 							if challengeResponse.Result.Token != "" {
 								c.SessionToken = "Bearer " + challengeResponse.Result.Token
@@ -255,10 +261,10 @@ var logonCmd = &cobra.Command{
 							AnswerOOBChallenge.Answer = code
 
 							if Verbose {
-								fmt.Printf("Session ID: %s\n", AnswerOOBChallenge.SessionID)
-								fmt.Printf("Mechanism ID: %s\n", AnswerOOBChallenge.MechanismID)
-								fmt.Printf("Action: %s\n", AnswerOOBChallenge.Action)
-								fmt.Printf("Answer: %s\n", AnswerOOBChallenge.Answer)
+								prettyprint.PrintColor("cyan", fmt.Sprintf("Session ID: %s", AnswerOOBChallenge.SessionID))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("Mechanism ID: %s", AnswerOOBChallenge.MechanismID))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("Action: %s", AnswerOOBChallenge.Action))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("Answer: %s", AnswerOOBChallenge.Answer))
 							}
 
 							// Answer challenge
@@ -267,14 +273,16 @@ var logonCmd = &cobra.Command{
 								log.Fatalf("Failed to answer challenge. %s", err)
 							}
 							if Verbose {
-								fmt.Printf("Advance Authentication Response: %+v\n", answerOOBResponse)
+								prettyprint.PrintColor("cyan", fmt.Sprintf("Advance Authentication Response: %+v", answerOOBResponse))
 							}
 							if answerOOBResponse.Result.Token != "" {
 								c.SessionToken = "Bearer " + answerOOBResponse.Result.Token
 								break
 							}
-							if !answerOOBResponse.Success {
+							if advanceResponse.Message != nil {
 								log.Fatalf("Identity returned unsuccessful response. %s", *advanceResponse.Message)
+							} else {
+								log.Fatalf("Identity returned unsuccessful response, but the message is unavailable.")
 							}
 						}
 					}
@@ -294,7 +302,7 @@ var logonCmd = &cobra.Command{
 		}
 
 		// Logon success message
-		fmt.Printf("Successfully logged onto PAS as user %s.\n", Username)
+		prettyprint.PrintColor("green", fmt.Sprintf("Successfully logged onto PAS as user %s.", Username))
 	},
 }
 
