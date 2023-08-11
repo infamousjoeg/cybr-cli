@@ -4,8 +4,8 @@ import (
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity/responses/shared"
 )
 
-// StartAuthentication is the response from the start authentication request
-type StartAuthentication struct {
+// Authentication is the response from the start authentication request
+type Authentication struct {
 	Success         bool          `json:"success"`
 	Result          shared.Result `json:"Result"`
 	Message         *string       `json:"Message"`

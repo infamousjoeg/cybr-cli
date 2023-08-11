@@ -15,17 +15,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Constants for logon command
+const (
+	maxAttempts = 10
+)
+
 // Global variables for logon command
 var (
-	Username           string // Username to logon PAS REST API
-	AuthenticationType string // Authentication type for PAS REST API
-	TenantID           string // Tenant ID for Identity authentication
-	InsecureTLS        bool   // Boolean to decide whether to verify TLS or not
-	BaseURL            string // Base URL to send PAS REST API logon request
-	NonInteractive     bool   // Flag for non-interactive logon
-	Password           string // Password for PAS REST API
-	ConcurrentSession  bool   // Flag to allow concurrent sessions
-	SelectedChallenges []int  // Slice of selected challenges for Identity authentication
+	Username           string                                 // Username to logon PAS REST API
+	AuthenticationType string                                 // Authentication type for PAS REST API
+	TenantID           string                                 // Tenant ID for Identity authentication
+	InsecureTLS        bool                                   // Boolean to decide whether to verify TLS or not
+	BaseURL            string                                 // Base URL to send PAS REST API logon request
+	NonInteractive     bool                                   // Flag for non-interactive logon
+	Password           string                                 // Password for PAS REST API
+	ConcurrentSession  bool                                   // Flag to allow concurrent sessions
+	SelectedChallenges []int                                  // Slice of selected challenges for Identity authentication
+	AnswerChallenge    identityrequests.AdvanceAuthentication // Answer challenge struct
+	StartOobChallenge  identityrequests.AdvanceAuthentication // Start Oob challenge struct
+	AnswerOOBChallenge identityrequests.AdvanceAuthentication // Answer Oob challenge struct
+	advanceResponse    *responses.Authentication              // Advance authentication response
 )
 
 func logonToPAS(c pasapi.Client, username, password string, nonInteractive, concurrentSession bool) error {
@@ -73,7 +82,7 @@ func logonToPAS(c pasapi.Client, username, password string, nonInteractive, conc
 	return nil
 }
 
-func startAuthIdentity(c pasapi.Client, username string) (*responses.StartAuthentication, error) {
+func startAuthIdentity(c pasapi.Client, username string) (*responses.Authentication, error) {
 	// Create credentials for logon
 	startAuth := identityrequests.StartAuthentication{
 		User:     username,
@@ -131,45 +140,60 @@ var logonCmd = &cobra.Command{
 			// Handle Identity authentication
 		} else {
 			// Start authentication
-			response, err := startAuthIdentity(c, Username)
+			startResponse, err := startAuthIdentity(c, Username)
 			if err != nil {
 				log.Fatalf("%s", err)
 			}
-
-			// If token is present, set config and exit
-			if response.Result.Token != "" {
-				// Set token
-				c.SessionToken = response.Result.Token
-				// Set client config
-				err = c.SetConfig()
-				if err != nil {
-					log.Fatalf("Failed to create configuration file. %s", err)
-				}
-				// Logon success message
-				fmt.Printf("Successfully logged onto PAS as user %s.\n", Username)
-				return
+			if Verbose {
+				fmt.Printf("Start Authentication Response: %+v\n", startResponse)
+			}
+			if startResponse.Result.Token != "" {
+				c.SessionToken = "Bearer " + startResponse.Result.Token
 			}
 
-			if response.Result.Challenges[0].Mechanisms[0].PromptSelectMech == "Password" {
-				// Get password from Stdin
-				Password, err = util.ReadPassword()
-				if err != nil {
-					log.Fatalf("An error occurred trying to read password from Stdin. Exiting")
+			// Loop through challenges until c.SessionToken is set
+			for attempts := 0; c.SessionToken == "" && attempts < maxAttempts; attempts++ {
+				fmt.Printf("Challenge #%d\n", attempts+1)
+
+				if startResponse.Result.Challenges[0].Mechanisms[0].PromptSelectMech == "Password" && attempts == 0 {
+					// Get password from Stdin
+					Password, err = util.ReadPassword()
+					if err != nil {
+						log.Fatalf("An error occurred trying to read password from Stdin. Exiting")
+					}
+					// Create AdvanceAuthentication struct
+					AnswerChallenge.SessionID = startResponse.Result.SessionID
+					AnswerChallenge.MechanismID = startResponse.Result.Challenges[0].Mechanisms[0].MechanismID
+					AnswerChallenge.Action = "Answer"
+					AnswerChallenge.Answer = Password
+
+					if Verbose {
+						fmt.Printf("Session ID: %s\n", AnswerChallenge.SessionID)
+						fmt.Printf("Mechanism ID: %s\n", AnswerChallenge.MechanismID)
+						fmt.Printf("Action: %s\n", AnswerChallenge.Action)
+						fmt.Printf("Answer: %s\n", AnswerChallenge.Answer)
+					}
+
+					// Answer challenge
+					advanceResponse, err = identity.AdvanceAuthentication(c, AnswerChallenge)
+					if err != nil {
+						log.Fatalf("Failed to answer challenge. %s", err)
+					}
+					if Verbose {
+						fmt.Printf("Advance Authentication Response: %+v\n", advanceResponse)
+					}
+					if advanceResponse.Result.Token != "" {
+						c.SessionToken = "Bearer " + advanceResponse.Result.Token
+						break
+					}
+					if !advanceResponse.Success {
+						log.Fatalf("Identity returned unsuccessful response. %s", *advanceResponse.Message)
+					}
 				}
-				AnswerChallenge1 := identityrequests.AdvanceAuthentication{
-					SessionID:   response.Result.SessionID,
-					MechanismID: response.Result.Challenges[0].Mechanisms[0].MechanismID,
-					Action:      "Answer",
-					Answer:      Password,
-				}
-				fmt.Printf("Session ID: %s\n", AnswerChallenge1.SessionID)
-				fmt.Printf("Mechanism ID: %s\n", AnswerChallenge1.MechanismID)
-				fmt.Printf("Action: %s\n", AnswerChallenge1.Action)
-				fmt.Printf("Answer: %s\n", AnswerChallenge1.Answer)
-			} else {
-				// Ask for user input for challenges
-				for _, challenge := range response.Result.Challenges {
-					for i, mechanism := range challenge.Mechanisms {
+
+				if advanceResponse.Result.Summary == "StartNextChallenge" {
+					// Ask for user input for challenges
+					for i, mechanism := range startResponse.Result.Challenges[1].Mechanisms {
 						fmt.Printf("%d. %s\n", i+1, mechanism.PromptSelectMech)
 					}
 
@@ -178,18 +202,94 @@ var logonCmd = &cobra.Command{
 					var input int
 					fmt.Scanln(&input)
 					// Keep asking for input until valid
-					for input < 1 || input > len(response.Result.Challenges[0].Mechanisms) {
-						fmt.Printf("Please enter a valid number between 1 and %d\n", len(response.Result.Challenges[0].Mechanisms))
+					for input < 1 || input > len(startResponse.Result.Challenges[1].Mechanisms) {
+						fmt.Printf("Please enter a valid number between 1 and %d\n", len(startResponse.Result.Challenges[1].Mechanisms))
 						fmt.Scanln(&input)
 					}
 					// Add selected challenge to slice
 					SelectedChallenges = append(SelectedChallenges, input)
-				}
 
-				// Print selected challenges' PromptSelectMech
-				for _, challenge := range SelectedChallenges {
-					fmt.Printf("Selected: %s\n", response.Result.Challenges[0].Mechanisms[challenge-1].PromptSelectMech)
+					// Print selected challenges' PromptSelectMech
+					for _, challenge := range SelectedChallenges {
+						if Verbose {
+							fmt.Printf("Selected: %s\n", startResponse.Result.Challenges[1].Mechanisms[challenge-1].PromptSelectMech)
+						}
+						selectedMechanismID := startResponse.Result.Challenges[1].Mechanisms[challenge-1].MechanismID
+						selectedAnswerType := startResponse.Result.Challenges[1].Mechanisms[challenge-1].AnswerType
+
+						if strings.HasPrefix(selectedAnswerType, "Start") && strings.HasSuffix(selectedAnswerType, "Oob") {
+							StartOobChallenge.SessionID = startResponse.Result.SessionID
+							StartOobChallenge.MechanismID = selectedMechanismID
+							StartOobChallenge.Action = "StartOOB"
+
+							if Verbose {
+								fmt.Printf("Session ID: %s\n", StartOobChallenge.SessionID)
+								fmt.Printf("Mechanism ID: %s\n", StartOobChallenge.MechanismID)
+								fmt.Printf("Action: %s\n", StartOobChallenge.Action)
+							}
+
+							// Answer challenge
+							challengeResponse, err := identity.AdvanceAuthentication(c, StartOobChallenge)
+							if err != nil {
+								log.Fatalf("Failed to answer challenge. %s", err)
+							}
+							if Verbose {
+								fmt.Printf("Advance Authentication Response: %+v\n", challengeResponse)
+							}
+							if challengeResponse.Result.Token != "" {
+								c.SessionToken = "Bearer " + challengeResponse.Result.Token
+								break
+							}
+							if !challengeResponse.Success {
+								log.Fatalf("Identity returned unsuccessful response. %s", *advanceResponse.Message)
+							}
+
+							// Get OTP code from Stdin
+							fmt.Printf("Enter code: ")
+							var code string
+							fmt.Scanln(&code)
+
+							AnswerOOBChallenge.SessionID = startResponse.Result.SessionID
+							AnswerOOBChallenge.MechanismID = selectedMechanismID
+							AnswerOOBChallenge.Action = "Answer"
+							AnswerOOBChallenge.Answer = code
+
+							if Verbose {
+								fmt.Printf("Session ID: %s\n", AnswerOOBChallenge.SessionID)
+								fmt.Printf("Mechanism ID: %s\n", AnswerOOBChallenge.MechanismID)
+								fmt.Printf("Action: %s\n", AnswerOOBChallenge.Action)
+								fmt.Printf("Answer: %s\n", AnswerOOBChallenge.Answer)
+							}
+
+							// Answer challenge
+							answerOOBResponse, err := identity.AdvanceAuthentication(c, AnswerOOBChallenge)
+							if err != nil {
+								log.Fatalf("Failed to answer challenge. %s", err)
+							}
+							if Verbose {
+								fmt.Printf("Advance Authentication Response: %+v\n", answerOOBResponse)
+							}
+							if answerOOBResponse.Result.Token != "" {
+								c.SessionToken = "Bearer " + answerOOBResponse.Result.Token
+								break
+							}
+							if !answerOOBResponse.Success {
+								log.Fatalf("Identity returned unsuccessful response. %s", *advanceResponse.Message)
+							}
+						}
+					}
 				}
+			}
+
+			// Maximum attempts reached
+			if c.SessionToken == "" {
+				log.Fatalf("Failed to get non-empty token after %d attempts. Exiting", maxAttempts)
+			}
+
+			// Set client config
+			err = c.SetConfig()
+			if err != nil {
+				log.Fatalf("Failed to create configuration file. %s", err)
 			}
 		}
 

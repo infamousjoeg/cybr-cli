@@ -12,7 +12,7 @@ import (
 )
 
 // StartAuthentication starts the authentication process
-func StartAuthentication(c api.Client, req requests.StartAuthentication) (*responses.StartAuthentication, error) {
+func StartAuthentication(c api.Client, req requests.StartAuthentication) (*responses.Authentication, error) {
 	identityTenant := fmt.Sprintf("https://%s.id.cyberark.cloud", req.TenantID)
 	url := fmt.Sprintf("%s/Security/StartAuthentication", identityTenant)
 
@@ -22,10 +22,10 @@ func StartAuthentication(c api.Client, req requests.StartAuthentication) (*respo
 
 	res, err := httpjson.SendRequestRawWithHeaders(url, "POST", headers, req, c.InsecureTLS, c.Logger)
 	if err != nil {
-		return &responses.StartAuthentication{}, fmt.Errorf("Failed to start authentication. %s", err)
+		return &responses.Authentication{}, fmt.Errorf("Failed to start authentication. %s", err)
 	}
 
-	StartAuthResponse := &responses.StartAuthentication{}
+	StartAuthResponse := &responses.Authentication{}
 	err = json.Unmarshal(res, StartAuthResponse)
 	return StartAuthResponse, err
 }
