@@ -161,7 +161,7 @@ func (c Client) ReconileAccountCredentials(accountID string) error {
 // Unlock removes a lock from an account
 func (c Client) Unlock(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/Unlock", c.BaseURL, accountID)
-	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to unlock account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -173,7 +173,7 @@ func (c Client) Unlock(accountID string) error {
 // CheckIn checks in an account that is checked out by the user
 func (c Client) CheckIn(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/CheckIn", c.BaseURL, accountID)
-	response, err := httpJson.Post(url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to check-in account '%s'. %s. %s", accountID, string(returnedError), err)
