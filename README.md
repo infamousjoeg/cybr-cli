@@ -1,9 +1,13 @@
 # cybr-cli <!-- omit in toc -->
 
+![image](https://github.com/infamousjoeg/cybr-cli/assets/1924063/ff018174-2880-46f1-bd24-3262d1276b41)
+
 A "Swiss Army Knife" command-line interface (CLI) for easy human and non-human interaction with CyberArk's suite of products.
 
 Current products supported:
-* CyberArk Privileged Access Manager (PAM)
+* CyberArk Identity Security Platform Shared Services (ISPSS)
+* CyberArk Privilege Cloud SaaS
+* CyberArk Self-Hosted Privileged Access Manager (PAM)
 * CyberArk Secrets Manager Central Credential Provider (CCP)
 * CyberArk Conjur Secrets Manager Enterprise & [Open Source](https://conjur.org)
 * CyberArk Cloud Entitlements Manager ([Free trial](https://www.cyberark.com/try-buy/cloud-entitlements-manager/))
@@ -21,6 +25,9 @@ Current products supported:
 	- [Install from Source](#install-from-source)
 - [Usage](#usage)
 	- [Authenticating with authn-iam (AWS IAM Role Authentication)](#authenticating-with-authn-iam-aws-iam-role-authentication)
+	- [Authenticating to Privilege Cloud via ISPSS (Identity)](#authenticating-to-privilege-cloud-via-ispss-identity)
+		- [Password Authentication](#password-authentication)
+		- [MFA Authentication](#mfa-authentication)
 	- [Documentation](#documentation)
 - [Autocomplete](#autocomplete)
 - [Example Source Code](#example-source-code)
@@ -86,6 +93,39 @@ Once environment variables are set, ensure no .conjurrc or .netrc exists in the 
 `rm -f ~/.conjurrc ~/.netrc`
 
 Then run any command you wish to run within `cybr conjur`. Use the `--help` flag to see all available commands.
+
+### Authenticating to Privilege Cloud via ISPSS (Identity)
+
+You will need to know the following information to authenticate to Privilege Cloud via ISPSS:
+	* `-b, --base-url` - The base URL of CyberArk Cloud (e.g. https://example.cyberark.cloud or https://example.privilegecloud.cyberark.cloud)
+	* `-u, --username` - The username of the Privilege Cloud user (e.g. joe.garcia@cyberark.cloud.1234)
+
+#### Password Authentication
+
+```shell
+$ cybr logon -u joe.garcia@cyberark.cloud.1234 -a identity -b https://example.cyberark.cloud
++ Challenge #1
+Enter password:
+```
+
+After providing the password, if no other challenges are required, the CLI will handle the token exchange and a successful logon will be displayed.
+
+#### MFA Authentication
+
+If MFA is required, the CLI will prompt for the challenge method to use out of those available:
+
+```shell
+$ cybr logon -u joe.garcia@cyberark.cloud.1234 -a identity -b https://example.cyberark.cloud
++ Challenge #1
+Enter password:
++ Challenge #2
+1. Email... @joe-garcia.com
+2. SMS... XXX-1234
+> 2
+Enter code: 12341234
+```
+
+After providing the MFA code, if no other challenges are required, the CLI will handle the token exchange and a successful logon will be displayed.
 
 ### Documentation
 
