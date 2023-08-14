@@ -134,7 +134,7 @@ var logonCmd = &cobra.Command{
 				log.Fatalf("Failed to get platform discovery. %s", err)
 			}
 			c.TenantID, err = util.GetSubDomain(platformDiscovery.IdentityUserPortal.API)
-			c.BaseURL, err = util.GetSubDomain(platformDiscovery.Pcloud.API)
+			c.BaseURL = platformDiscovery.Pcloud.API
 			if err != nil {
 				log.Fatalf("Failed to get tenant ID. %s", err)
 			}
