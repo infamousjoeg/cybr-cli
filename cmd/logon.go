@@ -13,6 +13,8 @@ import (
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity"
 	identityrequests "github.com/infamousjoeg/cybr-cli/pkg/cybr/identity/requests"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity/responses"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/ispss"
+	ispssresponses "github.com/infamousjoeg/cybr-cli/pkg/cybr/ispss/responses"
 	"github.com/spf13/cobra"
 )
 
@@ -36,6 +38,7 @@ var (
 	StartOobChallenge  identityrequests.AdvanceAuthentication // Start Oob challenge struct
 	AnswerOOBChallenge identityrequests.AdvanceAuthentication // Answer Oob challenge struct
 	advanceResponse    *responses.Authentication              // Advance authentication response
+	platformDiscovery  *ispssresponses.PlatformDiscovery      // Platform discovery response
 )
 
 func logonToPAS(c pasapi.Client, username, password string, nonInteractive, concurrentSession bool) error {
@@ -112,7 +115,7 @@ var logonCmd = &cobra.Command{
 	Example Usage:
 	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com
 	Logon to Privilege Cloud REST API:
-	$ cybr logon -u $USERNAME -a identity -t xxx1234 -b https://example.privilegecloud.cyberark.cloud
+	$ cybr logon -u $USERNAME -a identity -b https://example.privilegecloud.cyberark.cloud
 	To bypass TLS verification:
 	$ cybr logon -u $USERNAME -a $AUTH_TYPE -b https://pvwa.example.com -i`,
 	Aliases: []string{"login"},
@@ -121,12 +124,19 @@ var logonCmd = &cobra.Command{
 		c := pasapi.Client{
 			BaseURL:     BaseURL,
 			AuthType:    AuthenticationType,
-			TenantID:    TenantID,
 			InsecureTLS: InsecureTLS,
 		}
-		// Check if auth type is "identity" and no tenant id is provided
-		if c.AuthType == "identity" && c.TenantID == "" {
-			log.Fatalf("An error occured because --tenant-id must be provided when using --auth-type identity")
+
+		// Check if auth type is "identity" and get TenantID if true
+		if c.AuthType == "identity" {
+			platformDiscovery, err := ispss.PlatformDiscovery(c.BaseURL)
+			if err != nil {
+				log.Fatalf("Failed to get platform discovery. %s", err)
+			}
+			c.TenantID, err = util.GetSubDomain(platformDiscovery.IdentityUserPortal.API)
+			if err != nil {
+				log.Fatalf("Failed to get tenant ID. %s", err)
+			}
 		}
 
 		// Get password from environment variable PAS_PASSWORD
@@ -312,7 +322,6 @@ func init() {
 	logonCmd.MarkFlagRequired("username")
 	logonCmd.Flags().StringVarP(&AuthenticationType, "auth-type", "a", "", "Authentication method to logon using [cyberark|ldap|radius]")
 	logonCmd.MarkFlagRequired("auth-type")
-	logonCmd.Flags().StringVarP(&TenantID, "tenant-id", "t", "", "The ID of the Identity tenant to authenticate to [e.g. xxx1234]")
 	logonCmd.Flags().BoolVarP(&InsecureTLS, "insecure-tls", "i", false, "If detected, TLS will not be verified")
 	logonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Base URL to send Logon request to [https://pvwa.example.com]")
 	logonCmd.MarkFlagRequired("base-url")

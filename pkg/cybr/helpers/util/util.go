@@ -2,7 +2,9 @@ package util
 
 import (
 	"fmt"
+	"net/url"
 	"os"
+	"strings"
 	"syscall"
 
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
@@ -40,4 +42,20 @@ func ReadOTPcode(credentials requests.Logon) (requests.Logon, error) {
 	credentials.Password = string(byteOTPCode)
 	fmt.Println()
 	return credentials, nil
+}
+
+// GetSubDomain Get the subdomain from the platform URL
+func GetSubDomain(platformURL string) (string, error) {
+	// Get the subdomain from the platform URL https://<subdomain>.privilegecloud.cyberark.cloud
+	parsedURL, err := url.Parse(platformURL)
+	if err != nil {
+		return "", fmt.Errorf("Failed to parse URL. %s", err)
+	}
+
+	parts := strings.Split(parsedURL.Hostname(), ".")
+	if len(parts) > 2 {
+		return parts[0], nil
+	}
+
+	return "", fmt.Errorf("Failed to get subdomain from URL. %s", err)
 }
