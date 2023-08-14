@@ -20,7 +20,15 @@ import (
 
 // Constants for logon command
 const (
-	maxAttempts = 10
+	maxAttempts                  = 10
+	identityUnsuccessfulResponse = "Identity returned unsuccessful response."
+	identityFailedAnswer         = "Failed to answer challenge."
+	bearer                       = "Bearer "
+	sessionIDKey                 = "Session ID:"
+	mechanismIDKey               = "Mechanism ID:"
+	actionKey                    = "Action:"
+	answerKey                    = "Answer:"
+	advanceResponseKey           = "Advance Authentication Response:"
 )
 
 // Global variables for logon command
@@ -100,7 +108,7 @@ func startAuthIdentity(c pasapi.Client, username string) (*responses.Authenticat
 		return nil, fmt.Errorf("Failed to start authentication. %s", err)
 	}
 	if response.Success != true {
-		return nil, fmt.Errorf("Identity returned unsuccessful response. %s", *response.Message)
+		return nil, fmt.Errorf("%s %s", identityUnsuccessfulResponse, *response.Message)
 	}
 
 	return response, nil
@@ -160,7 +168,7 @@ var logonCmd = &cobra.Command{
 				prettyprint.PrintColor("cyan", fmt.Sprintf("Start Authentication Response: %+v", startResponse))
 			}
 			if startResponse.Result.Token != "" {
-				c.SessionToken = "Bearer " + startResponse.Result.Token
+				c.SessionToken = fmt.Sprintf("%s %s", bearer, startResponse.Result.Token)
 			}
 
 			// Loop through challenges until c.SessionToken is set
@@ -182,26 +190,26 @@ var logonCmd = &cobra.Command{
 					AnswerChallenge.Answer = Password
 
 					if Verbose {
-						prettyprint.PrintColor("cyan", fmt.Sprintf("Session ID: %s", AnswerChallenge.SessionID))
-						prettyprint.PrintColor("cyan", fmt.Sprintf("Mechanism ID: %s", AnswerChallenge.MechanismID))
-						prettyprint.PrintColor("cyan", fmt.Sprintf("Action: %s", AnswerChallenge.Action))
-						prettyprint.PrintColor("cyan", fmt.Sprintf("Answer: %s", AnswerChallenge.Answer))
+						prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", sessionIDKey, AnswerChallenge.SessionID))
+						prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", mechanismIDKey, AnswerChallenge.MechanismID))
+						prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", actionKey, AnswerChallenge.Action))
+						prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", answerKey, AnswerChallenge.Answer))
 					}
 
 					// Answer challenge
 					advanceResponse, err = identity.AdvanceAuthentication(c, AnswerChallenge)
 					if err != nil {
-						log.Fatalf("Failed to answer challenge. %s", err)
+						log.Fatalf("%s %s", identityFailedAnswer, err)
 					}
 					if Verbose {
-						prettyprint.PrintColor("cyan", fmt.Sprintf("Advance Authentication Response: %+v", advanceResponse))
+						prettyprint.PrintColor("cyan", fmt.Sprintf("%s %+v", advanceResponseKey, advanceResponse))
 					}
 					if advanceResponse.Result.Token != "" {
-						c.SessionToken = "Bearer " + advanceResponse.Result.Token
+						c.SessionToken = fmt.Sprintf("%s %s", bearer, advanceResponse.Result.Token)
 						break
 					}
 					if !advanceResponse.Success {
-						log.Fatalf("Identity returned unsuccessful response. %s", *advanceResponse.Message)
+						log.Fatalf("%s %s", identityUnsuccessfulResponse, *advanceResponse.Message)
 					}
 
 					attempts++
@@ -240,25 +248,25 @@ var logonCmd = &cobra.Command{
 							StartOobChallenge.Action = "StartOOB"
 
 							if Verbose {
-								prettyprint.PrintColor("cyan", fmt.Sprintf("Session ID: %s", StartOobChallenge.SessionID))
-								prettyprint.PrintColor("cyan", fmt.Sprintf("Mechanism ID: %s", StartOobChallenge.MechanismID))
-								prettyprint.PrintColor("cyan", fmt.Sprintf("Action: %s", StartOobChallenge.Action))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", sessionIDKey, StartOobChallenge.SessionID))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", mechanismIDKey, StartOobChallenge.MechanismID))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", actionKey, StartOobChallenge.Action))
 							}
 
 							// Answer challenge
 							challengeResponse, err := identity.AdvanceAuthentication(c, StartOobChallenge)
 							if err != nil {
-								log.Fatalf("Failed to answer challenge. %s", err)
+								log.Fatalf("%s %s", identityFailedAnswer, err)
 							}
 							if Verbose {
-								prettyprint.PrintColor("cyan", fmt.Sprintf("Advance Authentication Response: %+v", challengeResponse))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %+v", advanceResponseKey, challengeResponse))
 							}
 							if challengeResponse.Result.Token != "" {
-								c.SessionToken = "Bearer " + challengeResponse.Result.Token
+								c.SessionToken = fmt.Sprintf("%s %s", bearer, challengeResponse.Result.Token)
 								break
 							}
 							if !challengeResponse.Success {
-								log.Fatalf("Identity returned unsuccessful response. %s", *advanceResponse.Message)
+								log.Fatalf("%s %s", identityUnsuccessfulResponse, *advanceResponse.Message)
 							}
 
 							// Get OTP code from Stdin
@@ -272,26 +280,26 @@ var logonCmd = &cobra.Command{
 							AnswerOOBChallenge.Answer = code
 
 							if Verbose {
-								prettyprint.PrintColor("cyan", fmt.Sprintf("Session ID: %s", AnswerOOBChallenge.SessionID))
-								prettyprint.PrintColor("cyan", fmt.Sprintf("Mechanism ID: %s", AnswerOOBChallenge.MechanismID))
-								prettyprint.PrintColor("cyan", fmt.Sprintf("Action: %s", AnswerOOBChallenge.Action))
-								prettyprint.PrintColor("cyan", fmt.Sprintf("Answer: %s", AnswerOOBChallenge.Answer))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", sessionIDKey, AnswerOOBChallenge.SessionID))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", mechanismIDKey, AnswerOOBChallenge.MechanismID))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", actionKey, AnswerOOBChallenge.Action))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", answerKey, AnswerOOBChallenge.Answer))
 							}
 
 							// Answer challenge
 							answerOOBResponse, err := identity.AdvanceAuthentication(c, AnswerOOBChallenge)
 							if err != nil {
-								log.Fatalf("Failed to answer challenge. %s", err)
+								log.Fatalf("%s %s", identityFailedAnswer, err)
 							}
 							if Verbose {
-								prettyprint.PrintColor("cyan", fmt.Sprintf("Advance Authentication Response: %+v", answerOOBResponse))
+								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %+v", advanceResponseKey, answerOOBResponse))
 							}
 							if answerOOBResponse.Result.Token != "" {
-								c.SessionToken = "Bearer " + answerOOBResponse.Result.Token
+								c.SessionToken = fmt.Sprintf("%s %s", bearer, answerOOBResponse.Result.Token)
 								break
 							}
 							if advanceResponse.Message != nil {
-								log.Fatalf("Identity returned unsuccessful response. %s", *advanceResponse.Message)
+								log.Fatalf("%s %s", identityUnsuccessfulResponse, *advanceResponse.Message)
 							} else {
 								log.Fatalf("Identity returned unsuccessful response, but the message is unavailable.")
 							}
