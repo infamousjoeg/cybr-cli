@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
-	"golang.org/x/crypto/ssh/terminal"
+	terminal "golang.org/x/term"
 )
 
 // GetUserHomeDir Get the Home directory of the current user
@@ -30,6 +30,17 @@ func ReadPassword() (string, error) {
 		return "", fmt.Errorf("An error occurred trying to read password from Stdin. Exiting")
 	}
 	return string(byteSecretVal), nil
+}
+
+// ReadInput Read input from Stdin
+func ReadInput(message string) (string, error) {
+	fmt.Printf("%s: ", message)
+	var input string
+	_, err := fmt.Scanln(&input)
+	if err != nil {
+		return "", fmt.Errorf("An error occurred trying to read input from Stdin. Exiting")
+	}
+	return input, nil
 }
 
 // ReadOTPcode Read one-time passcode from Stdin
