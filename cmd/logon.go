@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
@@ -223,16 +224,21 @@ var logonCmd = &cobra.Command{
 					}
 
 					// Get user input
-					fmt.Printf("> ")
-					var input int
-					fmt.Scanln(&input)
-					// Keep asking for input until valid
-					for input < 1 || input > len(startResponse.Result.Challenges[1].Mechanisms) {
-						prettyprint.PrintColor("red", fmt.Sprintf("Please enter a valid number between 1 and %d", len(startResponse.Result.Challenges[1].Mechanisms)))
-						fmt.Scanln(&input)
+				input_loop:
+					strInput, err := util.ReadInput("> ")
+					if err != nil {
+						log.Fatalf("An error occurred trying to read input from Stdin. Exiting")
 					}
+					intInput, err := strconv.Atoi(strInput)
+					if err != nil || intInput < 1 || intInput > len(startResponse.Result.Challenges[1].Mechanisms) {
+						goto input_loop
+					}
+					if intInput <= 0 || intInput > len(startResponse.Result.Challenges[1].Mechanisms) {
+						goto input_loop
+					}
+
 					// Add selected challenge to slice
-					SelectedChallenges = append(SelectedChallenges, input)
+					SelectedChallenges = append(SelectedChallenges, intInput)
 
 					// Print selected challenges' PromptSelectMech
 					for _, challenge := range SelectedChallenges {
@@ -270,9 +276,7 @@ var logonCmd = &cobra.Command{
 							}
 
 							// Get OTP code from Stdin
-							fmt.Printf("Enter code: ")
-							var code string
-							fmt.Scanln(&code)
+							code, err := util.ReadInput("Enter code: ")
 
 							AnswerOOBChallenge.SessionID = startResponse.Result.SessionID
 							AnswerOOBChallenge.MechanismID = selectedMechanismID
