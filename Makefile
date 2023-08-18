@@ -49,7 +49,7 @@ test:
 compile:
 ### If GOOS is not defined, then throw an error
 ifeq (${GOOS}, unset)
-	@echo "GOOS is undefined"
+	@echo "GOOS is undefined. If you ran 'make release', run './release.sh' instead."
 	@exit 1
 endif
 ### If GOARCH is not defined, then throw an error
