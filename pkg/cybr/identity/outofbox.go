@@ -40,7 +40,7 @@ func checkURL(client api.Client, req requests.AdvanceAuthentication, c chan stri
 
 func waitForInput(c chan string) {
 	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Println("Enter the one-time passcode or click the link:")
+	fmt.Print("Enter the one-time passcode or click the link: ")
 	for scanner.Scan() {
 		c <- scanner.Text()
 	}
