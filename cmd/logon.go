@@ -45,6 +45,7 @@ var (
 	SelectedChallenges []int                                  // Slice of selected challenges for Identity authentication
 	AnswerChallenge    identityrequests.AdvanceAuthentication // Answer challenge struct
 	StartOobChallenge  identityrequests.AdvanceAuthentication // Start Oob challenge struct
+	PollOOBChallenge   identityrequests.AdvanceAuthentication // Poll Oob challenge struct
 	AnswerOOBChallenge identityrequests.AdvanceAuthentication // Answer Oob challenge struct
 	advanceResponse    *responses.Authentication              // Advance authentication response
 	platformDiscovery  *ispssresponses.PlatformDiscovery      // Platform discovery response
@@ -225,7 +226,7 @@ var logonCmd = &cobra.Command{
 
 					// Get user input
 				input_loop:
-					strInput, err := util.ReadInput("> ")
+					strInput, err := util.ReadInput("Select a challenge")
 					if err != nil {
 						log.Fatalf("An error occurred trying to read input from Stdin. Exiting")
 					}
@@ -275,37 +276,51 @@ var logonCmd = &cobra.Command{
 								log.Fatalf("%s %s", identityUnsuccessfulResponse, *advanceResponse.Message)
 							}
 
-							// Get OTP code from Stdin
-							code, err := util.ReadInput("Enter code: ")
+							PollOOBChallenge.SessionID = startResponse.Result.SessionID
+							PollOOBChallenge.MechanismID = selectedMechanismID
+							PollOOBChallenge.Action = "Poll"
 
-							AnswerOOBChallenge.SessionID = startResponse.Result.SessionID
-							AnswerOOBChallenge.MechanismID = selectedMechanismID
-							AnswerOOBChallenge.Action = "Answer"
-							AnswerOOBChallenge.Answer = code
+							// Get OTP code from Stdin or detect link click
+							code, err := identity.GetOOBPending(c, PollOOBChallenge)
 
-							if Verbose {
-								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", sessionIDKey, AnswerOOBChallenge.SessionID))
-								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", mechanismIDKey, AnswerOOBChallenge.MechanismID))
-								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", actionKey, AnswerOOBChallenge.Action))
-								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", answerKey, AnswerOOBChallenge.Answer))
+							if len(code) < 50 {
+								AnswerOOBChallenge.SessionID = startResponse.Result.SessionID
+								AnswerOOBChallenge.MechanismID = selectedMechanismID
+								AnswerOOBChallenge.Action = "Answer"
+								AnswerOOBChallenge.Answer = code
+
+								if Verbose && code != "Response received from URL" {
+									prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", sessionIDKey, AnswerOOBChallenge.SessionID))
+									prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", mechanismIDKey, AnswerOOBChallenge.MechanismID))
+									prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", actionKey, AnswerOOBChallenge.Action))
+									prettyprint.PrintColor("cyan", fmt.Sprintf("%s %s", answerKey, AnswerOOBChallenge.Answer))
+								}
+
+								// Answer challenge
+								answerOOBResponse, err := identity.AdvanceAuthentication(c, AnswerOOBChallenge)
+								if err != nil {
+									log.Fatalf("%s %s", identityFailedAnswer, err)
+								}
+								if Verbose {
+									prettyprint.PrintColor("cyan", fmt.Sprintf("%s %+v", advanceResponseKey, answerOOBResponse))
+								}
+								if answerOOBResponse.Result.Token != "" {
+									c.SessionToken = fmt.Sprintf("%s %s", bearer, answerOOBResponse.Result.Token)
+									break
+								}
+								if advanceResponse.Message != nil {
+									log.Fatalf("%s %s", identityUnsuccessfulResponse, *advanceResponse.Message)
+								} else {
+									log.Fatalf("Identity returned unsuccessful response, but the message is unavailable.")
+								}
 							}
 
-							// Answer challenge
-							answerOOBResponse, err := identity.AdvanceAuthentication(c, AnswerOOBChallenge)
-							if err != nil {
-								log.Fatalf("%s %s", identityFailedAnswer, err)
-							}
-							if Verbose {
-								prettyprint.PrintColor("cyan", fmt.Sprintf("%s %+v", advanceResponseKey, answerOOBResponse))
-							}
-							if answerOOBResponse.Result.Token != "" {
-								c.SessionToken = fmt.Sprintf("%s %s", bearer, answerOOBResponse.Result.Token)
+							if code != "" {
+								c.SessionToken = fmt.Sprintf("%s %s", bearer, code)
 								break
-							}
-							if advanceResponse.Message != nil {
-								log.Fatalf("%s %s", identityUnsuccessfulResponse, *advanceResponse.Message)
 							} else {
-								log.Fatalf("Identity returned unsuccessful response, but the message is unavailable.")
+								log.Fatalf("Failed to get OOB code. Exiting")
+								os.Exit(1)
 							}
 						}
 					}
