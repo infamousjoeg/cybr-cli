@@ -179,19 +179,55 @@ func TestVerifyAccountCredentialsInvalidAccount(t *testing.T) {
 	}
 }
 
-func TestChangeAccountCredentialsSuccess(t *testing.T) {
+func TestChangeAccountCredentialsImmediateSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.ChangeAccountCredentials(accountID, false)
+	err = client.ChangeAccountCredentials(accountID, false, "changeImmediately", "")
 	if err != nil {
 		t.Errorf("Failed to get account password. %s", err)
 	}
 }
 
-func TestChangeAccountCredentialsInvalidAccount(t *testing.T) {
+func TestChangeAccountCredentialsImmediateInvalidAccount(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.ChangeAccountCredentials(invalidAccountID, false)
+	err = client.ChangeAccountCredentials(invalidAccountID, false, "changeImmediately", "")
+	if err == nil {
+		t.Errorf("Set account for change but it should not exist")
+	}
+}
+
+func TestChangeAccountCredentialsVaultOnlySuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.ChangeAccountCredentials(accountID, false, "changeVaultOnly", "superSecreter")
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+}
+
+func TestChangeAccountCredentialsVaultOnlyInvalidAccount(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.ChangeAccountCredentials(invalidAccountID, false, "changeVaultOnly", "superSecreter")
+	if err == nil {
+		t.Errorf("Set account for change but it should not exist")
+	}
+}
+
+func TestChangeAccountCredentialsSetNextSuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.ChangeAccountCredentials(accountID, false, "changeSetNext", "superSecretest")
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+}
+
+func TestChangeAccountCredentialsSetNextInvalidAccount(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.ChangeAccountCredentials(invalidAccountID, false, "changeSetNext", "superSecretest")
 	if err == nil {
 		t.Errorf("Set account for change but it should not exist")
 	}
