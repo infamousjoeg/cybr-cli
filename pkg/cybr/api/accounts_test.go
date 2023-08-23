@@ -182,7 +182,7 @@ func TestVerifyAccountCredentialsInvalidAccount(t *testing.T) {
 func TestChangeAccountCredentialsImmediateSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.ChangeAccountCredentials(accountID, false, "changeImmediately", "")
+	err = client.ChangeAccountCredentials(accountID, false, "change", "")
 	if err != nil {
 		t.Errorf("Failed to get account password. %s", err)
 	}
@@ -191,7 +191,7 @@ func TestChangeAccountCredentialsImmediateSuccess(t *testing.T) {
 func TestChangeAccountCredentialsImmediateInvalidAccount(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.ChangeAccountCredentials(invalidAccountID, false, "changeImmediately", "")
+	err = client.ChangeAccountCredentials(invalidAccountID, false, "change", "")
 	if err == nil {
 		t.Errorf("Set account for change but it should not exist")
 	}
@@ -200,7 +200,7 @@ func TestChangeAccountCredentialsImmediateInvalidAccount(t *testing.T) {
 func TestChangeAccountCredentialsSetNextSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.ChangeAccountCredentials(accountID, false, "changeSetNext", "superSecretest")
+	err = client.ChangeAccountCredentials(accountID, false, "setnextpassword", "superSecretest")
 	if err != nil {
 		t.Errorf("Failed to get account password. %s", err)
 	}
@@ -209,7 +209,7 @@ func TestChangeAccountCredentialsSetNextSuccess(t *testing.T) {
 func TestChangeAccountCredentialsSetNextInvalidAccount(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.ChangeAccountCredentials(invalidAccountID, false, "changeSetNext", "superSecretest")
+	err = client.ChangeAccountCredentials(invalidAccountID, false, "setnextpassword", "superSecretest")
 	if err == nil {
 		t.Errorf("Set account for set next password but it should not exist")
 	}
