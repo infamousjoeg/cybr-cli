@@ -340,7 +340,7 @@ var logonCmd = &cobra.Command{
 		}
 
 		// Logon success message
-		prettyprint.PrintColor("green", fmt.Sprintf("Successfully logged onto PAS as user %s.", Username))
+		prettyprint.PrintColor("green", fmt.Sprintf("\nSuccessfully logged onto PAS as user %s.", Username))
 	},
 }
 
