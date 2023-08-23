@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	err := doc.GenMarkdownTree(cmd.GetCMD(), "./")
+	err := doc.GenMarkdownTree(cmd.GetCMD(), "./docs")
 	if err != nil {
 		log.Fatalf("Failed to generate markdown documentation")
 	}

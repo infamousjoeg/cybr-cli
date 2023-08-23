@@ -179,19 +179,19 @@ func TestVerifyAccountCredentialsInvalidAccount(t *testing.T) {
 	}
 }
 
-func TestChangeAccountCredentialsSuccess(t *testing.T) {
+func TestChangeAccountCredentialsImmediateSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.ChangeAccountCredentials(accountID, false)
+	err = client.ChangeAccountCredentials(accountID, false, "change", "")
 	if err != nil {
 		t.Errorf("Failed to get account password. %s", err)
 	}
 }
 
-func TestChangeAccountCredentialsInvalidAccount(t *testing.T) {
+func TestChangeAccountCredentialsImmediateInvalidAccount(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.ChangeAccountCredentials(invalidAccountID, false)
+	err = client.ChangeAccountCredentials(invalidAccountID, false, "change", "")
 	if err == nil {
 		t.Errorf("Set account for change but it should not exist")
 	}
@@ -212,5 +212,41 @@ func TestReconcileAccountCredentialsInvalidAccount(t *testing.T) {
 	err = client.ReconileAccountCredentials(invalidAccountID)
 	if err == nil {
 		t.Errorf("Set account for reconcile but it should not exist")
+	}
+}
+
+func TestUnlockSuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.Unlock(accountID)
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+}
+
+func TestUnlockFailure(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.Unlock(invalidAccountID)
+	if err == nil {
+		t.Errorf("Set account for unlock but it should not exist")
+	}
+}
+
+func TestCheckInSuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.CheckIn(accountID)
+	if err != nil {
+		t.Errorf("Failed to get account password. %s", err)
+	}
+}
+
+func TestCheckInFailure(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	err = client.CheckIn(invalidAccountID)
+	if err == nil {
+		t.Errorf("Set account for check in but it should not exist")
 	}
 }

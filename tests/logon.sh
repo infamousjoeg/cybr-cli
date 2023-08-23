@@ -17,6 +17,9 @@ main() {
         conjur-authn-iam)
             conjur-authn-iam
             ;;
+        conjur-authn-iam-cli)
+            conjur-authn-iam-cli
+            ;;
         *)
             echo "Usage: $0 {ldap|cyberark|conjur|conjur-non-interactive|conjur-authn-iam}"
             exit 1
@@ -57,4 +60,19 @@ conjur-authn-iam() {
     cybr conjur list
     unset CONJUR_ACCOUNT CONJUR_AUTHN_LOGIN CONJUR_APPLIANCE_URL CONJUR_AUTHENTICATOR CONJUR_AUTHN_SERVICE_ID CONJUR_AWS_TYPE
 }
+
+conjur-authn-iam-cli() {
+    set -x
+    CONJUR_ACCOUNT="cyberarkdemo"
+    CONJUR_AUTHN_LOGIN="host/cloud/aws/ec2/735280068473/ConjurAWSRoleEC2"
+    CONJUR_APPLIANCE_URL="https://conjur.joegarcia.dev"
+    CONJUR_AUTHENTICATOR="authn-iam"
+    CONJUR_AUTHN_SERVICE_ID="prod"
+    CONJUR_AWS_TYPE="cli"
+    export CONJUR_ACCOUNT CONJUR_AUTHN_LOGIN CONJUR_APPLIANCE_URL CONJUR_AUTHENTICATOR CONJUR_AUTHN_SERVICE_ID CONJUR_AWS_TYPE
+    cybr conjur list
+    unset CONJUR_ACCOUNT CONJUR_AUTHN_LOGIN CONJUR_APPLIANCE_URL CONJUR_AUTHENTICATOR CONJUR_AUTHN_SERVICE_ID CONJUR_AWS_TYPE
+    set +x
+}
+
 main "$@"

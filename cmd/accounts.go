@@ -3,12 +3,14 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/queries"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/shared"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/util"
 	"github.com/spf13/cobra"
 )
 
@@ -72,6 +74,12 @@ var (
 
 	// ChangeEntireGroup change account group
 	ChangeEntireGroup bool
+
+	// Scope of password change on account
+	Scope string
+
+	// NewPassword to set on account
+	NewPassword string
 )
 
 var accountsCmd = &cobra.Command{
@@ -148,7 +156,7 @@ var addAccountsCmd = &cobra.Command{
 	Long: `Add an account to PAS.
 	
 	Example Usage:
-	$ cybr accounts add -s SafeName -p platformID -u username -a 10.0.0.1 -t password -s SuperSecret`,
+	$ cybr accounts add -s SafeName -p platformID -u username -a 10.0.0.1 -t password -c SuperSecret`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
@@ -271,7 +279,10 @@ var changeAccountCmd = &cobra.Command{
 	Long: `This method marks an account for credential change
 	
 	Example Usage:
-	$ cybr accounts change -i 24_1`,
+	$ cybr accounts change -i 24_1
+	$ cybr accounts change -i 24_1 -s immediately
+	$ cybr accounts change -i 24_1 -s set
+	$ cybr accounts change -i 24_1 -s set -p $(openssl rand -base64 12)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
@@ -279,7 +290,23 @@ var changeAccountCmd = &cobra.Command{
 			return
 		}
 
-		err = client.ChangeAccountCredentials(AccountID, ChangeEntireGroup)
+		if NewPassword == "" && strings.ToLower(Scope) == "set" {
+			NewPassword, err = util.ReadPassword()
+			if NewPassword == "" {
+				log.Fatalf("Password cannot be empty")
+				return
+			}
+			if err != nil {
+				log.Fatalf("Failed to read password. %s", err)
+				return
+			}
+		}
+		if Scope == "" || strings.ToLower(Scope) == "immediate" {
+			err = client.ChangeAccountCredentials(AccountID, ChangeEntireGroup, "change", "")
+		}
+		if strings.ToLower(Scope) == "set" {
+			err = client.ChangeAccountCredentials(AccountID, ChangeEntireGroup, "setnextpassword", NewPassword)
+		}
 		if err != nil {
 			log.Fatalf("%s", err)
 			return
@@ -364,6 +391,54 @@ var moveAccountCmd = &cobra.Command{
 	},
 }
 
+var unlockAccountCmd = &cobra.Command{
+	Use:   "unlock",
+	Short: "Unlock an account",
+	Long: `Unlock an account
+
+	Example Usage:
+	$ cybr accounts unlock -i 24_1`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		err = client.Unlock(AccountID)
+		if err != nil {
+			log.Fatalf("%s", err)
+			return
+		}
+
+		fmt.Printf("Successfully unlocked account '%s'.\n", AccountID)
+	},
+}
+
+var checkInAccountCmd = &cobra.Command{
+	Use:   "checkin",
+	Short: "Check-in an account",
+	Long: `Check-in an account that was checked-out by the same user
+
+	Example Usage:
+	$ cybr accounts checkin -i 24_1`,
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		err = client.CheckIn(AccountID)
+		if err != nil {
+			log.Fatalf("%s", err)
+			return
+		}
+
+		fmt.Printf("Successfully checked in account '%s'\n", AccountID)
+	},
+}
+
 func init() {
 	// Listing an account
 	listAccountsCmd.Flags().StringVarP(&Search, "search", "s", "", "List of keywords to search for in accounts, separated by a space")
@@ -410,7 +485,9 @@ func init() {
 	// change account
 	changeAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to change")
 	changeAccountCmd.MarkFlagRequired("account-id")
+	changeAccountCmd.Flags().StringVarP(&Scope, "scope", "s", "", "Scope of change. Valid values: Immediate (Default) or Set")
 	changeAccountCmd.Flags().BoolVarP(&ChangeEntireGroup, "change-entire-group", "c", false, "If account is part of account group, change the entire group")
+	changeAccountCmd.Flags().StringVarP(&NewPassword, "password", "p", "", "New password to set on account")
 
 	// reconcile
 	reconcileAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to reconcile")
@@ -422,6 +499,14 @@ func init() {
 	moveAccountCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Safe name in which the account will be moved into")
 	moveAccountCmd.MarkFlagRequired("safe")
 
+	// unlock
+	unlockAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to unlock")
+	unlockAccountCmd.MarkFlagRequired("account-id")
+
+	// check-in
+	checkInAccountCmd.Flags().StringVarP(&AccountID, "account-id", "i", "", "Account ID to check-in")
+	checkInAccountCmd.MarkFlagRequired("account-id")
+
 	// Add cmd to account cmd
 	accountsCmd.AddCommand(listAccountsCmd)
 	accountsCmd.AddCommand(getAccountsCmd)
@@ -432,6 +517,8 @@ func init() {
 	accountsCmd.AddCommand(changeAccountCmd)
 	accountsCmd.AddCommand(reconcileAccountCmd)
 	accountsCmd.AddCommand(moveAccountCmd)
+	accountsCmd.AddCommand(unlockAccountCmd)
+	accountsCmd.AddCommand(checkInAccountCmd)
 
 	// Add accounts cmd to root
 	rootCmd.AddCommand(accountsCmd)

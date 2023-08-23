@@ -1,10 +1,6 @@
 name: cybr-cli CI
 
 on:
-  pull_request:
-    branches:
-      - main
-      - v*
   push:
     branches-ignore:
       - main

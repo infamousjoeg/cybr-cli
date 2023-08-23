@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws/cli"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws/ec2"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws/ecs"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators/aws/lambda"
@@ -15,6 +16,7 @@ func getAwsResources() []aws.Resource {
 	resources = append(resources, ec2.New())
 	resources = append(resources, lambda.New())
 	resources = append(resources, ecs.New())
+	resources = append(resources, cli.New())
 	return resources
 }
 

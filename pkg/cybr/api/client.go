@@ -13,6 +13,7 @@ import (
 type Client struct {
 	BaseURL      string
 	AuthType     string
+	TenantID     string
 	InsecureTLS  bool
 	SessionToken string
 	Logger       logger.Logger
