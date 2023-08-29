@@ -105,12 +105,21 @@ func startAuthIdentity(c pasapi.Client, username string) (*responses.Authenticat
 	}
 
 	// Start authentication
-	response, err := identity.StartAuthentication(c, startAuth)
+	response, err := identity.StartAuthentication(c, startAuth, "")
 	if err != nil {
 		return nil, fmt.Errorf("Failed to start authentication. %s", err)
 	}
 	if response.Success != true {
 		return nil, fmt.Errorf("%s %s", identityUnsuccessfulResponse, *response.Message)
+	}
+	if response.Result.PodFqdn != "" {
+		response, err = identity.StartAuthentication(c, startAuth, response.Result.PodFqdn)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to start authentication. %s", err)
+		}
+		if response.Success != true {
+			return nil, fmt.Errorf("%s %s", identityUnsuccessfulResponse, *response.Message)
+		}
 	}
 
 	return response, nil
@@ -147,6 +156,10 @@ var logonCmd = &cobra.Command{
 			c.BaseURL = platformDiscovery.Pcloud.API
 			if err != nil {
 				log.Fatalf("Failed to get tenant ID. %s", err)
+			}
+			if Verbose {
+				prettyprint.PrintColor("cyan", fmt.Sprintf("Tenant ID: %s", c.TenantID))
+				prettyprint.PrintColor("cyan", fmt.Sprintf("Base URL: %s", c.BaseURL))
 			}
 		}
 
