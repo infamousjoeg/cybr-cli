@@ -11,9 +11,15 @@ import (
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity/responses"
 )
 
+var identityTenant string
+
 // StartAuthentication starts the authentication process
-func StartAuthentication(c api.Client, req requests.StartAuthentication) (*responses.Authentication, error) {
-	identityTenant := fmt.Sprintf("https://%s.id.cyberark.cloud", req.TenantID)
+func StartAuthentication(c api.Client, req requests.StartAuthentication, podFqdn string) (*responses.Authentication, error) {
+	if podFqdn == "" {
+		identityTenant = fmt.Sprintf("https://%s.id.cyberark.cloud", req.TenantID)
+	} else {
+		identityTenant = fmt.Sprintf("https://%s", podFqdn)
+	}
 	url := fmt.Sprintf("%s/Security/StartAuthentication", identityTenant)
 
 	headers := http.Header{}
