@@ -20,7 +20,8 @@ Current products supported:
 
 - [Install](#install)
 	- [MacOS](#macos)
-	- [Windows or Linux](#windows-or-linux)
+	- [Windows](#windows)
+        - [Linux](#linux)
 	- [AWS CloudShell](#aws-cloudshell)
 	- [Install from Source](#install-from-source)
 - [Usage](#usage)
@@ -48,7 +49,13 @@ $ brew tap infamousjoeg/tap
 $ brew install cybr-cli
 ```
 
-### Windows or Linux
+### Windows
+
+```shell
+$ winget install InfamousJoeG.cybr-cli
+```
+
+### Linux
 
 Download from the [Releases](https://github.com/infamousjoeg/cybr-cli/releases) page.
 
