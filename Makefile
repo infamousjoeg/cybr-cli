@@ -7,17 +7,17 @@ VERSION ?= $(shell awk -F'"' 'NR==2{print $$4}' ./release.json)
 GOOS ?= unset
 GOARCH ?= unset
 ## If GOOS=windows, then the executable is named cybr.exe
-## and the compressed file is named cybr-cli_${GOOS}_${GOARCH}.zip
+## and the compressed file is named cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip
 ifeq (${GOOS}, windows)
 TARGET_EXEC := cybr.exe
-FILE_COMPRESSED := ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip
-FILE_MD5 := ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip.md5
-FILE_SHA256 := ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip.sha256
+FILE_COMPRESSED := ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip
+FILE_MD5 := ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip.md5
+FILE_SHA256 := ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip.sha256
 endif
 TARGET_EXEC ?= cybr
-FILE_MD5 ?= ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.md5
-FILE_SHA256 ?= ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.sha256
-FILE_COMPRESSED ?= ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.tar.gz
+FILE_MD5 ?= ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.md5
+FILE_SHA256 ?= ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.sha256
+FILE_COMPRESSED ?= ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.tar.gz
 
 
 # Rules
@@ -79,20 +79,20 @@ ifeq (${GOOS}, darwin)
 endif
 ### If GOOS=windows, then compress the executable into a zip
 ifeq (${GOOS}, windows)
-	@echo "Compressing ${TARGET_EXEC} into ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip..."
-	@zip -j ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip ${BUILD_DIR}/${GOOS}/${GOARCH}/${TARGET_EXEC}
-	@echo "Generating MD5 checksum for ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip..."
-	@md5 -qs ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip > ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip.md5
-	@echo "Generating SHA256 checksum for ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip..."
-	@shasum -a 256 ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip | cut -f1 -d' ' > ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.zip.sha256
+	@echo "Compressing ${TARGET_EXEC} into ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip..."
+	@zip -j ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip ${BUILD_DIR}/${GOOS}/${GOARCH}/${TARGET_EXEC}
+	@echo "Generating MD5 checksum for ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip..."
+	@md5 -qs ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip > ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip.md5
+	@echo "Generating SHA256 checksum for ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip..."
+	@shasum -a 256 ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip | cut -f1 -d' ' > ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.zip.sha256
 ### If GOOS is not windows, then compress the executable into a tar.gz
 else
-	@echo "Compressing ${TARGET_EXEC} into ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.tar.gz..."
-	@tar -czf ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.tar.gz -C ${BUILD_DIR}/${GOOS}/${GOARCH} ${TARGET_EXEC}
-	@echo "Generating MD5 checksum for ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.tar.gz..."
-	@md5 -qs ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.tar.gz > ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.tar.gz.md5
-	@echo "Generating SHA256 checksum for ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.tar.gz..."
-	@shasum -a 256 ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.tar.gz | cut -f1 -d' ' > ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.tar.gz.sha256
+	@echo "Compressing ${TARGET_EXEC} into ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.tar.gz..."
+	@tar -czf ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.tar.gz -C ${BUILD_DIR}/${GOOS}/${GOARCH} ${TARGET_EXEC}
+	@echo "Generating MD5 checksum for ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.tar.gz..."
+	@md5 -qs ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.tar.gz > ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.tar.gz.md5
+	@echo "Generating SHA256 checksum for ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.tar.gz..."
+	@shasum -a 256 ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.tar.gz | cut -f1 -d' ' > ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.tar.gz.sha256
 endif
 ### If GOOS=darwin, then build, sign, and notarize a package installer
 ifeq (${GOOS}, darwin)
@@ -103,13 +103,13 @@ ifeq (${GOOS}, darwin)
 		--identifier "com.github.infamousjoeg.cybr-cli" \
 		--version "${VERSION}" \
 		--sign "42510BD69E802006418644C21E229DC4461D6673" \
-		${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.pkg
+		${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.pkg
 	@echo "Notarizing package installer..."
-	@xcrun notarytool submit ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.pkg \
+	@xcrun notarytool submit ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.pkg \
 		--keychain-profile "notary-cybrcli" \
 		--wait
 	@echo "Stapling package installer..."
-	@xcrun stapler staple ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${GOOS}_${GOARCH}.pkg
+	@xcrun stapler staple ${BUILD_DIR}/${GOOS}/${GOARCH}/cybr-cli_${VERSION}_${GOOS}_${GOARCH}.pkg
 endif
 
 ## Generate Documentation
