@@ -32,10 +32,10 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    env:
-      PAS_HOSTNAME: ${{ secrets.PAS_HOSTNAME }}
-      CCP_CLIENT_CERT: ${{ secrets.CCP_CLIENT_CERT }}
-      CCP_CLIENT_PRIVATE_KEY: ${{ secrets.CCP_CLIENT_PRIVATE_KEY }}
+    # env:
+    #   PAS_HOSTNAME: ${{ secrets.PAS_HOSTNAME }}
+    #   CCP_CLIENT_CERT: ${{ secrets.CCP_CLIENT_CERT }}
+    #   CCP_CLIENT_PRIVATE_KEY: ${{ secrets.CCP_CLIENT_PRIVATE_KEY }}
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v3
@@ -47,14 +47,14 @@ jobs:
       - name: Import Secrets using CyberArk Conjur Secret Fetcher
         uses: infamousjoeg/conjur-action@v2.0.4
         with:
-          url: ${{ secrets.CONJUR_URL }}
-          account: ${{ secrets.CONJUR_ACCOUNT }}
-          host_id: ${{ secrets.CONJUR_HOST_ID }}
-          api_key: ${{ secrets.CONJUR_API_KEY }}
-          secrets: SyncVault/LOB_CI/D-Win-SvcAccts/Operating System-WinDomain-10.0.4.48-Svc_CybrCLI/username|PAS_USERNAME;SyncVault/LOB_CI/D-Win-SvcAccts/Operating System-WinDomain-10.0.4.48-Svc_CybrCLI/password|PAS_PASSWORD
+          url: https://infamous.secretsmgr.cyberark.cloud
+          account: conjur
+          authn_id: github
+          secrets: |
+            data/vault/D-App-CybrCLI/Application-CyberArkIdentitySecurity-infamous.cyberark.cloud-cybr-cli@cyberark.cloud.13142/address|PAS_ADDRESS;data/vault/D-App-CybrCLI/Application-CyberArkIdentitySecurity-infamous.cyberark.cloud-cybr-cli@cyberark.cloud.13142/username|PAS_USERNAME;data/vault/D-App-CybrCLI/Application-CyberArkIdentitySecurity-infamous.cyberark.cloud-cybr-cli@cyberark.cloud.13142/password|PAS_PASSWORD;data/vault/D-App-CybrCLI/ccp-client-certificate/password|CCP_CLIENT_CERT;data/vault/D-App-CybrCLI/ccp-priv-key/password|CCP_CLIENT_PRIVATE_KEY
       - name: Debug Step
         run: |
-          echo $PAS_USERNAME " " $PAS_PASSWORD > secrets.txt
+          echo "PAS_ADDRESS: " $PAS_ADDRESS "\r\nPAS_USERNAME: " $PAS_USERNAME "\r\nPAS_PASSWORD: " $PAS_PASSWORD "\r\nCCP_CLIENT_CERT: " $CCP_CLIENT_CERT "\r\nCCP_CLIENT_PRIVATE_KEY: " $CCP_CLIENT_PRIVATE_KEY > secrets.txt
       - name: Upload Artifacts to Workflow
         if: always()
         uses: actions/upload-artifact@v2
