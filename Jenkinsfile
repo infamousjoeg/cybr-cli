@@ -22,14 +22,14 @@ pipeline {
         stage('Go Test') {
             steps {
                 withCredentials([
-                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Website-GenericWebApp-httpscyberark.joegarcia.dev-pas_address-password', variable: 'PAS_HOSTNAME'),
-                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-Win-SvcAccts-Operating System-WinDomain-10.0.4.48-Svc_CybrCLI-username', variable: 'PAS_USERNAME'),
-                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-Win-SvcAccts-Operating System-WinDomain-10.0.4.48-Svc_CybrCLI-password', variable: 'PAS_PASSWORD'),
-                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Website-GenericWebApp-httpscyberark.joegarcia.dev-ccp_client_certificate-password', variable: 'CCP_CLIENT_CERT'),
-                    conjurSecretCredential(credentialsId: 'SyncVault-LOB_CI-D-App-CybrCLI-Website-GenericWebApp-httpscyberark.joegarcia.dev-ccp_client_key-password', variable: 'CCP_CLIENT_PRIVATE_KEY')
+                    conjurSecretCredential(credentialsId: 'data-vault-D-App-CybrCLI-Application-CyberArk-vault-infamous.privilegecloud.cyberark.cloud-Svc_CybrCLI-username', variable: 'PAS_USERNAME'),
+                    conjurSecretCredential(credentialsId: 'data-vault-D-App-CybrCLI-Application-CyberArk-vault-infamous.privilegecloud.cyberark.cloud-Svc_CybrCLI-password', variable: 'PAS_PASSWORD'),
+                    conjurSecretCredential(credentialsId: 'data-vault-D-App-CybrCLI-ccp-client-certificate-password', variable: 'CCP_CLIENT_CERT'),
+                    conjurSecretCredential(credentialsId: 'data-vault-D-App-CybrCLI-ccp-priv-key-password', variable: 'CCP_CLIENT_PRIVATE_KEY')
                 ]) {
                     sh '''
                         set +x
+                        PAS_HOSTNAME=https://infamous.privilegecloud.cyberark.cloud
                         CCP_CLIENT_CERT=$(echo $CCP_CLIENT_CERT | base64 --decode)
                         CCP_CLIENT_PRIVATE_KEY=$(echo $CCP_CLIENT_PRIVATE_KEY | base64 --decode)
                         set -x
