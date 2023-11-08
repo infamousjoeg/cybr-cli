@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -95,9 +96,10 @@ func (c Client) RevokeJITAccess(accountID string) error {
 
 // GetAccountPassword This method enables users to retrieve the password or SSH key of an existing account that is identified by its Account ID. It enables users to specify a reason and ticket ID, if required
 func (c Client) GetAccountPassword(accountID string, request requests.GetAccountPassword) (string, error) {
+	ctx := context.TODO()
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/Password/Retrieve", c.BaseURL, accountID)
 
-	response, err := httpJson.SendRequestRaw(false, url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
+	_, response, err := httpJson.SendRequestRaw(ctx, false, url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return "", fmt.Errorf("Failed to retrieve the account password '%s'. %s. %s", accountID, string(returnedError), err)
@@ -108,9 +110,11 @@ func (c Client) GetAccountPassword(accountID string, request requests.GetAccount
 
 // GetAccountSSHKey This method enables users to retrieve the password or SSH key of an existing account that is identified by its Account ID. It enables users to specify a reason and ticket ID, if required
 func (c Client) GetAccountSSHKey(accountID string, request requests.GetAccountPassword) (string, error) {
+	ctx := context.TODO()
+
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/Secret/Retrieve", c.BaseURL, accountID)
 
-	response, err := httpJson.SendRequestRaw(false, url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
+	_, response, err := httpJson.SendRequestRaw(ctx, false, url, "POST", c.SessionToken, request, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return "", fmt.Errorf("Failed to retrieve the account SSH Key '%s'. %s. %s", accountID, string(returnedError), err)

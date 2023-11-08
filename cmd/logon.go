@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -53,6 +54,7 @@ var (
 
 func logonToPAS(c pasapi.Client, username, password string, nonInteractive, concurrentSession bool) error {
 	var err error
+	ctx := context.Background()
 	// Check if non-interactive flag is not provided and password is not empty
 	if !nonInteractive && password != "" {
 		return fmt.Errorf("An error occured because --non-interactive must be provided when using --password flag")
@@ -75,15 +77,16 @@ func logonToPAS(c pasapi.Client, username, password string, nonInteractive, conc
 		ConcurrentSession: concurrentSession,
 	}
 	// Logon to the PAS REST API
-	err = c.Logon(credentials)
-	if err != nil && !strings.Contains(err.Error(), "ITATS542I") {
+	ctx, errorResponse, err := c.Logon(ctx, credentials)
+	if err != nil && errorResponse.ErrorCode != "ITATS542I" {
 		return fmt.Errorf("Failed to Logon to the PVWA. %s", err)
 	}
 	// Deal with OTPCode here if error contains challenge error code and redo client.Logon()
 	if err != nil {
 		// Get OTP code from Stdin
+		fmt.Printf("%s: \n", errorResponse.ErrorMessage)
 		credentials, err = util.ReadOTPcode(credentials)
-		err = c.Logon(credentials)
+		_, _, err = c.Logon(ctx, credentials)
 		if err != nil {
 			return fmt.Errorf("Failed to respond to challenge. Possible timeout occurred. %s", err)
 		}

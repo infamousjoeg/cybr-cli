@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -25,7 +26,7 @@ func defaultPASAPIClient(t *testing.T) (pasapi.Client, error) {
 		Password: password,
 	}
 
-	err := client.Logon(creds)
+	_, _, err := client.Logon(context.TODO(), creds)
 	if err != nil {
 		t.Errorf("Failed to logon. %s", err)
 	}
