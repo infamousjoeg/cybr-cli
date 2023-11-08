@@ -2,23 +2,26 @@ name: cybr-cli CI
 
 on:
   push:
-    branches-ignore:
-      - main
+    branches:
+      - '!main'
   workflow_dispatch:
 
 jobs:
+  setup-go: &setup-go
+    - name: Checkout source code
+      uses: actions/checkout@v3
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '>=1.18'
+        cache: false
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '>=1.16'
-          cache: false
+      - *setup-go
       - name: Lint All
         uses: golangci/golangci-lint-action@v3
         with:
@@ -28,87 +31,28 @@ jobs:
   test:
     name: Test
     runs-on: self-hosted
-    needs:
-      - lint
+    needs: lint
     permissions:
       id-token: write
       contents: read
-    # env:
-    #   PAS_HOSTNAME: ${{ secrets.PAS_HOSTNAME }}
-    #   CCP_CLIENT_CERT: ${{ secrets.CCP_CLIENT_CERT }}
-    #   CCP_CLIENT_PRIVATE_KEY: ${{ secrets.CCP_CLIENT_PRIVATE_KEY }}
     steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v3
-      - name: Install Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '>=1.16'
-          cache: false
+      - *setup-go
       - name: Import Secrets using CyberArk Conjur Secret Fetcher
         uses: infamousjoeg/conjur-action@v2.0.4
         with:
-          url: https://infamous.secretsmgr.cyberark.cloud
+          url: https://pineapple.secretsmgr.cyberark.cloud
           account: conjur
-          authn_id: github
+          authn_id: inf-github
           secrets: |
-            data/vault/D-App-CybrCLI/Application-CyberArkIdentitySecurity-infamous.cyberark.cloud-cybr-cli@cyberark.cloud.13142/address|PAS_ADDRESS;data/vault/D-App-CybrCLI/Application-CyberArkIdentitySecurity-infamous.cyberark.cloud-cybr-cli@cyberark.cloud.13142/username|PAS_USERNAME;data/vault/D-App-CybrCLI/Application-CyberArkIdentitySecurity-infamous.cyberark.cloud-cybr-cli@cyberark.cloud.13142/password|PAS_PASSWORD;data/vault/D-App-CybrCLI/ccp-client-certificate/password|CCP_CLIENT_CERT;data/vault/D-App-CybrCLI/ccp-priv-key/password|CCP_CLIENT_PRIVATE_KEY
+          data/vault/PIN-APP-CYBRCLI/Cloud Service-Identity-httpspineapple.privilegecloud.cyberark.cloud-svc_infamousdevops@cyberark.cloud.3558/address|PAS_ADDRESS;data/vault/PIN-APP-CYBRCLI/Cloud Service-Identity-httpspineapple.privilegecloud.cyberark.cloud-svc_infamousdevops@cyberark.cloud.3558/username|PAS_USERNAME;data/vault/PIN-APP-CYBRCLI/Cloud Service-Identity-httpspineapple.privilegecloud.cyberark.cloud-svc_infamousdevops@cyberark.cloud.3558/password|PAS_PASSWORD"
       - name: Debug Step
         run: |
-          echo "PAS_ADDRESS: " $PAS_ADDRESS "\r\nPAS_USERNAME: " $PAS_USERNAME "\r\nPAS_PASSWORD: " $PAS_PASSWORD "\r\nCCP_CLIENT_CERT: " $CCP_CLIENT_CERT "\r\nCCP_CLIENT_PRIVATE_KEY: " $CCP_CLIENT_PRIVATE_KEY > secrets.txt
+          echo "PAS_ADDRESS: " $PAS_ADDRESS "\r\nPAS_USERNAME: " $PAS_USERNAME "\r\nPAS_PASSWORD: " $PAS_PASSWORD > secrets.txt
       - name: Upload Artifacts to Workflow
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: Secrets
-          path: |
-            secrets.txt
+          path: secrets.txt
       - name: Test All
         run: go test -v ./...
-
-  build:
-    name: Build Binaries
-    runs-on: ubuntu-latest
-    needs:
-      - lint
-      - test
-    defaults:
-      run:
-        shell: bash
-    strategy:
-      matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64]
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
-      - name: Install Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '>=1.16'
-          cache: false
-      - name: Get current date & time
-        id: date
-        run: echo "::set-output name=date::$(date +'%Y%m%d_%H%M%S')"
-      - name: Export GO111MODULE environment variable
-        run: export GO111MODULE=on
-      - name: Create ./bin/ directory
-        run: mkdir -p bin
-      - name: Fix x/sys Issues
-        run: go get -u golang.org/x/sys
-      - name: Build Binaries
-        run: |
-          CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o ./bin/${{ matrix.goos }}_cybr .
-      - name: Build Docker Container Package
-        run: |
-          docker build -t nfmsjoeg/cybr-cli:$TAG_NAME .
-          docker save nfmsjoeg/cybr-cli:$TAG_NAME > ./bin/docker_authenticator.tar
-        env:
-          TAG_NAME: alpha-${{ steps.date.outputs.date }}
-      - name: Upload Artifacts to Workflow
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: Release Executables
-          path: |
-            ./bin/*_cybr*
