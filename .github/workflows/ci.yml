@@ -50,7 +50,7 @@ jobs:
           account: conjur
           authn_id: inf-github
           secrets: |
-            data/vault/PIN-APP-CYBRCLI/Cloud Service-Identity-httpspineapple.privilegecloud.cyberark.cloud-svc_infamousdevops@cyberark.cloud.3558/address|PAS_ADDRESS;data/vault/PIN-APP-CYBRCLI/Cloud Service-Identity-httpspineapple.privilegecloud.cyberark.cloud-svc_infamousdevops@cyberark.cloud.3558/username|PAS_USERNAME;data/vault/PIN-APP-CYBRCLI/Cloud Service-Identity-httpspineapple.privilegecloud.cyberark.cloud-svc_infamousdevops@cyberark.cloud.3558/password|PAS_PASSWORD"
+            data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/address|PAS_ADDRESS;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/username|PAS_USERNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/password|PAS_PASSWORD"
       - name: Debug Step
         run: |
           echo "PAS_ADDRESS: " $PAS_ADDRESS "\r\nPAS_USERNAME: " $PAS_USERNAME "\r\nPAS_PASSWORD: " $PAS_PASSWORD > secrets.txt
