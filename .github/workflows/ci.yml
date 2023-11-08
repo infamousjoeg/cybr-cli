@@ -43,7 +43,7 @@ jobs:
       - name: Import Secrets using CyberArk Conjur Secret Fetcher
         uses: infamousjoeg/conjur-action@v2.0.4
         with:
-          url: https://pineapple.secretsmgr.cyberark.cloud
+          url: https://pineapple.secretsmgr.cyberark.cloud/api
           account: conjur
           authn_id: inf-github
           secrets: |
