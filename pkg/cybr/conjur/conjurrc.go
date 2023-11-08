@@ -11,6 +11,8 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators"
 )
 
 var conjurrcTemplate string = `---
@@ -31,25 +33,14 @@ func GetConjurPemPath(homeDir string, account string) string {
 	return filepath.FromSlash(fmt.Sprintf("%s/conjur-%s.pem", homeDir, account))
 }
 
-// GetAuthURL returns a proper LDAP Authentication authn_url for the ~/.conjurrc file
-func GetAuthURL(baseURL string, authType string, serviceID string) string {
-	authURL := baseURL
-	if authType != "" {
-		authURL = authURL + "/" + authType
-	}
-	if serviceID != "" {
-		authURL = authURL + "/" + serviceID
-	}
-	return authURL
-}
-
 func getPem(url string) (string, error) {
 	conf := &tls.Config{
+		// file deepcode ignore TooPermissiveTrustManager: conjur.pem is not a trusted third-party certificate
 		InsecureSkipVerify: true,
 	}
 
 	// trim https://
-	url = strings.TrimLeft(url, "https://")
+	url = strings.TrimPrefix(url, "https://")
 	// If no port is provide default to port 443
 	if !strings.Contains(url, ":") {
 		url = url + ":443"
@@ -112,7 +103,7 @@ func createConjurRcFile(account string, url string, certFileName string, authnLD
 		conjurrcContent := strings.Replace(conjurrcTemplate, "{{ ACCOUNT }}", account, 1)
 		conjurrcContent = strings.Replace(conjurrcContent, "{{ APPLIANCE_URL }}", url, 1)
 		conjurrcContent = strings.Replace(conjurrcContent, "{{ CERT_FILE }}", certFileName, 1)
-		ldapURL := GetAuthURL(url, "authn-ldap", authnLDAP)
+		ldapURL := authenticators.GetAuthURL(url, "authn-ldap", authnLDAP)
 		conjurrcContent = strings.Replace(conjurrcContent, "{{ AUTHN_LDAP_URL }}", ldapURL, 1)
 		if authnLDAP == "" {
 			removeLine := "authn_url: " + ldapURL
@@ -131,7 +122,7 @@ func createConjurRcFile(account string, url string, certFileName string, authnLD
 func getFieldFromConjurRc(conjurrcFileName string, fieldName string) string {
 	file, err := os.Open(conjurrcFileName)
 	if err != nil {
-		log.Fatal(err)
+		return ""
 	}
 	defer file.Close()
 

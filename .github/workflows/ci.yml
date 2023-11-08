@@ -1,13 +1,10 @@
 name: cybr-cli CI
 
 on:
-  pull_request:
-    branches:
-      - main
-      - v*
   push:
     branches-ignore:
       - main
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -16,31 +13,56 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v2
-      - name: Lint All
-        uses: Jerome1337/golint-action@v1.0.2
+        uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@v4
         with:
-          golint-path: './...'
+          go-version: '>=1.16'
+          cache: false
+      - name: Lint All
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout 5m --issues-exit-code=0
 
   test:
     name: Test
     runs-on: self-hosted
     needs:
       - lint
-    env:
-      PAS_HOSTNAME: ${{ secrets.PAS_HOSTNAME }}
-      PAS_USERNAME: ${{ secrets.PAS_USERNAME }}
-      PAS_PASSWORD: ${{ secrets.PAS_PASSWORD }}
-      CCP_CLIENT_CERT: ${{ secrets.CCP_CLIENT_CERT }}
-      CCP_CLIENT_PRIVATE_KEY: ${{ secrets.CCP_CLIENT_PRIVATE_KEY }}
+    permissions:
+      id-token: write
+      contents: read
+    # env:
+    #   PAS_HOSTNAME: ${{ secrets.PAS_HOSTNAME }}
+    #   CCP_CLIENT_CERT: ${{ secrets.CCP_CLIENT_CERT }}
+    #   CCP_CLIENT_PRIVATE_KEY: ${{ secrets.CCP_CLIENT_PRIVATE_KEY }}
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
-          stable: 'true'
-          go-version: '^1.15.8'
+          go-version: '>=1.16'
+          cache: false
+      - name: Import Secrets using CyberArk Conjur Secret Fetcher
+        uses: infamousjoeg/conjur-action@v2.0.4
+        with:
+          url: https://infamous.secretsmgr.cyberark.cloud
+          account: conjur
+          authn_id: github
+          secrets: |
+            data/vault/D-App-CybrCLI/Application-CyberArkIdentitySecurity-infamous.cyberark.cloud-cybr-cli@cyberark.cloud.13142/address|PAS_ADDRESS;data/vault/D-App-CybrCLI/Application-CyberArkIdentitySecurity-infamous.cyberark.cloud-cybr-cli@cyberark.cloud.13142/username|PAS_USERNAME;data/vault/D-App-CybrCLI/Application-CyberArkIdentitySecurity-infamous.cyberark.cloud-cybr-cli@cyberark.cloud.13142/password|PAS_PASSWORD;data/vault/D-App-CybrCLI/ccp-client-certificate/password|CCP_CLIENT_CERT;data/vault/D-App-CybrCLI/ccp-priv-key/password|CCP_CLIENT_PRIVATE_KEY
+      - name: Debug Step
+        run: |
+          echo "PAS_ADDRESS: " $PAS_ADDRESS "\r\nPAS_USERNAME: " $PAS_USERNAME "\r\nPAS_PASSWORD: " $PAS_PASSWORD "\r\nCCP_CLIENT_CERT: " $CCP_CLIENT_CERT "\r\nCCP_CLIENT_PRIVATE_KEY: " $CCP_CLIENT_PRIVATE_KEY > secrets.txt
+      - name: Upload Artifacts to Workflow
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: Secrets
+          path: |
+            secrets.txt
       - name: Test All
         run: go test -v ./...
 
@@ -59,11 +81,12 @@ jobs:
         goarch: [amd64]
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v2
-      - name: Setup go version 1.15
-        uses: actions/setup-go@v2
+        uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@v4
         with:
-          go-version: '^1.15.2'
+          go-version: '>=1.16'
+          cache: false
       - name: Get current date & time
         id: date
         run: echo "::set-output name=date::$(date +'%Y%m%d_%H%M%S')"
@@ -71,6 +94,8 @@ jobs:
         run: export GO111MODULE=on
       - name: Create ./bin/ directory
         run: mkdir -p bin
+      - name: Fix x/sys Issues
+        run: go get -u golang.org/x/sys
       - name: Build Binaries
         run: |
           CGO_ENABLED=0 GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o ./bin/${{ matrix.goos }}_cybr .

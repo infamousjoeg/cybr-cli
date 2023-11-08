@@ -5,6 +5,7 @@ import (
 	"log"
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +28,10 @@ var logoffCmd = &cobra.Command{
 			log.Fatalf("Failed to remove configuration file. %s", err)
 		}
 		// Logoff the PAS REST API
+		if client.TenantID != "" {
+			_ = identity.SignOutSession(client)
+		}
+
 		_ = client.Logoff()
 
 		fmt.Println("Successfully logged off PAS.")

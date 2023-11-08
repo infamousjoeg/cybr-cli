@@ -10,19 +10,20 @@ import (
 func TestUnsuspendUserSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.UnsuspendUser(username)
+	userID := 1
+	err = client.UnsuspendUser(userID)
 	if err != nil {
-		t.Errorf("Failed to unsuspend user '%s'. %s", username, err)
+		t.Errorf("Failed to unsuspend user with id '%d'. %s", userID, err)
 	}
 }
 
 func TestUnsuspendUserInvalidUsername(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	invalidUsername := "invalidUsername"
-	err = client.UnsuspendUser(invalidUsername)
+	invalidUserID := 999999
+	err = client.UnsuspendUser(invalidUserID)
 	if err == nil {
-		t.Errorf("Unsuspended user '%s' but user should not exist. This should never happen", invalidUsername)
+		t.Errorf("Unsuspended user with id '%d' but user should not exist. This should never happen", invalidUserID)
 	}
 }
 
@@ -63,8 +64,9 @@ func TestRemoveUserInvalidUserID(t *testing.T) {
 func TestAddRemoveUser(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 	user := requests.AddUser{
-		Username:               "testcliuser",
-		UserType:               "EPVUser",
+		Username: "testcliuser",
+		UserType: "EPVUser",
+		// file deepcode ignore HardcodedPassword/test: dummy secret for testing
 		InitialPassword:        "Cyberark1",
 		AuthenticationMethod:   []string{"AuthTypePass"},
 		Location:               "\\",

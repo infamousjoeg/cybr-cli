@@ -1,11 +1,45 @@
 package api_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/queries"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
 )
+
+// The content will look like
+// port=something, sp
+func keyValueStringToMap(content string) (map[string]string, error) {
+	if content == "" {
+		return nil, nil
+	}
+
+	if !strings.Contains(content, "=") {
+		return nil, fmt.Errorf("Invalid platform prop content. The provided content does not container a '='")
+	}
+
+	m := make(map[string]string)
+
+	// TODO: Gotta be a better way to do this
+	replaceWith := "^||||^"
+
+	// If the address or property contains a `\,` then replace
+	content = strings.ReplaceAll(content, "\\,", replaceWith)
+	props := strings.Split(content, ",")
+	for _, prop := range props {
+		if !strings.Contains(prop, "=") {
+			return nil, fmt.Errorf("Property '%s' is invalid because it does not contain a '=' to seperate key from value", prop)
+		}
+		kvs := strings.SplitN(prop, "=", 2)
+		key := strings.Trim(kvs[0], " ")
+		value := strings.Trim(strings.ReplaceAll(kvs[1], replaceWith, ","), " ")
+		m[key] = value
+	}
+
+	return m, nil
+}
 
 func TestListSafesSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
@@ -23,7 +57,15 @@ func TestListSafesSuccess(t *testing.T) {
 func TestListSafeMembersSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	members, err := client.ListSafeMembers("PasswordManager")
+	query := &queries.ListSafeMembers{
+		Search: "",
+		Sort:   "",
+		Offset: 0,
+		Limit:  50,
+		Filter: "",
+	}
+
+	members, err := client.ListSafeMembers("PasswordManager", query)
 	if err != nil {
 		t.Errorf("Failed to list safes. %s", err)
 	}
@@ -36,7 +78,15 @@ func TestListSafeMembersSuccess(t *testing.T) {
 func TestListSafeMembersInvalidSafeName(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	_, err = client.ListSafeMembers("notReal")
+	query := &queries.ListSafeMembers{
+		Search: "",
+		Sort:   "",
+		Offset: 0,
+		Limit:  50,
+		Filter: "",
+	}
+
+	_, err = client.ListSafeMembers("notReal", query)
 	if !strings.Contains(err.Error(), "404") {
 		t.Errorf("Expecting 404 error to be returned but got. %s", err)
 	}
@@ -79,17 +129,15 @@ func TestAddRemoveSafeMemberSuccess(t *testing.T) {
 	safeName := "PasswordManager"
 	memberName := "test-add-member"
 
-	retrieveAccounts := requests.PermissionKeyValue{
-		Key:   "RetrieveAccounts",
-		Value: true,
+	retrieveAccounts, err := keyValueStringToMap("RetrieveAccounts=true")
+	if err != nil {
+		t.Errorf("Failed to parse props to map. %s", err)
 	}
 
 	addMember := requests.AddSafeMember{
-		Member: requests.AddSafeMemberInternal{
-			MemberName:  memberName,
-			SearchIn:    "Vault",
-			Permissions: []requests.PermissionKeyValue{retrieveAccounts},
-		},
+		MemberName:  memberName,
+		SearchIn:    "Vault",
+		Permissions: retrieveAccounts,
 	}
 
 	err = client.AddSafeMember(safeName, addMember)
@@ -109,17 +157,15 @@ func TestAddMemberInvalidMemberName(t *testing.T) {
 	safeName := "PasswordManager"
 	memberName := "notReal"
 
-	retrieveAccounts := requests.PermissionKeyValue{
-		Key:   "RetrieveAccounts",
-		Value: true,
+	retrieveAccounts, err := keyValueStringToMap("RetrieveAccounts=true")
+	if err != nil {
+		t.Errorf("Failed to parse props to map. %s", err)
 	}
 
 	addMember := requests.AddSafeMember{
-		Member: requests.AddSafeMemberInternal{
-			MemberName:  memberName,
-			SearchIn:    "Vault",
-			Permissions: []requests.PermissionKeyValue{retrieveAccounts},
-		},
+		MemberName:  memberName,
+		SearchIn:    "Vault",
+		Permissions: retrieveAccounts,
 	}
 
 	err = client.AddSafeMember(safeName, addMember)

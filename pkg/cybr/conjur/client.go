@@ -10,23 +10,35 @@ import (
 
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/conjur/authenticators"
+	helpersauthn "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators"
 )
 
 var (
-	envAccountKey      = "CONJUR_ACCOUNT"
-	envApplianceURLKey = "CONJUR_APPLIANCE_URL"
-	envLoginKey        = "CONJUR_AUTHN_LOGIN"
-	envAPIKeyKey       = "CONJUR_AUTHN_API_KEY"
-	envCertFileKey     = "CONJUR_CERT_FILE"
+	envAccountKey        = "CONJUR_ACCOUNT"
+	envApplianceURLKey   = "CONJUR_APPLIANCE_URL"
+	envLoginKey          = "CONJUR_AUTHN_LOGIN"
+	envAPIKeyKey         = "CONJUR_AUTHN_API_KEY"
+	envCertFileKey       = "CONJUR_CERT_FILE"
+	envAuthenticatorKey  = "CONJUR_AUTHENTICATOR"
+	envAwsTypeKey        = "CONJUR_AWS_TYPE"
+	envAwsRoleKey        = "CONJUR_AUTHN_IAM_ROLE"
+	envAuthnServiceIDKey = "CONJUR_AUTHN_SERVICE_ID"
+	envSSLVerifyKey      = "CONJUR_SSL_VERIFY"
 
-	envAccount      = os.Getenv(envAccountKey)
-	envApplianceURL = os.Getenv(envApplianceURLKey)
-	envLogin        = os.Getenv(envLoginKey)
-	envAPIKey       = os.Getenv(envAPIKeyKey)
-	envCertFile     = os.Getenv(envCertFileKey)
+	envAccount        = os.Getenv(envAccountKey)
+	envApplianceURL   = os.Getenv(envApplianceURLKey)
+	envLogin          = os.Getenv(envLoginKey)
+	envAPIKey         = os.Getenv(envAPIKeyKey)
+	envCertFile       = os.Getenv(envCertFileKey)
+	envAuthenticator  = os.Getenv(envAuthenticatorKey)
+	envAwsType        = os.Getenv(envAwsTypeKey)
+	envAwsRole        = os.Getenv(envAwsRoleKey)
+	envAuthnServiceID = os.Getenv(envAuthnServiceIDKey)
+	envSSLVerify      = os.Getenv(envSSLVerifyKey)
 )
 
-func validateEnviromentConfig(value string, keyName string, errMsg string) string {
+func validateEnvironmentConfig(value string, keyName string, errMsg string) string {
 	if value == "" {
 		errMsg += keyName + ", "
 	}
@@ -39,25 +51,28 @@ func validateEnviromentConfig(value string, keyName string, errMsg string) strin
 // error message of the missing environment variables.
 func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, error) {
 	// Do not get client from environment variables because none provided
-	if envAccount == "" && envApplianceURL == "" && envLogin == "" && envAPIKey == "" {
-		return &conjurapi.Client{}, &authn.LoginPair{}, nil
+	if envAccount == "" && envApplianceURL == "" && envLogin == "" && envAPIKey == "" && envAuthenticator == "" {
+		return &conjurapi.Client{}, &authn.LoginPair{}, fmt.Errorf("please use cybr conjur logon or provide proper environment variables")
 	}
 
+	// Get client from environment variables
 	errMsg := ""
-	errMsg = validateEnviromentConfig(envAccount, envAccountKey, errMsg)
-	errMsg = validateEnviromentConfig(envApplianceURL, envApplianceURLKey, errMsg)
-	errMsg = validateEnviromentConfig(envLogin, envLoginKey, errMsg)
-	errMsg = validateEnviromentConfig(envAPIKey, envAPIKeyKey, errMsg)
+	errMsg = validateEnvironmentConfig(envAccount, envAccountKey, errMsg)
+	errMsg = validateEnvironmentConfig(envApplianceURL, envApplianceURLKey, errMsg)
+	errMsg = validateEnvironmentConfig(envLogin, envLoginKey, errMsg)
+	errMsg = validateEnvironmentConfig(envAPIKey, envAPIKeyKey, errMsg)
 
 	// Partial environment variables were provided so return an error
 	// with a list of the environment variables that were not provided
 	if errMsg != "" {
 		return &conjurapi.Client{},
 			&authn.LoginPair{},
-			fmt.Errorf("Environment variable(s) not provided: %s", strings.TrimRight(errMsg, ", "))
+			fmt.Errorf("please use cybr conjur logon or provide proper environment variables")
 	}
 
-	apiKey, err := Login(envApplianceURL, envAccount, envLogin, []byte(envAPIKey), envCertFile)
+	authnURL := helpersauthn.GetAuthURL(envApplianceURL, "authn", "")
+
+	apiKey, err := Login(authnURL, envAccount, envLogin, []byte(envAPIKey), envCertFile)
 	if err != nil {
 		return &conjurapi.Client{}, &authn.LoginPair{}, err
 	}
@@ -76,20 +91,54 @@ func getClientFromEnvironmentVariable() (*conjurapi.Client, *authn.LoginPair, er
 	return client, &loginPair, err
 }
 
-// GetConjurClient create conjur client and login pair for ~/.conjurrc and ~/.netrc
-func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
-	client, loginPair, err := getClientFromEnvironmentVariable()
+func getClientFromAuthenticator() (*conjurapi.Client, *authn.LoginPair, error) {
+	errMsg := ""
+	errMsg = validateEnvironmentConfig(envAccount, envAccountKey, errMsg)
+	errMsg = validateEnvironmentConfig(envApplianceURL, envApplianceURLKey, errMsg)
+	errMsg = validateEnvironmentConfig(envLogin, envLoginKey, errMsg)
+	errMsg = validateEnvironmentConfig(envAuthenticator, envAuthenticatorKey, errMsg)
+	errMsg = validateEnvironmentConfig(envAuthnServiceID, envAuthnServiceIDKey, errMsg)
+	if envAuthenticator == "authn-iam" {
+		errMsg = validateEnvironmentConfig(envAwsType, envAwsTypeKey, errMsg)
+	}
+	if strings.ToLower(envAwsType) == "cli" {
+		errMsg = validateEnvironmentConfig(envAwsRole, envAwsRoleKey, errMsg)
+	}
 
-	// Partial environment variables were provided, assume user is attempting to use environment variables
+	// Partial environment variables were provided so return an error
+	// with a list of the environment variables that were not provided
+	if errMsg != "" {
+		return &conjurapi.Client{},
+			&authn.LoginPair{},
+			fmt.Errorf("please use cybr conjur logon or provide proper environment variables")
+	}
+
+	envSSLVerifyBool := false
+	if envSSLVerify == strings.ToLower("true") || envSSLVerify == strings.ToLower("yes") || envSSLVerify == "1" {
+		envSSLVerifyBool = true
+	}
+
+	config := helpersauthn.Config{
+		Account:         envAccount,
+		ApplianceURL:    envApplianceURL,
+		Login:           envLogin,
+		ServiceID:       envAuthnServiceID,
+		IgnoreSSLVerify: envSSLVerifyBool,
+	}
+
+	authenticator, err := authenticators.GetAuthenticator(envAuthenticator, config)
 	if err != nil {
 		return &conjurapi.Client{}, &authn.LoginPair{}, err
 	}
 
-	// Return client created from environment variables
-	if *client != (conjurapi.Client{}) {
-		return client, loginPair, nil
-	}
+	client, err := authenticator.Authenticate(config)
 
+	return client, nil, err
+}
+
+// GetConjurClient creates a Conjur API client and login pair from environment variables, an authenticator,
+// or .netrc & .conjurrc files
+func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 	homeDir, err := GetHomeDirectory()
 	if err != nil {
 		return nil, nil, fmt.Errorf("%s", err)
@@ -98,10 +147,28 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 	netrcPath := GetNetRcPath(homeDir)
 	conjurrcPath := GetConjurRcPath(homeDir)
 
-	account := GetAccountFromConjurRc(conjurrcPath)
-	baseURL := GetURLFromConjurRc(conjurrcPath)
-	certPath := GetCertFromConjurRc(conjurrcPath)
+	account := strings.TrimSpace(GetAccountFromConjurRc(conjurrcPath))
+	baseURL := strings.TrimSpace(GetURLFromConjurRc(conjurrcPath))
+	certPath := strings.TrimSpace(GetCertFromConjurRc(conjurrcPath))
 
+	// If .conjurrc is empty, attempt to get client from environment variables
+	if len(account) == 0 && len(baseURL) == 0 && len(certPath) == 0 {
+		// Get client from environment variables
+		client, loginPair, err := getClientFromEnvironmentVariable()
+		if err == nil {
+			return client, loginPair, nil
+		}
+		// If partial environment variables were provided, try authenticator
+		client, loginPair, err = getClientFromAuthenticator()
+		// Partial environment variables were provided, assume user is attempting to use environment variables
+		if err == nil {
+			return client, loginPair, nil
+		}
+
+		return &conjurapi.Client{}, &authn.LoginPair{}, err
+	}
+
+	// If .conjurrc is not empty, attempt to get client from .netrc & .conjurrc files
 	config := conjurapi.Config{
 		Account:      account,
 		ApplianceURL: baseURL,
@@ -109,25 +176,26 @@ func GetConjurClient() (*conjurapi.Client, *authn.LoginPair, error) {
 		NetRCPath:    netrcPath,
 	}
 
-	loginPair, err = conjurapi.LoginPairFromNetRC(config)
+	loginPair, err := conjurapi.LoginPairFromNetRC(config)
 	if err != nil {
-		return nil, nil, fmt.Errorf("Failed to retrieve credentials from ~/.netrc. %s", err)
+		return nil, nil, fmt.Errorf("failed to retrieve credentials from ~/.netrc. %s", err)
 	}
 
-	client, err = conjurapi.NewClientFromKey(config, *loginPair)
+	client, err := conjurapi.NewClientFromKey(config, *loginPair)
 	return client, loginPair, err
 }
 
 // sendConjurAuthenticatedHTTPRequest Send a HTTP request with the conjur session token in the authorization header
+// This is used for API endpoints not included in the conjur-api-go SDK (info, whoami, enableauthn)
 func sendConjurAuthenticatedHTTPRequest(client *conjurapi.Client, loginPair *authn.LoginPair, url string, method string, body io.Reader) (*http.Response, error) {
 	sessionToken, err := client.Authenticate(*loginPair)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to authenticate to conjur. %s", err)
+		return nil, fmt.Errorf("failed to authenticate to conjur. %s", err)
 	}
 
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create request '%s'. %s", url, err)
+		return nil, fmt.Errorf("failed to create request '%s'. %s", url, err)
 	}
 
 	req.Header.Add("Authorization", fmt.Sprintf("Token token=\"%s\"", base64.StdEncoding.EncodeToString(sessionToken)))
@@ -135,11 +203,11 @@ func sendConjurAuthenticatedHTTPRequest(client *conjurapi.Client, loginPair *aut
 	httpClient := client.GetHttpClient()
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to send HTTP request. %s", err)
+		return nil, fmt.Errorf("failed to send HTTP request. %s", err)
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 204 {
-		return resp, fmt.Errorf("Recieved invalid status code '%d'", resp.StatusCode)
+		return resp, fmt.Errorf("received invalid status code '%d'", resp.StatusCode)
 	}
 
 	return resp, nil

@@ -13,12 +13,11 @@ import (
 type Client struct {
 	BaseURL      string
 	AuthType     string
+	TenantID     string
 	InsecureTLS  bool
 	SessionToken string
 	Logger       logger.Logger
 }
-
-
 
 // IsValid checks to make sure that the authentication method chosen is valid
 func (c *Client) IsValid() error {

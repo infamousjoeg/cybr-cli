@@ -2,7 +2,7 @@ package responses
 
 // ListSafes contains an array of all safes the current user can read
 type ListSafes struct {
-	Safes []ListSafe `json:"Safes"`
+	Safes []ListSafe `json:"value"`
 }
 
 // ListSafe contains the safe details of every safe the current user can read

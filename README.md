@@ -1,10 +1,16 @@
 # cybr-cli <!-- omit in toc -->
 
+![image](https://github.com/infamousjoeg/cybr-cli/assets/1924063/ff018174-2880-46f1-bd24-3262d1276b41)
+
 A "Swiss Army Knife" command-line interface (CLI) for easy human and non-human interaction with CyberArk's suite of products.
 
 Current products supported:
-* CyberArk Privileged Access Security (PAS)
-* CyberArk Conjur Secrets Manager Enterprise & Open Source
+* CyberArk Identity Security Platform Shared Services (ISPSS)
+* CyberArk Privilege Cloud SaaS
+* CyberArk Self-Hosted Privileged Access Manager (PAM)
+* CyberArk Secrets Manager Central Credential Provider (CCP)
+* CyberArk Conjur Secrets Manager Enterprise & [Open Source](https://conjur.org)
+* CyberArk Cloud Entitlements Manager ([Free trial](https://www.cyberark.com/try-buy/cloud-entitlements-manager/))
 
 **Want to get dangerous quickly?** Check out the example bash script at [dev/add-delete-pas-application.sh](dev/add-delete-pas-application.sh).
 
@@ -13,13 +19,22 @@ Current products supported:
 ## Table of Contents <!-- omit in toc -->
 
 - [Install](#install)
-  - [MacOS](#macos)
-  - [Windows or Linux](#windows-or-linux)
-  - [AWS CloudShell](#aws-cloudshell)
-  - [Install from Source](#install-from-source)
+	- [MacOS](#macos)
+	- [Windows](#windows)
+        - [Linux](#linux)
+	- [AWS CloudShell](#aws-cloudshell)
+	- [Install from Source](#install-from-source)
 - [Usage](#usage)
+	- [Authenticating with authn-iam (AWS IAM Role Authentication)](#authenticating-with-authn-iam-aws-iam-role-authentication)
+	- [Authenticating to Privilege Cloud via ISPSS (Identity)](#authenticating-to-privilege-cloud-via-ispss-identity)
+		- [Password Authentication](#password-authentication)
+		- [MFA Authentication](#mfa-authentication)
+	- [Documentation](#documentation)
+- [Autocomplete](#autocomplete)
 - [Example Source Code](#example-source-code)
-  - [Logon to the PAS REST API Web Service](#logon-to-the-pas-rest-api-web-service)
+	- [Logon to the PAS REST API Web Service](#logon-to-the-pas-rest-api-web-service)
+- [Security](#security)
+	- [`cybr safes add-member --role` Role Permissions](#cybr-safes-add-member---role-role-permissions)
 - [Testing](#testing)
 - [Maintainers](#maintainers)
 - [Contributions](#contributions)
@@ -34,7 +49,13 @@ $ brew tap infamousjoeg/tap
 $ brew install cybr-cli
 ```
 
-### Windows or Linux
+### Windows
+
+```shell
+$ winget install InfamousJoeG.cybr-cli
+```
+
+### Linux
 
 Download from the [Releases](https://github.com/infamousjoeg/cybr-cli/releases) page.
 
@@ -54,7 +75,7 @@ chmod +x ~/.local/bin/cybr
 
 ```shell
 $ git clone https://github.com/infamousjoeg/pas-api-go.git
-$ ./install
+$ make install
 $ cybr help
 ```
 
@@ -62,6 +83,58 @@ $ cybr help
 
 * `$ cybr help` for top-level commands list
 * `$ cybr [command] -h` for specific command details and sub-commands list
+
+### Authenticating with authn-iam (AWS IAM Role Authentication)
+
+Set the following environment variables:
+
+* `CONJUR_ACCOUNT` - The Conjur account name
+* `CONJUR_APPLIANCE_URL` - The URL of the Conjur service (e.g. https://conjur.example.com)
+* `CONJUR_AUTHN_LOGIN` - The Host ID for the IAM role (e.g. `host/cloud/aws/ec2/1234567890/ConjurAWSRoleEC2`)
+* `CONJUR_AUTHENTICATOR` - The authenticator ID (e.g. `authn-iam`)
+* `CONJUR_AUTHN_SERVICE_ID` - The authenticator web service ID (e.g. `prod`)
+* `CONJUR_AWS_TYPE` - The AWS type (e.g. `ec2` or `ecs` or `lambda`)
+
+Once environment variables are set, ensure no .conjurrc or .netrc exists in the user's home directory:
+
+`rm -f ~/.conjurrc ~/.netrc`
+
+Then run any command you wish to run within `cybr conjur`. Use the `--help` flag to see all available commands.
+
+### Authenticating to Privilege Cloud via ISPSS (Identity)
+
+You will need to know the following information to authenticate to Privilege Cloud via ISPSS:
+	* `-b, --base-url` - The base URL of CyberArk Cloud (e.g. https://example.cyberark.cloud or https://example.privilegecloud.cyberark.cloud)
+	* `-u, --username` - The username of the Privilege Cloud user (e.g. joe.garcia@cyberark.cloud.1234)
+
+#### Password Authentication
+
+```shell
+$ cybr logon -u joe.garcia@cyberark.cloud.1234 -a identity -b https://example.cyberark.cloud
++ Challenge #1
+Enter password:
+```
+
+After providing the password, if no other challenges are required, the CLI will handle the token exchange and a successful logon will be displayed.
+
+#### MFA Authentication
+
+If MFA is required, the CLI will prompt for the challenge method to use out of those available:
+
+```shell
+$ cybr logon -u joe.garcia@cyberark.cloud.1234 -a identity -b https://example.cyberark.cloud
++ Challenge #1
+Enter password:
++ Challenge #2
+1. Email... @joe-garcia.com
+2. SMS... XXX-1234
+> 2
+Enter code: 12341234
+```
+
+After providing the MFA code, if no other challenges are required, the CLI will handle the token exchange and a successful logon will be displayed.
+
+### Documentation
 
 All commands are documentated [in the docs/ directory](docs/cybr.md).
 
@@ -116,9 +189,37 @@ func main() {
 }
 ```
 
+## Security
+
+If there is a security concern or bug discovered, please responsibly disclose all information to joe (dot) garcia (at) cyberark (dot) com.
+
+### `cybr safes add-member --role` Role Permissions
+
+All safe member roles defined below are based on best practices and recommendations put forth by CyberArk's PAS Programs Office, creators of the CyberArk Blueprint for Identity Security.
+
+|Role|Safe Authorizations|
+|---|---|
+|BreakGlass|All authorizations except Authorize Password Requests|
+|VaultAdmin|- List Accounts<br>- View Audit Log<br>- View Safe Members|
+|SafeManager|- Manage Safe<br>- Manage Safe Members<br>- View Audit Log<br>- View Safe Members<br>- Access Safe w/o Confirmation|
+|EndUser|- Use/Retrieve/List Accounts<br>- View Audit Log<br>- View Safe Members|
+|Auditor|- List Accounts<br>- View Audit Log<br>- View Safe Members|
+|AIMWebService|No authorizations|
+|AppProvider|- Retrieve/List Accounts<br>- View Safe Members|
+|ApplicationIdentity|- Retrieve/List Accounts|
+|AccountProvisioner|- List/Add/Delete Accounts<br>- Update Password Properties<br>- Initiate CPM Password Management Operations<br>- View Audit Log<br>- View Safe Members<br>- Access Safe w/o Confirmation|
+|CPDeployer|- List/Add Accounts<br>- Update Password Properties<br>- Initiate CPM Password Management Operations<br>- Manage Safe Member<br>- View Audit Log, View Safe Members<br>- Access Safe w/o Confirmation|
+|ComponentOrchestrator|- List/Add Accounts<br>- Update Password Properties<br>- Initiate CPM Password Management Operations<br>- View Audit Log<br>- Access Safe w/o Confirmation|
+|APIAutomation|- List/Add/Rename/Delete/Unlock Accounts<br>- Update Password Content/Properties<br>- Initiate CPM Password Management Operations<br>- Manage Safe<br>- Manage Safe Members<br>- View Audit Log<br>- View Safe Members<br>- Create/Delete Folders<br>- Move Accounts/Folders|
+|PasswordScheduler|- List Accounts<br>- Initiate CPM Password Management Operation<br>- View Audit Log<br>- View Safe Members<br>- Access Safe w/o Confirmation|
+|ApproverLevel1|- List Accounts<br>- View Audit Log<br>- View Safe Members<br>- Authorize Password Requests (Level 1)|
+|ApproverLevel2|- List Acccounts<br>- View Audit Log<br>- View Safe Members<br>- Authorize Password Requests (Level 2)|
+
 ## Testing
 
-`go test -v ./...`
+To vet the code, run `make vet`.
+To test the code, run `make test`.
+To run all tests, run `make test-all`.
 
 ## Maintainers
 

@@ -74,7 +74,7 @@ var unsuspendUserCmd = &cobra.Command{
 	Long: `Activates a suspended user. It does not activate an inactive user.
 	
 	Example Usage:
-	$ cybr users unsuspend --username userName`,
+	$ cybr users unsuspend --id 9`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := pasapi.GetConfig()
 		if err != nil {
@@ -82,13 +82,13 @@ var unsuspendUserCmd = &cobra.Command{
 			return
 		}
 
-		err = client.UnsuspendUser(Username)
+		err = client.UnsuspendUser(UserID)
 		if err != nil {
-			log.Fatalf("Failed to unsuspend user '%s'. %s", Username, err)
+			log.Fatalf("Failed to unsuspend user with id '%d'. %s", UserID, err)
 			return
 		}
 
-		fmt.Printf("Successfully unsuspended user '%s'\n", Username)
+		fmt.Printf("Successfully unsuspended user with id '%d'\n", UserID)
 	},
 }
 
@@ -224,8 +224,8 @@ var addUserCmd = &cobra.Command{
 
 func init() {
 	// unsuspend
-	unsuspendUserCmd.Flags().StringVarP(&Username, "username", "u", "", "The user you would like to unsuspend")
-	unsuspendUserCmd.MarkFlagRequired("username")
+	unsuspendUserCmd.Flags().IntVarP(&UserID, "id", "i", 0, "The ID of the user you wish to unsuspend")
+	unsuspendUserCmd.MarkFlagRequired("id")
 
 	// list
 	listUsersCmd.Flags().StringVarP(&Search, "search", "s", "", "Search for the username, first name or last name of a user")

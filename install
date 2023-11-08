@@ -1,3 +1,0 @@
-#!/bin/bash
-
-sudo go build -i -o ~/bin/cybr .

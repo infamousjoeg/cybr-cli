@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64]
+        goos: [linux, windows]
+        goarch: [amd64, arm64]
     steps:
     - name: Checkout source code
       uses: actions/checkout@v2
@@ -37,4 +37,5 @@ jobs:
         goversion: "https://dl.google.com/go/go${{ steps.go_version.outputs.prop }}.linux-amd64.tar.gz"
         project_path: "./"
         binary_name: "cybr"
+        asset_name: cybr-cli_${{ steps.client_version.outputs.prop }}_${{ matrix.goos }}_${{ matrix.goarch }}
         extra_files: LICENSE README.md SECURITY.md

@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -11,10 +12,13 @@ import (
 	"github.com/cyberark/conjur-api-go/conjurapi"
 	"github.com/cyberark/conjur-api-go/conjurapi/authn"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/conjur"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/authenticators"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )
+
+const stdinErrMsg = "Failed to read from stdin."
 
 var (
 	// Account conjur account
@@ -48,7 +52,16 @@ var (
 	InspectResources bool
 )
 
-func loadPolicy(policyBranch string, policyFilePath string, policyMode conjurapi.PolicyMode) {
+func isInputFromPipe() bool {
+	stat, _ := os.Stdin.Stat()
+	return (stat.Mode() & os.ModeCharDevice) == 0
+}
+
+func loadPolicyFile(policyBranch string, policyFilePath string, policyMode conjurapi.PolicyMode) {
+	if policyFilePath == "" {
+		log.Fatal("Policy file path is required")
+	}
+
 	client, _, err := conjur.GetConjurClient()
 	if err != nil {
 		log.Fatalf("Failed to initialize conjur client. %s", err)
@@ -66,11 +79,43 @@ func loadPolicy(policyBranch string, policyFilePath string, policyMode conjurapi
 	prettyprint.PrintJSON(response)
 }
 
+func loadPolicyPipe(policyBranch, policyContent string, policyMode conjurapi.PolicyMode) {
+	client, _, err := conjur.GetConjurClient()
+	if err != nil {
+		log.Fatalf("Failed to initialize conjur client. %s", err)
+	}
+
+	response, err := client.LoadPolicy(policyMode, policyBranch, strings.NewReader(policyContent))
+	if err != nil {
+		log.Fatalf("Failed to load policy. %v. %s", response, err)
+	}
+	prettyprint.PrintJSON(response)
+}
+
 func removeFile(path string) {
 	err := os.Remove(path)
 	if err != nil {
 		log.Fatalf("Failed to remove file '%s'. %s", path, err)
 	}
+}
+
+func readPassword() []byte {
+	// Convert Password variable to byte array
+	byteSecretVal := []byte(Password)
+
+	// If password is not provided, prompt for password
+	if len(byteSecretVal) == 0 {
+		fmt.Print("Enter password: ")
+		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			log.Fatalf("An error occurred trying to read password from " +
+				"Stdin. Exiting...")
+		}
+		fmt.Println()
+		return byteSecretVal
+	}
+
+	return byteSecretVal
 }
 
 var conjurCmd = &cobra.Command{
@@ -85,16 +130,11 @@ var conjurLogonCmd = &cobra.Command{
 	Long: `Authenticate to Conjur using API Key or password
 	
 	Example Usage:
-	$ cybr conjur logon -a account -b https://conjur.example.com -l admin`,
+	$ cybr conjur logon -a account -b https://conjur.example.com -l admin
+	$ cybr conjur logon -a account -b https://conjur.example.com -l serviceAccountUser --authn-ldap`,
 	Aliases: []string{"login"},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print("Enter password: ")
-		byteSecretVal, err := terminal.ReadPassword(int(syscall.Stdin))
-		if err != nil {
-			log.Fatalln("An error occurred trying to read password from " +
-				"Stdin. Exiting...")
-		}
-		fmt.Println()
+		byteSecretVal := readPassword()
 
 		homeDir, err := conjur.GetHomeDirectory()
 		if err != nil {
@@ -114,9 +154,9 @@ var conjurLogonCmd = &cobra.Command{
 			log.Fatalf("Failed to create ~/.conjurrc file. %s\n", err)
 		}
 
-		authnURL := conjur.GetAuthURL(BaseURL, "authn", "")
+		authnURL := authenticators.GetAuthURL(BaseURL, "authn", "")
 		if AuthnLDAP != "" {
-			authnURL = conjur.GetAuthURL(BaseURL, "authn-ldap", AuthnLDAP)
+			authnURL = authenticators.GetAuthURL(BaseURL, "authn-ldap", AuthnLDAP)
 		}
 
 		apiKey, err := conjur.Login(authnURL, Account, Username, byteSecretVal, certPath)
@@ -207,7 +247,16 @@ var conjurAppendPolicyCmd = &cobra.Command{
 	Example Usage:
 	$ cybr conjur append-policy --branch root --file ./path/to/root.yml`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loadPolicy(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePost)
+		if isInputFromPipe() {
+			// Read from stdin
+			policy, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				log.Fatalf("%s %s", stdinErrMsg, err)
+			}
+			loadPolicyPipe(PolicyBranch, string(policy), conjurapi.PolicyModePost)
+		} else {
+			loadPolicyFile(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePost)
+		}
 	},
 }
 
@@ -220,7 +269,16 @@ var conjurUpdatePolicyCmd = &cobra.Command{
 	Example Usage:
 	$ cybr conjur update-policy --branch root --file ./path/to/root.yml`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loadPolicy(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePatch)
+		if isInputFromPipe() {
+			// Read from stdin
+			policy, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				log.Fatalf("%s %s", stdinErrMsg, err)
+			}
+			loadPolicyPipe(PolicyBranch, string(policy), conjurapi.PolicyModePut)
+		} else {
+			loadPolicyFile(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePatch)
+		}
 	},
 }
 
@@ -233,7 +291,16 @@ var conjurReplacePolicyCmd = &cobra.Command{
 	Example Usage:
 	$ cybr conjur replace-policy --branch root --file ./path/to/root.yml`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loadPolicy(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePut)
+		if isInputFromPipe() {
+			// Read from stdin
+			policy, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				log.Fatalf("%s %s", stdinErrMsg, err)
+			}
+			loadPolicyPipe(PolicyBranch, string(policy), conjurapi.PolicyModePut)
+		} else {
+			loadPolicyFile(PolicyBranch, PolicyFilePath, conjurapi.PolicyModePut)
+		}
 	},
 }
 
@@ -310,6 +377,22 @@ var conjurInfoCmd = &cobra.Command{
 	$ cybr conjur info`,
 	Run: func(cmd *cobra.Command, args []string) {
 		result, err := conjur.Info()
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+		prettyprint.PrintJSON(result)
+	},
+}
+
+var conjurWhoamiCmd = &cobra.Command{
+	Use:   "whoami",
+	Short: "Get current user info logged into Conjur",
+	Long: `Get current user information logged into Conjur.
+	
+	Example Usage:
+	$ cybr conjur whoami`,
+	Run: func(cmd *cobra.Command, args []string) {
+		result, err := conjur.Whoami()
 		if err != nil {
 			log.Fatalf("%s", err)
 		}
@@ -400,6 +483,7 @@ func init() {
 	// Logon command
 	conjurLogonCmd.Flags().StringVarP(&Username, "login", "l", "", "Conjur login name")
 	conjurLogonCmd.MarkFlagRequired("login")
+	conjurLogonCmd.Flags().StringVarP(&Password, "password", "p", "", "Conjur password")
 	conjurLogonCmd.Flags().StringVarP(&Account, "account", "a", "", "Conjur account")
 	conjurLogonCmd.MarkFlagRequired("account")
 	conjurLogonCmd.Flags().StringVarP(&BaseURL, "base-url", "b", "", "Conjur appliance URL")
@@ -411,7 +495,6 @@ func init() {
 	conjurAppendPolicyCmd.Flags().StringVarP(&PolicyBranch, "branch", "b", "", "The policy branch in which policy is being loaded")
 	conjurAppendPolicyCmd.MarkFlagRequired("branch")
 	conjurAppendPolicyCmd.Flags().StringVarP(&PolicyFilePath, "file", "f", "", "The policy file that will be loaded into the branch")
-	conjurAppendPolicyCmd.MarkFlagRequired("file")
 
 	// update-policy
 	conjurUpdatePolicyCmd.Flags().StringVarP(&PolicyBranch, "branch", "b", "", "The policy branch in which policy is being loaded")
@@ -459,6 +542,7 @@ func init() {
 	conjurCmd.AddCommand(conjurSetSecretCmd)
 	conjurCmd.AddCommand(conjurEnableAuthnCmd)
 	conjurCmd.AddCommand(conjurInfoCmd)
+	conjurCmd.AddCommand(conjurWhoamiCmd)
 	conjurCmd.AddCommand(conjurListResourcesCmd)
 	conjurCmd.AddCommand(conjurRotateAPIKeyCmd)
 	conjurCmd.AddCommand(conjurLogoffCmd)

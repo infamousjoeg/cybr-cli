@@ -2,36 +2,17 @@ package httpjson
 
 import (
 	"bytes"
-	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/http/cookiejar"
-	"net/url"
 	"strings"
 	"time"
 
 	"github.com/infamousjoeg/cybr-cli/pkg/logger"
 )
-
-type contextKey string
-
-var (
-	contextKeyCookies = contextKey("cookies")
-)
-
-func (c contextKey) String() string {
-	return "httpjson_cookies" + string(c)
-}
-
-//Cookies get http cookies from context
-func Cookies(ctx context.Context) ([]*http.Cookie, bool) {
-	cookies, ok := ctx.Value(contextKeyCookies).(([]*http.Cookie))
-	return cookies, ok
-}
 
 func bodyToBytes(body interface{}) ([]byte, error) {
 	if body == nil {
@@ -75,24 +56,13 @@ func logRequest(req *http.Request, logger logger.Logger) {
 	req.Body = ioutil.NopCloser(bytes.NewReader([]byte(body)))
 }
 
-func getResponse(ctx context.Context, urls string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (http.Response, error) {
+func getResponse(identity bool, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (http.Response, error) {
 	if insecureTLS {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	} else {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: false}
 	}
-	jar, _ := cookiejar.New(nil)
-	u, _ := url.Parse(urls)
-
-	cookies, ok := Cookies(ctx)
-	if !ok {
-		jar.SetCookies(u, nil)
-	} else {
-		jar.SetCookies(u, cookies)
-	}
-
 	httpClient := http.Client{
-		Jar:     jar,
 		Timeout: time.Second * 30, // Maximum of 30 secs
 	}
 	var bodyReader io.ReadCloser
@@ -106,7 +76,7 @@ func getResponse(ctx context.Context, urls string, method string, token string, 
 	bodyReader = ioutil.NopCloser(bytes.NewReader(content))
 
 	// create the request
-	req, err := http.NewRequestWithContext(ctx, method, urls, bodyReader)
+	req, err := http.NewRequest(method, url, bodyReader)
 	if err != nil {
 		return *res, fmt.Errorf("Failed to create new request. %s", err)
 	}
@@ -114,9 +84,16 @@ func getResponse(ctx context.Context, urls string, method string, token string, 
 	// attach the header
 	req.Header = make(http.Header)
 	req.Header.Add("Content-Type", "application/json")
+	if identity {
+		req.Header.Add("X-IDAP-NATIVE-CLIENT", "true")
+	}
 	// if token is provided, add header Authorization
 	if token != "" {
-		req.Header.Add("Authorization", token)
+		if identity {
+			req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+		} else {
+			req.Header.Add("Authorization", token)
+		}
 	}
 
 	logRequest(req, logger)
@@ -134,8 +111,8 @@ func getResponse(ctx context.Context, urls string, method string, token string, 
 }
 
 // SendRequest is an http request and get response as serialized json map[string]interface{}
-func SendRequest(ctx context.Context, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
-	res, err := getResponse(ctx, url, method, token, body, insecureTLS, logger)
+func SendRequest(identity bool, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
+	res, err := getResponse(identity, url, method, token, body, insecureTLS, logger)
 
 	if err != nil && strings.Contains(err.Error(), "Failed to send request") {
 		return nil, err
@@ -162,44 +139,85 @@ func SendRequest(ctx context.Context, url string, method string, token string, b
 }
 
 // SendRequestRaw is an http request and get response as byte[]
-func SendRequestRaw(ctx context.Context, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (context.Context, []byte, error) {
-	res, err := getResponse(ctx, url, method, token, body, insecureTLS, logger)
-	//Read the response body if not nil
-	if err != nil && res.Body != nil {
-		content, errRead := ioutil.ReadAll(res.Body)
-		if errRead != nil {
-			return ctx, nil, fmt.Errorf("Failed to read body. %s", errRead)
-		}
-		newCtx := context.WithValue(ctx, contextKeyCookies, res.Cookies())
-		return newCtx, content, err
+func SendRequestRaw(identity bool, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) ([]byte, error) {
+	res, err := getResponse(identity, url, method, token, body, insecureTLS, logger)
+	if err != nil {
+		return nil, err
 	}
-	return ctx, nil, err
+
+	content, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to read body. %s", err)
+	}
+	return content, err
+}
+
+// SendRequestRawWithHeaders is an http request and get response as byte[]
+func SendRequestRawWithHeaders(url, method string, headers http.Header, body interface{}, insecureTLS bool, logger logger.Logger) ([]byte, error) {
+	if insecureTLS {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	} else {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: false}
+	}
+	httpClient := http.Client{
+		Timeout: time.Second * 30, // Maximum of 30 secs
+	}
+
+	var res *http.Response
+
+	content, err := bodyToBytes(body)
+	if err != nil {
+		return []byte(""), err
+	}
+
+	// create the request
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(content))
+	if err != nil {
+		return []byte(""), fmt.Errorf("Failed to create new request. %s", err)
+	}
+
+	// attach the header
+	req.Header = headers
+
+	logRequest(req, logger)
+
+	// send request
+	res, err = httpClient.Do(req)
+	if err != nil {
+		return []byte(""), fmt.Errorf("Failed to send request. %s", err)
+	}
+
+	if res.StatusCode >= 300 {
+		return []byte(""), fmt.Errorf("Received non-200 status code '%d'", res.StatusCode)
+	}
+
+	content, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		return []byte(""), fmt.Errorf("Failed to read body. %s", err)
+	}
+	return content, err
 }
 
 // Get a get request and get response as serialized json map[string]interface{}
-func Get(url string, token string, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
-	ctx := context.TODO()
-	response, err := SendRequest(ctx, url, http.MethodGet, token, "", insecureTLS, logger)
+func Get(identity bool, url string, token string, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
+	response, err := SendRequest(identity, url, http.MethodGet, token, "", insecureTLS, logger)
 	return response, err
 }
 
 // Post a post request and get response as serialized json map[string]interface{}
-func Post(url string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
-	ctx := context.TODO()
-	response, err := SendRequest(ctx, url, http.MethodPost, token, body, insecureTLS, logger)
+func Post(identity bool, url string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
+	response, err := SendRequest(identity, url, http.MethodPost, token, body, insecureTLS, logger)
 	return response, err
 }
 
 // Put a put request and get response as serialized json map[string]interface{}
-func Put(url string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
-	ctx := context.TODO()
-	response, err := SendRequest(ctx, url, http.MethodPut, token, body, insecureTLS, logger)
+func Put(identity bool, url string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
+	response, err := SendRequest(identity, url, http.MethodPut, token, body, insecureTLS, logger)
 	return response, err
 }
 
 // Delete a delete request and get response as serialized json map[string]interface{}
-func Delete(url string, token string, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
-	ctx := context.TODO()
-	response, err := SendRequest(ctx, url, http.MethodDelete, token, "", insecureTLS, logger)
+func Delete(identity bool, url string, token string, insecureTLS bool, logger logger.Logger) (map[string]interface{}, error) {
+	response, err := SendRequest(identity, url, http.MethodDelete, token, "", insecureTLS, logger)
 	return response, err
 }
