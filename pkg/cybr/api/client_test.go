@@ -21,8 +21,9 @@ func defaultPASAPIClient(t *testing.T) (pasapi.Client, error) {
 	}
 
 	creds := requests.Logon{
-		Username: username,
-		Password: password,
+		Username:          username,
+		Password:          password,
+		ConcurrentSession: true,
 	}
 
 	err := client.Logon(creds)
