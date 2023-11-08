@@ -17,7 +17,7 @@ var (
 func defaultPASAPIClient(t *testing.T) (pasapi.Client, error) {
 	client := pasapi.Client{
 		BaseURL:  hostname,
-		AuthType: "ldap",
+		AuthType: "identity",
 	}
 
 	creds := requests.Logon{
@@ -33,7 +33,7 @@ func defaultPASAPIClient(t *testing.T) (pasapi.Client, error) {
 }
 
 func TestIsValidSuccess(t *testing.T) {
-	validAuthTypes := []string{"cyberark", "ldap"}
+	validAuthTypes := []string{"cyberark", "ldap", "identity", "radius"}
 
 	for _, validAuthType := range validAuthTypes {
 		client := pasapi.Client{
@@ -67,7 +67,7 @@ func TestSetGetRemoveConfigSuccess(t *testing.T) {
 	// without worrying about the order of test execution
 	client := pasapi.Client{
 		BaseURL:      hostname,
-		AuthType:     "cyberark",
+		AuthType:     "identity",
 		InsecureTLS:  false,
 		SessionToken: "",
 	}
