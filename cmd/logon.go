@@ -78,7 +78,12 @@ func logonToPAS(c pasapi.Client, username, password string, nonInteractive, conc
 	}
 	// Logon to the PAS REST API
 	ctx, errorResponse, err := c.Logon(ctx, credentials)
-	if err != nil && errorResponse.ErrorCode != "ITATS542I" {
+	if err != nil && (errorResponse == nil || errorResponse.ErrorCode != "ITATS542I") {
+		// If errorResponse is nil, you can't use its ErrorCode, so handle the error accordingly
+		if errorResponse == nil {
+			return fmt.Errorf("Failed to logon to the PVWA and error details are unavailable. %s", err)
+		}
+
 		return fmt.Errorf("Failed to Logon to the PVWA. %s", err)
 	}
 	// Deal with OTPCode here if error contains challenge error code and redo client.Logon()
