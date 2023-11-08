@@ -180,6 +180,14 @@ func SendRequestRaw(ctx context.Context, identity bool, url string, method strin
 		return ctx, nil, fmt.Errorf("Failed to read body. %v", err)
 	}
 
+	// Check if the response status code is 500 and look for the error message ITATS542I
+	if res.StatusCode == 500 && bytes.Contains(content, []byte("ITATS542I")) {
+		newCtx := context.WithValue(ctx, contextKeyCookies, res.Cookies())
+		return newCtx, content, err
+	} else if res.StatusCode >= 300 {
+		return ctx, nil, fmt.Errorf("Received non-200 status code '%d'", res.StatusCode)
+	}
+
 	newCtx := context.WithValue(ctx, contextKeyCookies, res.Cookies())
 	return newCtx, content, err
 
