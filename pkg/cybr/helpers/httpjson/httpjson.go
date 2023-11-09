@@ -170,7 +170,7 @@ func SendRequest(ctx context.Context, identity bool, url string, method string, 
 // SendRequestRaw is an http request and get response as byte[]
 func SendRequestRaw(ctx context.Context, identity bool, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (context.Context, []byte, error) {
 	res, err := getResponse(ctx, identity, url, method, token, body, insecureTLS, logger)
-	if err != nil {
+	if err != nil && res.StatusCode != 500 {
 		return ctx, nil, err
 	}
 	defer res.Body.Close()

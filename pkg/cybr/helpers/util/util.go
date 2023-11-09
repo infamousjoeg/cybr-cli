@@ -32,6 +32,26 @@ func ReadPassword() (string, error) {
 	return string(byteSecretVal), nil
 }
 
+// PromptForPassword prompts the user to enter a password, retrying until valid input is provided or max attempts are reached
+func PromptForPassword(maxAttempts int) (string, error) {
+	var password string
+	var err error
+
+	for attempts := 0; attempts < maxAttempts; attempts++ {
+		password, err = ReadPassword()
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		if password != "" {
+			return password, nil
+		}
+		fmt.Println("Password cannot be empty. Please try again.")
+	}
+	return "", fmt.Errorf("No valid password entered after %d attempts. Exiting", maxAttempts)
+}
+
 // ReadInput Read input from Stdin
 func ReadInput(message string) (string, error) {
 	fmt.Printf("%s: ", message)

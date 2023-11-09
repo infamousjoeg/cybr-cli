@@ -23,12 +23,12 @@ func (c *Client) Logon(ctx context.Context, req requests.Logon) (context.Context
 	// Handle cyberark, ldap, and radius push, append & challenge/response authentication methods
 	url := fmt.Sprintf("%s/passwordvault/api/auth/%s/logon", c.BaseURL, c.AuthType)
 	ctx, response, err := httpJson.SendRequestRaw(ctx, false, url, "POST", "", req, c.InsecureTLS, c.Logger)
-	if err != nil {
+	if err != nil || strings.Contains(string(response), "ITATS542I") {
 		// Check if response can be unmarshalled to ErrorResponse
 		errorResponse := &shared.ErrorResponse{}
 		errUm := json.Unmarshal(response, &errorResponse)
 		if errUm != nil {
-			return ctx, nil, fmt.Errorf("Unable to unmarshal response from PAS REST API Web Service. %s", errUm)
+			return ctx, nil, errUm
 		}
 
 		return ctx, errorResponse, fmt.Errorf("Failed to authenticate to the PAS REST API. %s", err)

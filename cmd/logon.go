@@ -10,6 +10,7 @@ import (
 
 	pasapi "github.com/infamousjoeg/cybr-cli/pkg/cybr/api"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/requests"
+	"github.com/infamousjoeg/cybr-cli/pkg/cybr/api/shared"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/prettyprint"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/util"
 	"github.com/infamousjoeg/cybr-cli/pkg/cybr/identity"
@@ -52,56 +53,104 @@ var (
 	platformDiscovery  *ispssresponses.PlatformDiscovery      // Platform discovery response
 )
 
+// func logonToPAS(c pasapi.Client, username, password string, nonInteractive, concurrentSession bool) error {
+// 	var err error
+// 	ctx := context.Background()
+// 	// Check if non-interactive flag is not provided and password is not empty
+// 	if !nonInteractive && password != "" {
+// 		return fmt.Errorf("An error occured because --non-interactive must be provided when using --password flag")
+// 	}
+// 	// If the execution is not non-interactive, ask the user to input password
+// 	if !nonInteractive {
+// 		password, err = util.ReadPassword()
+// 		if err != nil {
+// 			return fmt.Errorf("An error occurred trying to read password from Stdin. Exiting")
+// 		}
+// 	}
+// 	// Check if password is empty
+// 	if password == "" {
+// 		return fmt.Errorf("Provided password is empty")
+// 	}
+// 	// Create credentials for logon
+// 	credentials := requests.Logon{
+// 		Username:          username,
+// 		Password:          password,
+// 		ConcurrentSession: concurrentSession,
+// 	}
+// 	// Logon to the PAS REST API
+// 	ctx, errorResponse, err := c.Logon(ctx, credentials)
+// 	if err != nil && (errorResponse == nil || errorResponse.ErrorCode != "ITATS542I") {
+// 		// If errorResponse is nil, you can't use its ErrorCode, so handle the error accordingly
+// 		if errorResponse == nil {
+// 			return fmt.Errorf("Failed to logon to the PVWA and error details are unavailable. %s", err)
+// 		} else if errorResponse != nil {
+// 			return fmt.Errorf("Failed to Logon to the PVWA. %s", err)
+// 		}
+// 	}
+// 	// Deal with OTPCode here if error contains challenge error code and redo client.Logon()
+// 	if errorResponse != nil && errorResponse.ErrorCode == "ITATS542I" {
+// 		// Get OTP code from Stdin
+// 		fmt.Printf("%s: \n", errorResponse.ErrorMessage)
+// 		credentials, err = util.ReadOTPcode(credentials)
+// 		_, _, err = c.Logon(ctx, credentials)
+// 		if err != nil {
+// 			return fmt.Errorf("Failed to respond to challenge. Possible timeout occurred. %s", err)
+// 		}
+// 	}
+// 	// Set client config
+// 	err = c.SetConfig()
+// 	if err != nil {
+// 		return fmt.Errorf("Failed to create configuration file. %s", err)
+// 	}
+// 	return nil
+// }
+
 func logonToPAS(c pasapi.Client, username, password string, nonInteractive, concurrentSession bool) error {
-	var err error
 	ctx := context.Background()
-	// Check if non-interactive flag is not provided and password is not empty
-	if !nonInteractive && password != "" {
-		return fmt.Errorf("An error occured because --non-interactive must be provided when using --password flag")
+
+	// If --non-interactive flag is provided and password is empty, return error
+	if nonInteractive && password == "" {
+		return fmt.Errorf("An error occured because --password is required when using --non-interactive flag")
 	}
-	// If the execution is not non-interactive, ask the user to input password
+
+	// If --non-interactive flag is not provided, ask the user to input password
 	if !nonInteractive {
-		password, err = util.ReadPassword()
+		var err error
+		password, err = util.PromptForPassword(5)
 		if err != nil {
 			return fmt.Errorf("An error occurred trying to read password from Stdin. Exiting")
 		}
 	}
-	// Check if password is empty
-	if password == "" {
-		return fmt.Errorf("Provided password is empty")
-	}
+
 	// Create credentials for logon
 	credentials := requests.Logon{
 		Username:          username,
 		Password:          password,
 		ConcurrentSession: concurrentSession,
 	}
-	// Logon to the PAS REST API
+
+	return performLogon(ctx, c, credentials)
+}
+
+func performLogon(ctx context.Context, c pasapi.Client, credentials requests.Logon) error {
 	ctx, errorResponse, err := c.Logon(ctx, credentials)
-	if err != nil && (errorResponse == nil || errorResponse.ErrorCode != "ITATS542I") {
-		// If errorResponse is nil, you can't use its ErrorCode, so handle the error accordingly
-		if errorResponse == nil {
-			return fmt.Errorf("Failed to logon to the PVWA and error details are unavailable. %s", err)
-		} else if errorResponse != nil {
-			return fmt.Errorf("Failed to Logon to the PVWA. %s", err)
-		}
-	}
-	// Deal with OTPCode here if error contains challenge error code and redo client.Logon()
-	if errorResponse != nil && errorResponse.ErrorCode == "ITATS542I" {
-		// Get OTP code from Stdin
-		fmt.Printf("%s: \n", errorResponse.ErrorMessage)
-		credentials, err = util.ReadOTPcode(credentials)
-		_, _, err = c.Logon(ctx, credentials)
-		if err != nil {
-			return fmt.Errorf("Failed to respond to challenge. Possible timeout occurred. %s", err)
-		}
-	}
-	// Set client config
-	err = c.SetConfig()
 	if err != nil {
-		return fmt.Errorf("Failed to create configuration file. %s", err)
+		return handleLogonError(c, credentials, errorResponse, err)
 	}
-	return nil
+
+	return c.SetConfig()
+}
+
+func handleLogonError(c pasapi.Client, credentials requests.Logon, errorResponse *shared.ErrorResponse, err error) error {
+	if errorResponse != nil && errorResponse.ErrorCode == "ITATS542I" {
+		fmt.Printf("%s. \n", errorResponse.ErrorMessage)
+		credentials, err := util.ReadOTPcode(credentials)
+		if err != nil {
+			return fmt.Errorf("Failed to read OTP code. %s", err)
+		}
+		return performLogon(context.Background(), c, credentials)
+	}
+	return fmt.Errorf("Failed to logon to the PVWA. %s", err)
 }
 
 func startAuthIdentity(c pasapi.Client, username string) (*responses.Authentication, error) {
