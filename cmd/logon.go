@@ -87,7 +87,7 @@ func logonToPAS(c pasapi.Client, username, password string, nonInteractive, conc
 		}
 	}
 	// Deal with OTPCode here if error contains challenge error code and redo client.Logon()
-	if errorResponse.ErrorCode == "ITATS542I" {
+	if errorResponse != nil && errorResponse.ErrorCode == "ITATS542I" {
 		// Get OTP code from Stdin
 		fmt.Printf("%s: \n", errorResponse.ErrorMessage)
 		credentials, err = util.ReadOTPcode(credentials)
