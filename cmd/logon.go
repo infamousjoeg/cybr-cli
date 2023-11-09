@@ -82,12 +82,12 @@ func logonToPAS(c pasapi.Client, username, password string, nonInteractive, conc
 		// If errorResponse is nil, you can't use its ErrorCode, so handle the error accordingly
 		if errorResponse == nil {
 			return fmt.Errorf("Failed to logon to the PVWA and error details are unavailable. %s", err)
+		} else if errorResponse != nil {
+			return fmt.Errorf("Failed to Logon to the PVWA. %s", err)
 		}
-
-		return fmt.Errorf("Failed to Logon to the PVWA. %s", err)
 	}
 	// Deal with OTPCode here if error contains challenge error code and redo client.Logon()
-	if err != nil {
+	if errorResponse.ErrorCode == "ITATS542I" {
 		// Get OTP code from Stdin
 		fmt.Printf("%s: \n", errorResponse.ErrorMessage)
 		credentials, err = util.ReadOTPcode(credentials)
