@@ -84,10 +84,10 @@ func getResponse(ctx context.Context, identity bool, urls string, method string,
 	jar, _ := cookiejar.New(nil)
 	u, _ := url.Parse(urls)
 	cookies, ok := Cookies(ctx)
-	if ok {
-		jar.SetCookies(u, cookies)
-	} else {
+	if !ok {
 		jar.SetCookies(u, nil)
+	} else {
+		jar.SetCookies(u, cookies)
 	}
 
 	httpClient := http.Client{
@@ -132,9 +132,9 @@ func getResponse(ctx context.Context, identity bool, urls string, method string,
 		return http.Response{}, fmt.Errorf("Failed to send request. %s", err)
 	}
 
-	if res.StatusCode >= 300 {
-		return *res, fmt.Errorf("Received non-200 status code '%d'", res.StatusCode)
-	}
+	// if res.StatusCode >= 300 {
+	// 	return *res, fmt.Errorf("getResponse: Received non-200 status code '%d'", res.StatusCode)
+	// }
 
 	return *res, err
 }
@@ -176,6 +176,7 @@ func SendRequestRaw(ctx context.Context, identity bool, url string, method strin
 	defer res.Body.Close()
 
 	content, err := io.ReadAll(res.Body)
+	fmt.Printf("SRR Response: %s\n", content)
 	if err != nil {
 		return ctx, nil, fmt.Errorf("Failed to read body. %v", err)
 	}
@@ -185,7 +186,7 @@ func SendRequestRaw(ctx context.Context, identity bool, url string, method strin
 		newCtx := context.WithValue(ctx, contextKeyCookies, res.Cookies())
 		return newCtx, content, err
 	} else if res.StatusCode >= 300 {
-		return ctx, nil, fmt.Errorf("Received non-200 status code '%d'", res.StatusCode)
+		return ctx, nil, fmt.Errorf("SendRequestRaw: Received non-200 status code '%d'", res.StatusCode)
 	}
 
 	newCtx := context.WithValue(ctx, contextKeyCookies, res.Cookies())

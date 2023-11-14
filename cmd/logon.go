@@ -150,7 +150,7 @@ func handleLogonError(c pasapi.Client, credentials requests.Logon, errorResponse
 		}
 		return performLogon(context.Background(), c, credentials)
 	}
-	return fmt.Errorf("Failed to logon to the PVWA. %s", err)
+	return fmt.Errorf("handleLogonError: Failed to logon to the PVWA. %s", err)
 }
 
 func startAuthIdentity(c pasapi.Client, username string) (*responses.Authentication, error) {
