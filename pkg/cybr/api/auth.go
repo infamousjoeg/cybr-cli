@@ -20,10 +20,16 @@ func (c *Client) Logon(req requests.Logon) error {
 	// Handle cyberark, ldap, and radius push, append & challenge/response authentication methods
 	url := fmt.Sprintf("%s/passwordvault/api/auth/%s/logon", c.BaseURL, c.AuthType)
 	token, err := httpJson.SendRequestRaw(false, url, "POST", "", req, c.InsecureTLS, c.Logger)
+	fmt.Printf("token: %s\n", string(token))
+	fmt.Printf("err: %s\n", err)
 	if err != nil {
-		return fmt.Errorf("Failed to authenticate to the PAS REST API. %s", err)
+		return fmt.Errorf("Failed to logon to PAS REST API Web Service. %s", err)
+	}
+	if strings.Contains(string(token), "ITATS542I") {
+		return fmt.Errorf("ITATS542I")
 	}
 
+	fmt.Printf("token: %s\n", strings.Trim(string(token), "\""))
 	c.SessionToken = strings.Trim(string(token), "\"")
 	return nil
 }

@@ -6,12 +6,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/gorilla/sessions"
 	"github.com/infamousjoeg/cybr-cli/pkg/logger"
+)
+
+var (
+	store = sessions.NewCookieStore([]byte("2vQYfI$Qc$EJzqyI"))
 )
 
 func bodyToBytes(body interface{}) ([]byte, error) {
@@ -53,7 +57,7 @@ func logRequest(req *http.Request, logger logger.Logger) {
 	body := buf.String()
 	logger.Writef("%s\n", body)
 
-	req.Body = ioutil.NopCloser(bytes.NewReader([]byte(body)))
+	req.Body = io.NopCloser(bytes.NewReader([]byte(body)))
 }
 
 func getResponse(identity bool, url string, method string, token string, body interface{}, insecureTLS bool, logger logger.Logger) (http.Response, error) {
@@ -73,7 +77,7 @@ func getResponse(identity bool, url string, method string, token string, body in
 		return *res, err
 	}
 
-	bodyReader = ioutil.NopCloser(bytes.NewReader(content))
+	bodyReader = io.NopCloser(bytes.NewReader(content))
 
 	// create the request
 	req, err := http.NewRequest(method, url, bodyReader)
@@ -96,6 +100,15 @@ func getResponse(identity bool, url string, method string, token string, body in
 		}
 	}
 
+	session, err := store.Get(req, "cybr-cli")
+	if err != nil {
+		return *res, fmt.Errorf("Failed to get session. %s", err)
+	}
+
+	for name, value := range session.Values {
+		req.AddCookie(&http.Cookie{Name: name.(string), Value: value.(string)})
+	}
+
 	logRequest(req, logger)
 	// send request
 	res, err = httpClient.Do(req)
@@ -103,7 +116,11 @@ func getResponse(identity bool, url string, method string, token string, body in
 		return http.Response{}, fmt.Errorf("Failed to send request. %s", err)
 	}
 
-	if res.StatusCode >= 300 {
+	for _, cookie := range res.Cookies() {
+		session.Values[cookie.Name] = cookie.Value
+	}
+
+	if res.StatusCode >= 300 && res.StatusCode != 500 {
 		return *res, fmt.Errorf("Received non-200 status code '%d'", res.StatusCode)
 	}
 
@@ -145,7 +162,7 @@ func SendRequestRaw(identity bool, url string, method string, token string, body
 		return nil, err
 	}
 
-	content, err := ioutil.ReadAll(res.Body)
+	content, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to read body. %s", err)
 	}
@@ -191,7 +208,7 @@ func SendRequestRawWithHeaders(url, method string, headers http.Header, body int
 		return []byte(""), fmt.Errorf("Received non-200 status code '%d'", res.StatusCode)
 	}
 
-	content, err = ioutil.ReadAll(res.Body)
+	content, err = io.ReadAll(res.Body)
 	if err != nil {
 		return []byte(""), fmt.Errorf("Failed to read body. %s", err)
 	}

@@ -79,15 +79,14 @@ func logonToPAS(c pasapi.Client, username, password string, nonInteractive, conc
 	if err != nil && !strings.Contains(err.Error(), "ITATS542I") {
 		return fmt.Errorf("Failed to Logon to the PVWA. %s", err)
 	}
-	// Deal with OTPCode here if error contains challenge error code and redo client.Logon()
-	if err != nil {
-		// Get OTP code from Stdin
+	if strings.Contains(err.Error(), "ITATS542I") {
 		credentials, err = util.ReadOTPcode(credentials)
 		err = c.Logon(credentials)
 		if err != nil {
 			return fmt.Errorf("Failed to respond to challenge. Possible timeout occurred. %s", err)
 		}
 	}
+
 	// Set client config
 	err = c.SetConfig()
 	if err != nil {
