@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	accountSafeName  = "PIN_APP_CYBRCLI_TEST"
+	accountSafeName  = "PIN-APP-CYBRCLI-TEST"
 	accountID        = "162_3"
 	accountUsername  = "test"
 	accountSSHKeyID  = "162_4"
