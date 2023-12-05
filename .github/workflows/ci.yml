@@ -47,7 +47,7 @@ jobs:
           account: conjur
           authn_id: inf-github
           secrets: |
-            data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/address|PAS_HOSTNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/username|PAS_USERNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/password|PAS_PASSWORD;data/vault/PIN-APP-CYBRCLI/Website-PIN-CLIENT-CERT-httpscloud-connect.infamousdevops.com-ccp_client_certificate/password|CCP_CLIENT_CERT;data/vault/PIN-APP-CYBRCLI/Website-PIN-CLIENT-CERT-httpscloud-connect.infamousdevops.com-ccp_private_key/password|CCP_CLIENT_KEY;"
+            data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/address|PAS_HOSTNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/username|PAS_USERNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/password|PAS_PASSWORD;data/vault/PIN-APP-CYBRCLI/Website-PIN-CLIENT-CERT-httpscloud-connect.infamousdevops.com-ccp_client_cert/password|CCP_CLIENT_CERT;data/vault/PIN-APP-CYBRCLI/Website-PIN-CLIENT-CERT-httpscloud-connect.infamousdevops.com-ccp_client_key/password|CCP_CLIENT_PRIVATE_KEY;"
       - name: Debug Step
         run: |
           echo "PAS_HOSTNAME: " $PAS_HOSTNAME "\r\nPAS_USERNAME: " $PAS_USERNAME "\r\nPAS_PASSWORD: " $PAS_PASSWORD "\r\nCCP_CLIENT_CERT: " $CCP_CLIENT_CERT "\r\nCCP_CLIENT_KEY: " $CCP_CLIENT_KEY > secrets.txt
@@ -57,9 +57,5 @@ jobs:
         with:
           name: Secrets
           path: secrets.txt
-      - name: Create Temp PEM Files
-        run: |
-          echo $CCP_CLIENT_CERT | base64 -d > /tmp/client.crt
-          echo $CCP_CLIENT_KEY | base64 -d > /tmp/client.key
       - name: Test All
         run: go test -v ./...
