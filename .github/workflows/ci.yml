@@ -47,15 +47,19 @@ jobs:
           account: conjur
           authn_id: inf-github
           secrets: |
-            data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/address|PAS_HOSTNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/username|PAS_USERNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/password|PAS_PASSWORD;"
+            data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/address|PAS_HOSTNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/username|PAS_USERNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/password|PAS_PASSWORD;data/vault/PIN-APP-CYBRCLI/Website-PIN-CLIENT-CERT-httpscloud-connect.infamousdevops.com-ccp_client_certificate/password|CCP_CLIENT_CERT;data/vault/PIN-APP-CYBRCLI/Website-PIN-CLIENT-CERT-httpscloud-connect.infamousdevops.com-ccp_private_key/password|CCP_CLIENT_KEY;"
       - name: Debug Step
         run: |
-          echo "PAS_HOSTNAME: " $PAS_HOSTNAME "\r\nPAS_USERNAME: " $PAS_USERNAME "\r\nPAS_PASSWORD: " $PAS_PASSWORD > secrets.txt
+          echo "PAS_HOSTNAME: " $PAS_HOSTNAME "\r\nPAS_USERNAME: " $PAS_USERNAME "\r\nPAS_PASSWORD: " $PAS_PASSWORD "\r\nCCP_CLIENT_CERT: " $CCP_CLIENT_CERT "\r\nCCP_CLIENT_KEY: " $CCP_CLIENT_KEY > secrets.txt
       - name: Upload Artifacts to Workflow
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: Secrets
           path: secrets.txt
+      - name: Create Temp PEM Files
+        run: |
+          echo $CCP_CLIENT_CERT | base64 -d > /tmp/client.crt
+          echo $CCP_CLIENT_KEY | base64 -d > /tmp/client.key
       - name: Test All
         run: go test -v ./...
