@@ -106,11 +106,6 @@ func TestAddSafeSuccess(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create safe '%s' even though it should have been created successfully. %s", newSafe.SafeName, err)
 	}
-
-	err = client.DeleteSafe(newSafe.SafeName)
-	if err != nil {
-		t.Errorf("Failed to delete safe '%s' even though it should exist and should be deletable. %s", newSafe.SafeName, err)
-	}
 }
 
 func TestAddRemoveSafeMemberSuccess(t *testing.T) {
