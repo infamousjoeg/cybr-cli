@@ -50,7 +50,7 @@ func (c Client) AddSafeMember(safeName string, addMember requests.AddSafeMember)
 
 // RemoveSafeMember Remove a member from a specific safe
 func (c Client) RemoveSafeMember(safeName string, member string) error {
-	url := fmt.Sprintf("%s/passwordvault/WebServices/PIMServices.svc/Safes/%s/Members/%s", c.BaseURL, url.QueryEscape(safeName), url.QueryEscape(member))
+	url := fmt.Sprintf("%s/passwordvault/api/Safes/%s/Members/%s", c.BaseURL, url.QueryEscape(safeName), url.QueryEscape(member))
 	response, err := httpJson.Delete(false, url, c.SessionToken, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
