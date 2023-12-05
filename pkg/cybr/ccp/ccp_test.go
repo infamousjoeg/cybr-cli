@@ -10,8 +10,8 @@ import (
 var (
 	hostname   = os.Getenv("PAS_HOSTNAME")
 	appID      = "cybr-cli-ccp-test"
-	safe       = "PIN_APP_CYBRCLI_TEST"
-	object     = "Operating System-PL-WIN-DOMAIN-ADMIN-10.0.0.1-test"
+	safe       = "PIN-APP-CYBRCLI-TEST"
+	object     = "Operating System-PL-WIN-DOMAIN-ADMIN-10.0.0.1-test-new"
 	clientCert = os.Getenv("CCP_CLIENT_CERT")
 	clientKey  = os.Getenv("CCP_CLIENT_PRIVATE_KEY")
 )
