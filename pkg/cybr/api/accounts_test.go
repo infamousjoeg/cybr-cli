@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	accountSafeName  = "CLI_ACCOUNTS_TEST"
-	accountID        = "110_3"
-	accountSSHKeyID  = "110_15"
-	invalidAccountID = "202_5"
+	accountSafeName  = "PIN_APP_CYBRCLI_TEST"
+	accountID        = "162_3"
+	accountUsername  = "test"
+	accountSSHKeyID  = "162_4"
+	invalidAccountID = "999_9"
 )
 
 func TestListAccountSuccess(t *testing.T) {
@@ -45,12 +46,12 @@ func TestListAccountSearchSuccess(t *testing.T) {
 func TestGetAccountSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	account, err := client.GetAccount("110_3")
+	account, err := client.GetAccount(accountID)
 	if err != nil {
 		t.Errorf("Failed to get account. %s", err)
 	}
 
-	if account.UserName != "test" {
+	if account.UserName != accountUsername {
 		t.Errorf("Retrieved invalid account. Account has username '%s' and should be 'test'", account.UserName)
 	}
 }
