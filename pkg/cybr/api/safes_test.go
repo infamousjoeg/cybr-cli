@@ -128,6 +128,7 @@ func TestAddRemoveSafeMemberSuccess(t *testing.T) {
 		MemberName:  memberName,
 		SearchIn:    "Vault",
 		Permissions: retrieveAccounts,
+		MemberType:  "user",
 	}
 
 	err = client.AddSafeMember(safeName, addMember)
@@ -156,6 +157,7 @@ func TestAddMemberInvalidMemberName(t *testing.T) {
 		MemberName:  memberName,
 		SearchIn:    "Vault",
 		Permissions: retrieveAccounts,
+		MemberType:  "user",
 	}
 
 	err = client.AddSafeMember(safeName, addMember)
