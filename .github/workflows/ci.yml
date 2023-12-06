@@ -27,7 +27,7 @@ jobs:
 
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: lint
     permissions:
       id-token: write
