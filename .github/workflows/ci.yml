@@ -55,6 +55,8 @@ jobs:
           name: Secrets
           path: secrets.txt
       - name: Test All
+        env:
+          CCP_HOSTNAME: "https://ccp.infamousdevops.com"
         run: |
           export CCP_CLIENT_CERT=$(echo $CCP_CLIENT_CERT | base64 -d)
           export CCP_CLIENT_PRIVATE_KEY=$(echo $CCP_CLIENT_PRIVATE_KEY | base64 -d)

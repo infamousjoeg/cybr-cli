@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	hostname   = os.Getenv("PAS_HOSTNAME")
+	hostname   = os.Getenv("CCP_HOSTNAME")
 	appID      = "cybr-cli-ccp-test"
 	safe       = "PIN-APP-CYBRCLI-TEST"
 	object     = "Operating System-PL-WIN-DOMAIN-ADMIN-10.0.0.1-test-new"
