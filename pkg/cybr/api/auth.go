@@ -47,7 +47,7 @@ func (c *Client) Logon(ctx context.Context, req requests.Logon) (context.Context
 func (c Client) Logoff() error {
 	// Set URL for request
 	url := fmt.Sprintf("%s/passwordvault/api/auth/logoff", c.BaseURL)
-	_, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	_, err := httpJson.Post(false, url, c.SessionToken, emptyBody, c.InsecureTLS, c.Logger)
 	if err != nil {
 		return fmt.Errorf("Unable to logoff PAS REST API Web Service. %s", err)
 	}

@@ -18,12 +18,13 @@ var (
 func defaultPASAPIClient(t *testing.T) (pasapi.Client, error) {
 	client := pasapi.Client{
 		BaseURL:  hostname,
-		AuthType: "ldap",
+		AuthType: "cyberark",
 	}
 
 	creds := requests.Logon{
-		Username: username,
-		Password: password,
+		Username:          username,
+		Password:          password,
+		ConcurrentSession: true,
 	}
 
 	_, _, err := client.Logon(context.TODO(), creds)

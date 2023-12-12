@@ -12,6 +12,9 @@ import (
 	httpJson "github.com/infamousjoeg/cybr-cli/pkg/cybr/helpers/httpjson"
 )
 
+// Create an empty JSON body payload
+var emptyBody = struct{}{}
+
 // ListAccounts CyberArk user has access to
 func (c Client) ListAccounts(query *queries.ListAccounts) (*responses.ListAccount, error) {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts%s", c.BaseURL, httpJson.GetURLQuery(query))
@@ -73,7 +76,7 @@ func (c Client) DeleteAccount(accountID string) error {
 // GetJITAccess from a specific account
 func (c Client) GetJITAccess(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/grantAdministrativeAccess", c.BaseURL, accountID)
-	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, emptyBody, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to get JIT access for account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -85,7 +88,7 @@ func (c Client) GetJITAccess(accountID string) error {
 // RevokeJITAccess from a specific account
 func (c Client) RevokeJITAccess(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/api/Accounts/%s/RevokeAdministrativeAccess", c.BaseURL, accountID)
-	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, emptyBody, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to revoke JIT access for account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -126,7 +129,7 @@ func (c Client) GetAccountSSHKey(accountID string, request requests.GetAccountPa
 // VerifyAccountCredentials marks an account for verification
 func (c Client) VerifyAccountCredentials(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/Verify", c.BaseURL, accountID)
-	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, emptyBody, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to verify account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -158,7 +161,7 @@ func (c Client) ChangeAccountCredentials(accountID string, changeEntireGroup boo
 // ReconileAccountCredentials marks an account for reconciliation
 func (c Client) ReconileAccountCredentials(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/Reconcile", c.BaseURL, accountID)
-	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, emptyBody, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to mark reconcile on account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -170,7 +173,7 @@ func (c Client) ReconileAccountCredentials(accountID string) error {
 // Unlock removes a lock from an account
 func (c Client) Unlock(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/Unlock", c.BaseURL, accountID)
-	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, emptyBody, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to unlock account '%s'. %s. %s", accountID, string(returnedError), err)
@@ -182,7 +185,7 @@ func (c Client) Unlock(accountID string) error {
 // CheckIn checks in an account that is checked out by the user
 func (c Client) CheckIn(accountID string) error {
 	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/CheckIn", c.BaseURL, accountID)
-	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, emptyBody, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to check-in account '%s'. %s. %s", accountID, string(returnedError), err)
