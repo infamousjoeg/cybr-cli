@@ -1,7 +1,6 @@
 package ccp_test
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -9,10 +8,10 @@ import (
 )
 
 var (
-	hostname   = os.Getenv("PAS_HOSTNAME")
+	hostname   = os.Getenv("CCP_HOSTNAME")
 	appID      = "cybr-cli-ccp-test"
-	safe       = "CLI_ACCOUNTS_TEST"
-	object     = "Operating System-UnixSSH-10.0.0.1-test_list"
+	safe       = "PIN-APP-CYBRCLI-TEST"
+	object     = "Operating System-PL-WIN-DOMAIN-ADMIN-10.0.0.1-test-new"
 	clientCert = os.Getenv("CCP_CLIENT_CERT")
 	clientKey  = os.Getenv("CCP_CLIENT_PRIVATE_KEY")
 )
@@ -21,11 +20,11 @@ func writeCertsToFile(clientCertContent string, clientKeyContent string) (string
 	certFilePath := os.TempDir() + "/client.crt"
 	keyFilePath := os.TempDir() + "/client.key"
 
-	err := ioutil.WriteFile(certFilePath, []byte(clientCertContent), 0644)
+	err := os.WriteFile(certFilePath, []byte(clientCertContent), 0644)
 	if err != nil {
 		return "", "", err
 	}
-	err = ioutil.WriteFile(keyFilePath, []byte(clientKeyContent), 0644)
+	err = os.WriteFile(keyFilePath, []byte(clientKeyContent), 0644)
 	if err != nil {
 		return "", "", err
 	}

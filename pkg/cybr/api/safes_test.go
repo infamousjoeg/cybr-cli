@@ -92,7 +92,7 @@ func TestListSafeMembersInvalidSafeName(t *testing.T) {
 	}
 }
 
-func TestAddRemoveSafeSuccess(t *testing.T) {
+func TestAddSafeSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
 	newSafe := requests.AddSafe{
@@ -106,27 +106,12 @@ func TestAddRemoveSafeSuccess(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to create safe '%s' even though it should have been created successfully. %s", newSafe.SafeName, err)
 	}
-
-	err = client.DeleteSafe(newSafe.SafeName)
-	if err != nil {
-		t.Errorf("Failed to delete safe '%s' even though it should exist and should be deletable. %s", newSafe.SafeName, err)
-	}
-}
-
-func TestRemoveSafeFail(t *testing.T) {
-	client, err := defaultPASAPIClient(t)
-
-	safeName := "notRealSafeName"
-	err = client.DeleteSafe(safeName)
-	if err == nil {
-		t.Errorf("Client returned successful safe deletion even though safe '%s' should not exist", safeName)
-	}
 }
 
 func TestAddRemoveSafeMemberSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	safeName := "PasswordManager"
+	safeName := "TestCreateDelete"
 	memberName := "test-add-member"
 
 	retrieveAccounts, err := keyValueStringToMap("RetrieveAccounts=true")
@@ -138,6 +123,7 @@ func TestAddRemoveSafeMemberSuccess(t *testing.T) {
 		MemberName:  memberName,
 		SearchIn:    "Vault",
 		Permissions: retrieveAccounts,
+		MemberType:  "user",
 	}
 
 	err = client.AddSafeMember(safeName, addMember)
@@ -154,7 +140,7 @@ func TestAddRemoveSafeMemberSuccess(t *testing.T) {
 func TestAddMemberInvalidMemberName(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	safeName := "PasswordManager"
+	safeName := "TestCreateDelete"
 	memberName := "notReal"
 
 	retrieveAccounts, err := keyValueStringToMap("RetrieveAccounts=true")
@@ -166,6 +152,7 @@ func TestAddMemberInvalidMemberName(t *testing.T) {
 		MemberName:  memberName,
 		SearchIn:    "Vault",
 		Permissions: retrieveAccounts,
+		MemberType:  "user",
 	}
 
 	err = client.AddSafeMember(safeName, addMember)
@@ -177,11 +164,31 @@ func TestAddMemberInvalidMemberName(t *testing.T) {
 func TestRemoveMemberInvalidMemberName(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	safeName := "PasswordManager"
+	safeName := "TestCreateDelete"
 	memberName := "notReal"
 
 	err = client.RemoveSafeMember(safeName, memberName)
 	if err == nil {
 		t.Errorf("Removed a non-existent member. This should not happen")
+	}
+}
+
+func TestRemoveSafeSuccess(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	safeName := "TestCreateDelete"
+	err = client.DeleteSafe(safeName)
+	if err != nil {
+		t.Errorf("Failed to delete safe '%s' even though it should exist and should be deletable. %s", safeName, err)
+	}
+}
+
+func TestRemoveSafeFail(t *testing.T) {
+	client, err := defaultPASAPIClient(t)
+
+	safeName := "notRealSafeName"
+	err = client.DeleteSafe(safeName)
+	if err == nil {
+		t.Errorf("Client returned successful safe deletion even though safe '%s' should not exist", safeName)
 	}
 }

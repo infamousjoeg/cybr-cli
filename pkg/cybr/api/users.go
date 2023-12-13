@@ -14,7 +14,7 @@ import (
 func (c Client) UnsuspendUser(userID int) error {
 	url := fmt.Sprintf("%s/passwordvault/api/Users/%d/activate", c.BaseURL, userID)
 
-	response, err := httpJson.Post(false, url, c.SessionToken, nil, c.InsecureTLS, c.Logger)
+	response, err := httpJson.Post(false, url, c.SessionToken, emptyBody, c.InsecureTLS, c.Logger)
 	if err != nil {
 		returnedError, _ := json.Marshal(response)
 		return fmt.Errorf("Failed to unsuspend user with id '%d'. %s. %s", userID, string(returnedError), err)
