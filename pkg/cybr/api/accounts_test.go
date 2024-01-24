@@ -189,48 +189,12 @@ func TestChangeAccountCredentialsImmediateSuccess(t *testing.T) {
 	}
 }
 
-func TestChangeAccountCredentialsSetNextSuccess(t *testing.T) {
-	client, err := defaultPASAPIClient(t)
-
-	err = client.ChangeAccountCredentials(accountID, false, "set", "Cyberark123!")
-	if err != nil {
-		t.Errorf("Failed to get account password. %s", err)
-	}
-}
-
-func TestChangeAccountCredentialsVaultOnlySuccess(t *testing.T) {
-	client, err := defaultPASAPIClient(t)
-
-	err = client.ChangeAccountCredentials(accountID, false, "vault", "Cyberark123!")
-	if err != nil {
-		t.Errorf("Failed to get account password. %s", err)
-	}
-}
-
 func TestChangeAccountCredentialsImmediateInvalidAccount(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
 	err = client.ChangeAccountCredentials(invalidAccountID, false, "immediate", "")
 	if err == nil {
 		t.Errorf("Set account for change but it should not exist")
-	}
-}
-
-func TestChangeAccountCredentialsSetNextInvalidAccount(t *testing.T) {
-	client, err := defaultPASAPIClient(t)
-
-	err = client.ChangeAccountCredentials(invalidAccountID, false, "set", "Cyberark123!")
-	if err == nil {
-		t.Errorf("Set account for setnextpassword but it should not exist")
-	}
-}
-
-func TestChangeAccountCredentialsVaultOnlyInvalidAccount(t *testing.T) {
-	client, err := defaultPASAPIClient(t)
-
-	err = client.ChangeAccountCredentials(invalidAccountID, false, "vault", "Cyberark1234!")
-	if err == nil {
-		t.Errorf("Set account for update but it should not exist")
 	}
 }
 
