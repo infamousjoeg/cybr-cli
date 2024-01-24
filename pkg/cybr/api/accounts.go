@@ -136,10 +136,18 @@ func (c Client) VerifyAccountCredentials(accountID string) error {
 
 // ChangeAccountCredentials marks an account for immediate change
 func (c Client) ChangeAccountCredentials(accountID string, changeEntireGroup bool, changeScope string, newPassword string) error {
-	if changeScope != "change" && changeScope != "setnextpassword" {
-		return fmt.Errorf("Scope must be one of the following: change or setnextpassword")
+	var scope string
+	switch changeScope {
+	case "immediate":
+		scope = "change"
+	case "set":
+		scope = "setnextpassword"
+	case "vault":
+		scope = "password/update"
+	default:
+		return fmt.Errorf("Scope must be one of the following: immediate, set, or vault")
 	}
-	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/%s", c.BaseURL, accountID, changeScope)
+	url := fmt.Sprintf("%s/passwordvault/API/Accounts/%s/%s", c.BaseURL, accountID, scope)
 	body := requests.ChangeAccountCredential{
 		ChangeEntireGroup: changeEntireGroup,
 		NewCredentials:    newPassword,
