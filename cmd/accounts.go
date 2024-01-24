@@ -279,10 +279,15 @@ var changeAccountCmd = &cobra.Command{
 	Long: `This method marks an account for credential change
 	
 	Example Usage:
+	+ Change password immediately:
 	$ cybr accounts change -i 24_1
 	$ cybr accounts change -i 24_1 -s immediately
+	+ Change password, set next password:
 	$ cybr accounts change -i 24_1 -s set
-	$ cybr accounts change -i 24_1 -s set -p $(openssl rand -base64 12)`,
+	$ cybr accounts change -i 24_1 -s set -p $(openssl rand -base64 12)
+	+ Change password in Vault only:
+	$ cybr accounts change -i 24_1 -s vault
+	$ cybr accounts change -i 24_1 -s vault -p $(openssl rand -base64 12)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client, err := pasapi.GetConfigWithLogger(getLogger())
 		if err != nil {
@@ -290,7 +295,7 @@ var changeAccountCmd = &cobra.Command{
 			return
 		}
 
-		if NewPassword == "" && strings.ToLower(Scope) == "set" {
+		if NewPassword == "" && (strings.ToLower(Scope) == "set" || strings.ToLower(Scope) == "vault") {
 			NewPassword, err = util.ReadPassword()
 			if NewPassword == "" {
 				log.Fatalf("Password cannot be empty")
@@ -302,17 +307,20 @@ var changeAccountCmd = &cobra.Command{
 			}
 		}
 		if Scope == "" || strings.ToLower(Scope) == "immediate" {
-			err = client.ChangeAccountCredentials(AccountID, ChangeEntireGroup, "change", "")
+			err = client.ChangeAccountCredentials(AccountID, ChangeEntireGroup, "immediate", "")
 		}
 		if strings.ToLower(Scope) == "set" {
-			err = client.ChangeAccountCredentials(AccountID, ChangeEntireGroup, "setnextpassword", NewPassword)
+			err = client.ChangeAccountCredentials(AccountID, ChangeEntireGroup, "set", NewPassword)
+		}
+		if strings.ToLower(Scope) == "vault" {
+			err = client.ChangeAccountCredentials(AccountID, ChangeEntireGroup, "vault", NewPassword)
 		}
 		if err != nil {
 			log.Fatalf("%s", err)
 			return
 		}
 
-		fmt.Printf("Successfully marked account '%s' for change\n", AccountID)
+		fmt.Printf("Successfully marked account '%s' for change.\n", AccountID)
 	},
 }
 

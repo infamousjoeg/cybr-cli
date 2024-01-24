@@ -91,6 +91,8 @@ var (
 	User string
 	// Group is the group to search for as a safe member
 	Group string
+	// MemberType is the type of member being added to the safe
+	MemberType string
 )
 
 var safesCmd = &cobra.Command{
@@ -231,7 +233,8 @@ var addMembersCmd = &cobra.Command{
 	
 	Example Usage:
 	$ cybr safes add-member -s SafeName -m MemberName --list-account --use-account --retrieve-account
-	$ cybr safes add-member -s SafeName -m MemberName --role ApplicationIdentity`,
+	$ cybr safes add-member -s SafeName -m MemberName --role ApplicationIdentity --member-type user
+	$ cybr safes add-member -s SafeName -m MemberName --role ApplicationIdentity --member-type group`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get config file written to local file system
 		client, err := pasapi.GetConfigWithLogger(getLogger())
@@ -265,6 +268,7 @@ var addMembersCmd = &cobra.Command{
 			SearchIn:                 SearchIn,
 			MembershipExpirationDate: MembershipExpirationDate,
 			Permissions:              RolePermissions,
+			MemberType:               MemberType,
 		}
 
 		// Add a safe with the configuration options given via CLI subcommands
@@ -436,6 +440,8 @@ func init() {
 	addMembersCmd.Flags().StringVarP(&MemberName, "member-name", "m", "", "Name of member being added to the desired safe")
 	addMembersCmd.MarkFlagRequired("member-name")
 	addMembersCmd.Flags().StringVarP(&SearchIn, "search-in", "i", "Vault", "Search in Domain or Vault")
+	addMembersCmd.Flags().StringVarP(&MemberType, "member-type", "t", "user", "Type of member being added to the safe: user (default) or group")
+	addMembersCmd.MarkFlagRequired("member-type")
 	addMembersCmd.Flags().StringVarP(&MembershipExpirationDate, "member-expiration-date", "e", "", "When the membership will expire")
 	addMembersCmd.Flags().StringVarP(&Role, "role", "r", "", "The role of the safe member being added for automated permissioning")
 	addMembersCmd.Flags().BoolVar(&UseAccounts, "use-accounts", false, "Use accounts in safe")

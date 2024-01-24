@@ -6,4 +6,5 @@ type AddSafeMember struct {
 	SearchIn                 string            `json:"SearchIn"`
 	MembershipExpirationDate string            `json:"MembershipExpirationDate,omitempty"`
 	Permissions              map[string]string `json:"Permissions,omitempty"`
+	MemberType               string            `json:"MemberType"`
 }

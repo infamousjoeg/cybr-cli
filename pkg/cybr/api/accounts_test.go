@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	accountSafeName  = "CLI_ACCOUNTS_TEST"
-	accountID        = "110_3"
-	accountSSHKeyID  = "110_15"
-	invalidAccountID = "202_5"
+	accountSafeName  = "PIN-APP-CYBRCLI-TEST"
+	accountID        = "162_6"
+	accountUsername  = "test"
+	accountSSHKeyID  = "162_4"
+	invalidAccountID = "999_9"
 )
 
 func TestListAccountSuccess(t *testing.T) {
@@ -45,12 +46,12 @@ func TestListAccountSearchSuccess(t *testing.T) {
 func TestGetAccountSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	account, err := client.GetAccount("110_3")
+	account, err := client.GetAccount(accountID)
 	if err != nil {
 		t.Errorf("Failed to get account. %s", err)
 	}
 
-	if account.UserName != "test" {
+	if account.UserName != accountUsername {
 		t.Errorf("Retrieved invalid account. Account has username '%s' and should be 'test'", account.UserName)
 	}
 }
@@ -182,7 +183,7 @@ func TestVerifyAccountCredentialsInvalidAccount(t *testing.T) {
 func TestChangeAccountCredentialsImmediateSuccess(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.ChangeAccountCredentials(accountID, false, "change", "")
+	err = client.ChangeAccountCredentials(accountID, false, "immediate", "")
 	if err != nil {
 		t.Errorf("Failed to get account password. %s", err)
 	}
@@ -191,7 +192,7 @@ func TestChangeAccountCredentialsImmediateSuccess(t *testing.T) {
 func TestChangeAccountCredentialsImmediateInvalidAccount(t *testing.T) {
 	client, err := defaultPASAPIClient(t)
 
-	err = client.ChangeAccountCredentials(invalidAccountID, false, "change", "")
+	err = client.ChangeAccountCredentials(invalidAccountID, false, "immediate", "")
 	if err == nil {
 		t.Errorf("Set account for change but it should not exist")
 	}
