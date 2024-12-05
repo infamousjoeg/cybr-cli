@@ -13,7 +13,7 @@ func keyValueStringToMap(content string) (map[string]string, error) {
 	}
 
 	if !strings.Contains(content, "=") {
-		return nil, fmt.Errorf("Invalid platform prop content. The provided content does not container a '='")
+		return nil, fmt.Errorf("Invalid platform prop content. The provided content does not contain a '='")
 	}
 
 	m := make(map[string]string)
