@@ -46,8 +46,7 @@ jobs:
           url: https://pineapple.secretsmgr.cyberark.cloud/api
           account: conjur
           authn_id: inf-github
-          secrets: |
-            data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/address|PAS_HOSTNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/username|PAS_USERNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/password|PAS_PASSWORD;data/vault/PIN-APP-CYBRCLI/Website-PIN-CLIENT-CERT-httpscloud-connect.infamousdevops.com-ccp_client_cert/password|CCP_CLIENT_CERT;data/vault/PIN-APP-CYBRCLI/Website-PIN-CLIENT-CERT-ccp.infamousdevops.com-ccp_client_key/password|CCP_CLIENT_PRIVATE_KEY;"
+          secrets: data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/address|PAS_HOSTNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/username|PAS_USERNAME;data/vault/PIN-APP-CYBRCLI/Application-CyberArk-httpspineapple.privilegecloud.cyberark.cloud-jgarcia/password|PAS_PASSWORD;data/vault/PIN-APP-CYBRCLI/Website-PIN-CLIENT-CERT-httpscloud-connect.infamousdevops.com-ccp_client_cert/password|CCP_CLIENT_CERT;data/vault/PIN-APP-CYBRCLI/Website-PIN-CLIENT-CERT-ccp.infamousdevops.com-ccp_client_key/password|CCP_CLIENT_PRIVATE_KEY;"
       - name: Test All
         env:
           CCP_HOSTNAME: "https://ccp.infamousdevops.com"
