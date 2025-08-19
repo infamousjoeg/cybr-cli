@@ -41,7 +41,7 @@ jobs:
           go-version: '>=1.18'
           cache: false
       - name: Import Secrets using CyberArk Conjur Secret Fetcher
-        uses: infamousjoeg/conjur-action@v2.0.4
+        uses: cyberark/conjur-action@v2.0.12
         with:
           url: https://pineapple.secretsmgr.cyberark.cloud/api
           account: conjur
