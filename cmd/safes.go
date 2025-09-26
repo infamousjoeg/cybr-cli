@@ -93,6 +93,10 @@ var (
 	Group string
 	// MemberType is the type of member being added to the safe
 	MemberType string
+	// Include accounts with safe details
+	IncludeAccounts bool
+	// MembershipExpirationDate when membership will expire (docs show this as int for update)
+	UpdateMembershipExpirationDate int64
 )
 
 var safesCmd = &cobra.Command{
@@ -232,7 +236,7 @@ var addMembersCmd = &cobra.Command{
 		- ApproverLevel2
 	
 	Example Usage:
-	$ cybr safes add-member -s SafeName -m MemberName --list-account --use-account --retrieve-account
+	$ cybr safes add-member -s SafeName -m MemberName --list-accounts --use-accounts --retrieve-accounts
 	$ cybr safes add-member -s SafeName -m MemberName --role ApplicationIdentity --member-type user
 	$ cybr safes add-member -s SafeName -m MemberName --role ApplicationIdentity --member-type group`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -273,6 +277,83 @@ var addMembersCmd = &cobra.Command{
 
 		// Add a safe with the configuration options given via CLI subcommands
 		err = client.AddSafeMember(Safe, newMember)
+		if err != nil {
+			log.Fatalf("Failed to add member '%s' to safe '%s'. %s", MemberName, Safe, err)
+			return
+		}
+		fmt.Printf("Successfully added member '%s' to safe '%s'\n", MemberName, Safe)
+	},
+}
+
+var updateMembersCmd = &cobra.Command{
+	Use:   "update-member",
+	Short: "Update an existing Safe member with specific permissions",
+	Long: `This method updates an existing Safe member. The user who runs this web service requires Manage Safe Members permissions in the Vault.
+
+	Available Roles:
+		- BreakGlass
+		- VaultAdmin
+		- SafeManager
+		- EndUser
+		- Auditor
+		- AIMWebService
+		- AppProvider
+		- ApplicationIdentity
+		- AccountProvisioner
+		- CPDeployer
+		- ComponentOrchestrator
+		- APIAutomation
+		- PasswordScheduler
+		- ApproverLevel1
+		- ApproverLevel2
+	
+	Example Usage:
+	$ cybr safes update-member -s SafeName -m MemberName --list-accounts --use-accounts --retrieve-accounts
+	$ cybr safes update-member -s SafeName -m MemberName --role ApplicationIdentity --member-type user
+	$ cybr safes update-member -s SafeName -m MemberName --role ApplicationIdentity --member-type group
+	
+	Doc:
+	https://docs.cyberark.com/privilege-cloud-shared-services/latest/en/content/webservices/update%20safe%20member.htm`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Get config file written to local file system
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		updatePermissions := requests.Permissions{
+			UseAccounts:                            UseAccounts,
+			RetrieveAccounts:                       RetrieveAccounts,
+			ListAccounts:                           ListAccounts,
+			AddAccounts:                            AddAccounts,
+			UpdateAccountContent:                   UpdateAccountContent,
+			UpdateAccountProperties:                UpdateAccountProperties,
+			InitiateCPMAccountManagementOperations: InitiateCPMAccountManagementOperations,
+			SpecifyNextAccountContent:              SpecifyNextAccountContent,
+			RenameAccounts:                         RenameAccounts,
+			DeleteAccounts:                         DeleteAccounts,
+			UnlockAccounts:                         UnlockAccounts,
+			ManageSafe:                             ManageSafe,
+			ManageSafeMembers:                      ManageSafeMembers,
+			BackupSafe:                             BackupSafe,
+			ViewAuditLog:                           ViewAuditLog,
+			ViewSafeMembers:                        ViewSafeMembers,
+			AccessWithoutConfirmation:              AccessWithoutConfirmation,
+			CreateFolders:                          CreateFolders,
+			DeleteFolders:                          DeleteFolders,
+			MoveAccountsAndFolders:                 MoveAccountsAndFolders,
+			RequestsAuthorizationLevel1:            RequestsAuthorizationLevel1,
+			RequestsAuthorizationLevel2:            RequestsAuthorizationLevel2,
+		}
+
+		updateMember := requests.UpdateSafeMember{
+			MembershipExpirationDate: UpdateMembershipExpirationDate,
+			Permissions:              updatePermissions,
+		}
+
+		// Add a safe with the configuration options given via CLI subcommands
+		err = client.UpdateSafeMember(Safe, MemberName, updateMember)
 		if err != nil {
 			log.Fatalf("Failed to add member '%s' to safe '%s'. %s", MemberName, Safe, err)
 			return
@@ -402,6 +483,38 @@ var updateSafeCmd = &cobra.Command{
 	},
 }
 
+var getSafeDetailsCmd = &cobra.Command{
+	Use:   "details",
+	Short: "Get details about a specific safe",
+	Long: `Get details about a specific safe that the user logged on can read from PAS REST API.
+	
+	Example Usage:
+	$ cybr safes details -s SafeName
+	$ cybr safes details -s SafeName --include-accounts
+	$ cybr safes details -s SafeName -u UserName
+	$ cybr safes details -s SafeName -g GroupName
+	
+	Doc:
+	https://docs.cyberark.com/privilege-cloud-shared-services/latest/en/content/sdk/safes%20web%20services%20-%20get%20safes%20details.htm`,
+	Aliases: []string{"details"},
+	Run: func(cmd *cobra.Command, args []string) {
+		// Get config file written to local file system
+		client, err := pasapi.GetConfigWithLogger(getLogger())
+		if err != nil {
+			log.Fatalf("Failed to read configuration file. %s", err)
+			return
+		}
+
+		details, err := client.GetSafeDetails(Safe, IncludeAccounts)
+		if err != nil {
+			log.Fatalf("Failed to retrieve a list of all safe members for %s. %s", Safe, err)
+			return
+		}
+		// Pretty print returned object as JSON blob
+		prettyprint.PrintJSON(details)
+	},
+}
+
 func init() {
 	listSafesCmd.Flags().StringVarP(&User, "user", "u", "", "Username to filter request on")
 	listSafesCmd.Flags().StringVarP(&Group, "group", "g", "", "Group to filter request on")
@@ -469,9 +582,43 @@ func init() {
 
 	// remove-member
 	removeMembersCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Name of the safe")
-	removeMembersCmd.MarkFlagRequired("safe-name")
+	removeMembersCmd.MarkFlagRequired("safe")
 	removeMembersCmd.Flags().StringVarP(&MemberName, "member-name", "m", "", "Name of member being removed from the safe")
 	removeMembersCmd.MarkFlagRequired("member-name")
+
+	// update-member
+	updateMembersCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Name of the safe")
+	updateMembersCmd.MarkFlagRequired("safe")
+	updateMembersCmd.Flags().StringVarP(&MemberName, "member-name", "m", "", "Name of member being added to the desired safe")
+	updateMembersCmd.MarkFlagRequired("member-name")
+	updateMembersCmd.Flags().Int64VarP(&UpdateMembershipExpirationDate, "member-expiration-date", "e", 0, "When the membership will expire")
+	updateMembersCmd.Flags().BoolVar(&UseAccounts, "use-accounts", false, "Use accounts in safe")
+	updateMembersCmd.Flags().BoolVar(&RetrieveAccounts, "retrieve-accounts", false, "Retrieve accounts in safe")
+	updateMembersCmd.Flags().BoolVar(&ListAccounts, "list-accounts", false, "List accounts in safe")
+	updateMembersCmd.Flags().BoolVar(&AddAccounts, "add-accounts", false, "Add accounts to safe")
+	updateMembersCmd.Flags().BoolVar(&UpdateAccountContent, "update-account-content", false, "Update account content in safe")
+	updateMembersCmd.Flags().BoolVar(&UpdateAccountProperties, "update-account-properties", false, "Update account properties in safe")
+	updateMembersCmd.Flags().BoolVar(&InitiateCPMAccountManagementOperations, "init-cpm-account-managment-operations", false, "Perform cpm actions on accounts inside of safe")
+	updateMembersCmd.Flags().BoolVar(&RenameAccounts, "rename-accounts", false, "Rename accounts in safe")
+	updateMembersCmd.Flags().BoolVar(&DeleteAccounts, "delete-accounts", false, "Delete accounts in safe")
+	updateMembersCmd.Flags().BoolVar(&UnlockAccounts, "unlock-accounts", false, "Unlock accounts in safe")
+	updateMembersCmd.Flags().BoolVar(&SpecifyNextAccountContent, "specify-next-account-content", false, "Specify next account's content within safe")
+	updateMembersCmd.Flags().BoolVar(&ManageSafe, "manage-safe", false, "Manage the safe")
+	updateMembersCmd.Flags().BoolVar(&ManageSafeMembers, "manage-safe-members", false, "Manage members of the safe")
+	updateMembersCmd.Flags().BoolVar(&BackupSafe, "backup-safe", false, "Backup the safe")
+	updateMembersCmd.Flags().BoolVar(&ViewAuditLog, "view-audit-log", false, "View audit log of safe")
+	updateMembersCmd.Flags().BoolVar(&ViewSafeMembers, "view-safe-members", false, "View the safe members")
+	updateMembersCmd.Flags().BoolVar(&AccessWithoutConfirmation, "access-content-without-confirmation", false, "Access safe content without confirmation")
+	updateMembersCmd.Flags().BoolVar(&CreateFolders, "create-folders", false, "Create folders within safe")
+	updateMembersCmd.Flags().BoolVar(&DeleteFolders, "delete-folders", false, "Delete folders within safe")
+	updateMembersCmd.Flags().BoolVar(&MoveAccountsAndFolders, "move-accounts-and-folders", false, "Move accounts and folders")
+	updateMembersCmd.Flags().BoolVar(&RequestsAuthorizationLevel1, "requests-authz-level-1", false, "Approver for level 1 requests for access")
+	updateMembersCmd.Flags().BoolVar(&RequestsAuthorizationLevel2, "requests-authz-level-2", false, "Approver for level 2 requests for access")
+
+	// details
+	getSafeDetailsCmd.Flags().StringVarP(&Safe, "safe", "s", "", "Name of the safe")
+	getSafeDetailsCmd.MarkFlagRequired("safe")
+	getSafeDetailsCmd.Flags().BoolVar(&IncludeAccounts, "include-accounts", false, "include accounts with safe details")
 
 	safesCmd.AddCommand(listSafesCmd)
 	safesCmd.AddCommand(listMembersCmd)
@@ -480,5 +627,7 @@ func init() {
 	safesCmd.AddCommand(updateSafeCmd)
 	safesCmd.AddCommand(addMembersCmd)
 	safesCmd.AddCommand(removeMembersCmd)
+	safesCmd.AddCommand(getSafeDetailsCmd)
+	safesCmd.AddCommand(updateMembersCmd)
 	rootCmd.AddCommand(safesCmd)
 }
