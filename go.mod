@@ -8,7 +8,7 @@ require (
 	github.com/cyberark/conjur-api-go v0.6.1
 	github.com/quincycheng/cem-api-go v0.1.3
 	github.com/spf13/cobra v1.1.1
-	golang.org/x/crypto v0.17.0
-	golang.org/x/term v0.15.0
+	golang.org/x/crypto v0.31.0
+	golang.org/x/term v0.27.0
 
 )
